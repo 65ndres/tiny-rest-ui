@@ -1,0 +1,20 @@
+# Exclude large unused image files from EAS builds
+
+# Exclude build artifacts
+ios/build/
+ios/Pods/
+android/build/
+android/app/build/
+android/.gradle/
+
+# Exclude development files
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+

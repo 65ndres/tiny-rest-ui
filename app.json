@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "Promesas",
+    "slug": "sample-ui",
+    "version": "7.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "promesas",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#6E9AB1"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.afre92.sampleui",
+      "buildNumber": "7",
+      "appleTeamId": "NQ6AG8RHP3",
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.afre92.sampleui"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.afre92.sampleui"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "@bacons/apple-targets"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "owner": "afre92"
+  }
+}

@@ -1,3 +1,4 @@
+import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useRef } from 'react';
@@ -58,7 +59,7 @@ const FeaturedScreenGuest: React.FC = () => {
         </View>
         <View style={styles.bottomSection}>
           <View style={styles.bottomContent}>
-            <Text style={styles.appNameText}>app-name</Text>
+            <Text style={styles.appNameText}>{APP_DISPLAY_NAME}</Text>
           </View>
         </View>
       </Animated.View>

@@ -1,3 +1,4 @@
+import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import React, { useEffect, useRef } from 'react';
 import { Animated, Dimensions, StyleSheet, Text, View } from 'react-native';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
@@ -38,7 +39,7 @@ const FeaturedScreen: React.FC = () => {
         </View>
         <View style={styles.bottomSection}>
           <View style={styles.bottomContent}>
-            <Text style={styles.appNameText}>app-name</Text>
+            <Text style={styles.appNameText}>{APP_DISPLAY_NAME}</Text>
           </View>
         </View>
       </Animated.View>

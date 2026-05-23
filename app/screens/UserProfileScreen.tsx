@@ -1,3 +1,4 @@
+import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -321,7 +322,7 @@ const UserProfileScreen: React.FC = () => {
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>app-name</Text>
+            <Text style={styles.footerText}>{APP_DISPLAY_NAME}</Text>
           </View>
         </View>
       </Animated.View>

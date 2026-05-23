@@ -1,6 +1,6 @@
 # Production Setup Guide
 
-This guide explains how to configure and build the sample-ui app for production.
+This guide explains how to configure and build the TinyRest app for production.
 
 ## Environment Configuration
 

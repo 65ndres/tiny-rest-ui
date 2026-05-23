@@ -1,4 +1,4 @@
-package com.afre92.sampleui
+package com.afre92.tinyrest
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

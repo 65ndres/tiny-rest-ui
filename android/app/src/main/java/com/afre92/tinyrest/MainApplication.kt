@@ -1,4 +1,4 @@
-package com.afre92.sampleui
+package com.afre92.tinyrest
 
 import android.app.Application
 import android.content.res.Configuration

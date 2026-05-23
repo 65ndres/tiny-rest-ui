@@ -52,7 +52,7 @@ Edit the `"ios:simulator"` script in `package.json` if you want a different devi
 ## Option 3: Build from Xcode
 
 1. Open the workspace:  
-   `open ios/Promesas.xcworkspace`
+   `open ios/TinyRest.xcworkspace`
 2. In the scheme bar, pick a **simulator** (e.g. iPhone 16).
 3. Press **Run** (⌘R).
 

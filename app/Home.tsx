@@ -1,3 +1,4 @@
+import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -118,7 +119,7 @@ const Home: React.FC = () => {
         </View>
         <View style={{height: '20%'}}>
           <View style={{flex: 1, justifyContent: 'flex-end'}}>
-          <Text style={{ color: 'white', fontSize: 15, fontWeight: '500', textAlign: 'center' }}>app-name</Text>
+          <Text style={{ color: 'white', fontSize: 15, fontWeight: '500', textAlign: 'center' }}>{APP_DISPLAY_NAME}</Text>
           {/* <Image source={require('../assets/images/splash-icon.png')} style={styles.logoImage} /> */}
           </View>
         </View>

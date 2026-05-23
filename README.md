@@ -48,7 +48,6 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
-# sample-ui
+# TinyRest
 
 Run `eas init` before cloud builds to register a new Expo project (the original app's EAS project ID was not copied).
-# sample-ui

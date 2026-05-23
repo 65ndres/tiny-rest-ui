@@ -1,3 +1,4 @@
+import { PRO_PLAN_DISPLAY_NAME } from '@/constants/appBranding';
 import { Button } from '@rneui/themed';
 import React from 'react';
 import { Text, View } from 'react-native';
@@ -19,7 +20,7 @@ const ProSlide: React.FC<ProSlideProps> = ({ onPressNext }) => {
     <OnboardingSlideShell>
       <View style={onboardingSlideLayoutStyles.root}>
         <View style={onboardingSlideLayoutStyles.main}>
-          <Text style={slideStyles.titleCenter}>app-name Pro</Text>
+          <Text style={slideStyles.titleCenter}>{PRO_PLAN_DISPLAY_NAME}</Text>
           <View style={onboardingBenefitListStyles.benefits}>
             <View style={onboardingBenefitListStyles.benefitRow}>
               <Text style={onboardingBenefitListStyles.bulletIcon} accessibilityLabel="Cross bullet">

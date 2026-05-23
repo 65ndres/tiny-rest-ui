@@ -1,5 +1,6 @@
 import { API_URL } from '@/constants/Config';
 import { PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from '@/constants/legalUrls';
+import { APP_DISPLAY_NAME, BASIC_PLAN_DISPLAY_NAME } from '@/constants/appBranding';
 import { proPlanDisplayName, subscriptionPlanPerks } from '@/constants/subscriptionPlanPerks';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -276,7 +277,7 @@ const SubscriptionScreen: React.FC = () => {
             {!isProTier && (
               <View style={styles.planCard}>
                 <View style={styles.planHeader}>
-                  <Text style={styles.planName}>app-name Basic</Text>
+                  <Text style={styles.planName}>{BASIC_PLAN_DISPLAY_NAME}</Text>
                   {isBasicServerTier ? (
                     <View style={styles.activeBadge}>
                       <Text style={styles.activeBadgeText}>Current</Text>
@@ -325,7 +326,7 @@ const SubscriptionScreen: React.FC = () => {
               </View>
             )}
 
-            {/* app-name Pro Plan Card */}
+            {/* TinyRest Pro Plan Card */}
             <View style={styles.planCard}>
               <View style={styles.planHeader}>
                 <Text style={styles.planName}>{proPlanDisplayName}</Text>
@@ -438,7 +439,7 @@ const SubscriptionScreen: React.FC = () => {
       </Animated.View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerLabel}>app-name</Text>
+        <Text style={styles.footerLabel}>{APP_DISPLAY_NAME}</Text>
       </View>
     </ScreenComponent>
   );

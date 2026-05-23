@@ -1,3 +1,4 @@
+import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
@@ -228,7 +229,7 @@ const NewConversationScreen: React.FC = () => {
         </View>
         <View style={{ height: "20%" }}>
           <View style={{flex: 1, justifyContent: 'flex-end'}}>
-            <Text style={{ color: 'white', fontSize: 15, fontWeight: '500', textAlign: 'center' }}>app-name</Text>
+            <Text style={{ color: 'white', fontSize: 15, fontWeight: '500', textAlign: 'center' }}>{APP_DISPLAY_NAME}</Text>
           </View>
         </View>
       </Animated.View>

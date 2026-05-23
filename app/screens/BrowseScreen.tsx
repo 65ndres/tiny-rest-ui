@@ -1,3 +1,4 @@
+import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { useFonts } from 'expo-font';
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
@@ -31,7 +32,7 @@ const BrowseScreen: React.FC = () => {
         </View>
         <View style={styles.bottomSection}>
           <View style={styles.bottomContent}>
-            <Text style={styles.appNameText}>app-name</Text>
+            <Text style={styles.appNameText}>{APP_DISPLAY_NAME}</Text>
           </View>
         </View>
       </Animated.View>

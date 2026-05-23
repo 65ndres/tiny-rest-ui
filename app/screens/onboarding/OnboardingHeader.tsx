@@ -1,3 +1,4 @@
+import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import React from 'react';
 import { StyleSheet, Text, View, type TextStyle, type ViewStyle } from 'react-native';
 import { onboardingHeight } from './onboardingLayout';
@@ -5,7 +6,7 @@ import { onboardingHeight } from './onboardingLayout';
 const OnboardingHeader: React.FC = () => {
   return (
     <View style={styles.wrap}>
-      <Text style={styles.title}>app-name</Text>
+      <Text style={styles.title}>{APP_DISPLAY_NAME}</Text>
     </View>
   );
 };

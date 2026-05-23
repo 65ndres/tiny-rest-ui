@@ -1,3 +1,4 @@
+import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
@@ -380,7 +381,7 @@ const ConversationScreen: React.FC = () => {
           </View>
           <View style={styles.bottomArea}>
               <View style={styles.appNameContainer}>
-                <Text style={styles.appNameText}>app-name</Text>
+                <Text style={styles.appNameText}>{APP_DISPLAY_NAME}</Text>
               </View>
             </View>
         </View>

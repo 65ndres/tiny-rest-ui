@@ -1,3 +1,4 @@
+import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -257,7 +258,7 @@ const ConversationsScreen: React.FC = () => {
             />
           </View>
           <View style={styles.appNameContainer}>
-            <Text style={styles.appNameText}>app-name</Text>
+            <Text style={styles.appNameText}>{APP_DISPLAY_NAME}</Text>
           </View>
         </View>
       </Animated.View>

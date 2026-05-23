@@ -8,11 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		1B755F0706F4A3C96CBBAFAC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 66C81B6663F01433896413AE /* PrivacyInfo.xcprivacy */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		8B9FAF0A759416B9639F7D4D /* libPods-Promesas.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F04DEB939C2BE927F04D8718 /* libPods-Promesas.a */; };
-		A177F4E13061D57580031723 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C44C10B0BA171D765D695A3 /* ExpoModulesProvider.swift */; };
-		B2649133BC6456BD7D76EE20 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CD4FC8D802EB94C846FBE037 /* PrivacyInfo.xcprivacy */; };
+		9C84415E5447FCB97E6D6638 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7585E3559D74F63530524BD1 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
+		F0E75039133502F8CC22AB51 /* libPods-TinyRest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B7DA7880E67DC0C0F8C6427 /* libPods-TinyRest.a */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 		XX09E725E164C2787243F7XX /* widget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = XXD26DB380DB6D7349BA89XX /* widget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		XX12B55A1EDABF083C3B51XX /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = XX470101BAEB8E0BBC8B0DXX /* WidgetKit.framework */; };
@@ -22,11 +22,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		XX460D49F14721F791D239XX /* PBXContainerItemProxy */ = {
+		XX97363D71654E51E55FA9XX /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = XX016C93A04D176FC65877XX;
+			remoteGlobalIDString = XX2F69133A9526A479C040XX;
 			remoteInfo = widget;
 		};
 /* End PBXContainerItemProxy section */
@@ -46,19 +46,19 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		13B07F961A680F5B00A75B9A /* Promesas.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; fileEncoding = 4; includeInIndex = 0; path = Promesas.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Promesas/Images.xcassets; sourceTree = "<group>"; };
-		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = Info.plist; path = Promesas/Info.plist; sourceTree = "<group>"; };
-		5F50E5FD8343071D3E4EC44D /* Pods-Promesas.debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Promesas.debug.xcconfig"; path = "Target Support Files/Pods-Promesas/Pods-Promesas.debug.xcconfig"; sourceTree = "<group>"; };
-		8C44C10B0BA171D765D695A3 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Promesas/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Promesas/SplashScreen.storyboard; sourceTree = "<group>"; };
+		13B07F961A680F5B00A75B9A /* TinyRest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; fileEncoding = 4; includeInIndex = 0; path = TinyRest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = TinyRest/Images.xcassets; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = Info.plist; path = TinyRest/Info.plist; sourceTree = "<group>"; };
+		1B7DA7880E67DC0C0F8C6427 /* libPods-TinyRest.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-TinyRest.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4D3B57030A47E8E7227138EB /* Pods-TinyRest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TinyRest.debug.xcconfig"; path = "Target Support Files/Pods-TinyRest/Pods-TinyRest.debug.xcconfig"; sourceTree = "<group>"; };
+		66C81B6663F01433896413AE /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = TinyRest/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		7585E3559D74F63530524BD1 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-TinyRest/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		93D15C9C3FB0DC714E6345C2 /* Pods-TinyRest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TinyRest.release.xcconfig"; path = "Target Support Files/Pods-TinyRest/Pods-TinyRest.release.xcconfig"; sourceTree = "<group>"; };
+		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = TinyRest/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		CD4FC8D802EB94C846FBE037 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 1; lastKnownFileType = undefined; name = PrivacyInfo.xcprivacy; path = Promesas/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		D655645AA1B1028D891009D0 /* Pods-Promesas.release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Promesas.release.xcconfig"; path = "Target Support Files/Pods-Promesas/Pods-Promesas.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = undefined; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		F04DEB939C2BE927F04D8718 /* libPods-Promesas.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; fileEncoding = 4; includeInIndex = 0; path = "libPods-Promesas.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Promesas/AppDelegate.swift; sourceTree = "<group>"; };
-		F11748442D0722820044C1D9 /* Promesas-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "Promesas-Bridging-Header.h"; path = "Promesas/Promesas-Bridging-Header.h"; sourceTree = "<group>"; };
+		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = TinyRest/AppDelegate.swift; sourceTree = "<group>"; };
+		F11748442D0722820044C1D9 /* TinyRest-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "TinyRest-Bridging-Header.h"; path = "TinyRest/TinyRest-Bridging-Header.h"; sourceTree = "<group>"; };
 		XX470101BAEB8E0BBC8B0DXX /* WidgetKit.framework */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = undefined; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		XX4DFF38D47332D6BF0183XX /* SwiftUI.framework */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = undefined; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		XXA12889081EB894481655XX /* AppIntents.framework */ = {isa = PBXFileReference; fileEncoding = 4; includeInIndex = undefined; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
@@ -67,21 +67,21 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		XX8BC775B285F6AE48003EXX /* Exceptions for "widget" folder in "widget" target */ = {
+		XX7656E3720F846D84628CXX /* Exceptions for "widget" folder in "widget" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 				"expo-target.config.js",
 			);
-			target = XX016C93A04D176FC65877XX /* widget */;
+			target = XX2F69133A9526A479C040XX /* widget */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		XX7D0EFA1C29DA708C2C07XX /* widget */ = {
+		XXC215A746C55F5FCDBAF2XX /* widget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				XX8BC775B285F6AE48003EXX /* Exceptions for "widget" folder in "widget" target */,
+				XX7656E3720F846D84628CXX /* Exceptions for "widget" folder in "widget" target */,
 			);
 			explicitFileTypes = {
 			};
@@ -97,7 +97,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8B9FAF0A759416B9639F7D4D /* libPods-Promesas.a in Frameworks */,
+				F0E75039133502F8CC22AB51 /* libPods-TinyRest.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,18 +115,28 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		13B07FAE1A68108700A75B9A /* Promesas */ = {
+		08656B9EEF08A2EA84BBF2E8 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				4D3B57030A47E8E7227138EB /* Pods-TinyRest.debug.xcconfig */,
+				93D15C9C3FB0DC714E6345C2 /* Pods-TinyRest.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		13B07FAE1A68108700A75B9A /* TinyRest */ = {
 			isa = PBXGroup;
 			children = (
 				F11748412D0307B40044C1D9 /* AppDelegate.swift */,
-				F11748442D0722820044C1D9 /* Promesas-Bridging-Header.h */,
+				F11748442D0722820044C1D9 /* TinyRest-Bridging-Header.h */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				CD4FC8D802EB94C846FBE037 /* PrivacyInfo.xcprivacy */,
+				66C81B6663F01433896413AE /* PrivacyInfo.xcprivacy */,
 			);
-			name = Promesas;
+			name = TinyRest;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
@@ -137,17 +147,9 @@
 				XX4DFF38D47332D6BF0183XX /* SwiftUI.framework */,
 				XXCAF23C3FC41F82140FA1XX /* ActivityKit.framework */,
 				XXA12889081EB894481655XX /* AppIntents.framework */,
-				F04DEB939C2BE927F04D8718 /* libPods-Promesas.a */,
+				1B7DA7880E67DC0C0F8C6427 /* libPods-TinyRest.a */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		7C64039B66EED7A2CB763035 /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				CC9B11AE6EF4F05230793032 /* Promesas */,
-			);
-			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -161,12 +163,12 @@
 			isa = PBXGroup;
 			children = (
 				XX3E41C1850246162C0061XX /* expo:targets */,
-				13B07FAE1A68108700A75B9A /* Promesas */,
+				13B07FAE1A68108700A75B9A /* TinyRest */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				7C64039B66EED7A2CB763035 /* ExpoModulesProviders */,
-				DEC220C1449ADF04D10535E5 /* Pods */,
+				08656B9EEF08A2EA84BBF2E8 /* Pods */,
+				94087A379A15B3394CEE20E9 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -176,10 +178,18 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* Promesas.app */,
+				13B07F961A680F5B00A75B9A /* TinyRest.app */,
 				XXD26DB380DB6D7349BA89XX /* widget.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		94087A379A15B3394CEE20E9 /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				FE888A60AEA737E90F1B4D0F /* TinyRest */,
+			);
+			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
@@ -188,31 +198,21 @@
 				BB2F792C24A3F905000567C9 /* Expo.plist */,
 			);
 			name = Supporting;
-			path = Promesas/Supporting;
+			path = TinyRest/Supporting;
 			sourceTree = "<group>";
 		};
-		CC9B11AE6EF4F05230793032 /* Promesas */ = {
+		FE888A60AEA737E90F1B4D0F /* TinyRest */ = {
 			isa = PBXGroup;
 			children = (
-				8C44C10B0BA171D765D695A3 /* ExpoModulesProvider.swift */,
+				7585E3559D74F63530524BD1 /* ExpoModulesProvider.swift */,
 			);
-			name = Promesas;
-			sourceTree = "<group>";
-		};
-		DEC220C1449ADF04D10535E5 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				5F50E5FD8343071D3E4EC44D /* Pods-Promesas.debug.xcconfig */,
-				D655645AA1B1028D891009D0 /* Pods-Promesas.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
+			name = TinyRest;
 			sourceTree = "<group>";
 		};
 		XX3E41C1850246162C0061XX /* expo:targets */ = {
 			isa = PBXGroup;
 			children = (
-				XX7D0EFA1C29DA708C2C07XX /* widget */,
+				XXC215A746C55F5FCDBAF2XX /* widget */,
 			);
 			name = "expo:targets";
 			path = ../targets;
@@ -221,33 +221,33 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		13B07F861A680F5B00A75B9A /* Promesas */ = {
+		13B07F861A680F5B00A75B9A /* TinyRest */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Promesas" */;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "TinyRest" */;
 			buildPhases = (
-				22D1A285E6FEA2F2AE08FC2A /* [CP] Check Pods Manifest.lock */,
-				974D671628E3D90D4D6B9DC3 /* [Expo] Configure project */,
+				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
+				349665664286FF5D24E53788 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
+				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
 				XX72A8CFBF0FBA13A79902XX /* Embed Foundation Extensions */,
-				B76E1EAC9EAB587BE5F5258D /* [CP] Embed Pods Frameworks */,
-				3468714E0D1B0B7177F123B1 /* [CP] Copy Pods Resources */,
+				BC92BC2E318C890B09A7F8A9 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				XX47172675B79126E9E1D3XX /* PBXTargetDependency */,
+				XX75A88BB0C0097BBDDA2AXX /* PBXTargetDependency */,
 			);
-			name = Promesas;
-			productName = Promesas;
-			productReference = 13B07F961A680F5B00A75B9A /* Promesas.app */;
+			name = TinyRest;
+			productName = TinyRest;
+			productReference = 13B07F961A680F5B00A75B9A /* TinyRest.app */;
 			productType = "com.apple.product-type.application";
 		};
-		XX016C93A04D176FC65877XX /* widget */ = {
+		XX2F69133A9526A479C040XX /* widget */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = XX6090B3F54ACDA679E534XX /* Build configuration list for PBXNativeTarget "widget" */;
+			buildConfigurationList = XX33EE1D91CB2C5F2776D3XX /* Build configuration list for PBXNativeTarget "widget" */;
 			buildPhases = (
 				XX074B8811C1CF8E8A3D74XX /* Frameworks */,
 				XXE45443DC38DCFE1DB622XX /* Sources */,
@@ -258,7 +258,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				XX7D0EFA1C29DA708C2C07XX /* widget */,
+				XXC215A746C55F5FCDBAF2XX /* widget */,
 			);
 			name = widget;
 			productName = widget;
@@ -276,14 +276,14 @@
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1250;
 					};
-					XX016C93A04D176FC65877XX = {
+					XX2F69133A9526A479C040XX = {
 						CreatedOnToolsVersion = 14.3;
 						DevelopmentTeam = NQ6AG8RHP3;
 						ProvisioningStyle = Automatic;
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Promesas" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "TinyRest" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -296,8 +296,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				13B07F861A680F5B00A75B9A /* Promesas */,
-				XX016C93A04D176FC65877XX /* widget */,
+				13B07F861A680F5B00A75B9A /* TinyRest */,
+				XX2F69133A9526A479C040XX /* widget */,
 			);
 		};
 /* End PBXProject section */
@@ -310,7 +310,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				B2649133BC6456BD7D76EE20 /* PrivacyInfo.xcprivacy in Resources */,
+				1B755F0706F4A3C96CBBAFAC /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -345,7 +345,7 @@
 			shellPath = /bin/sh;
 			shellScript = "if [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n# The project root by default is one level up from the ios directory\nexport PROJECT_ROOT=\"$PROJECT_DIR\"/..\n\nif [[ \"$CONFIGURATION\" = *Debug* ]]; then\n  export SKIP_BUNDLING=1\nfi\nif [[ -z \"$ENTRY_FILE\" ]]; then\n  # Set the entry JS file using the bundler's entry resolution.\n  export ENTRY_FILE=\"$(\"$NODE_BINARY\" -e \"require('expo/scripts/resolveAppEntry')\" \"$PROJECT_ROOT\" ios absolute | tail -n 1)\"\nfi\n\nif [[ -z \"$CLI_PATH\" ]]; then\n  # Use Expo CLI\n  export CLI_PATH=\"$(\"$NODE_BINARY\" --print \"require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })\")\"\nfi\nif [[ -z \"$BUNDLE_COMMAND\" ]]; then\n  # Default Expo CLI command for bundling\n  export BUNDLE_COMMAND=\"export:embed\"\nfi\n\n# Source .xcode.env.updates if it exists to allow\n# SKIP_BUNDLING to be unset if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.updates\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.updates\"\nfi\n# Source local changes to allow overrides\n# if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n`\"$NODE_BINARY\" --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh'\"`\n\n";
 		};
-		22D1A285E6FEA2F2AE08FC2A /* [CP] Check Pods Manifest.lock */ = {
+		08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -360,20 +360,44 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Promesas-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-TinyRest-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		3468714E0D1B0B7177F123B1 /* [CP] Copy Pods Resources */ = {
+		349665664286FF5D24E53788 /* [Expo] Configure project */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.xcode.env",
+				"$(SRCROOT)/.xcode.env.local",
+				"$(SRCROOT)/TinyRest/TinyRest.entitlements",
+				"$(SRCROOT)/Pods/Target Support Files/Pods-TinyRest/expo-configure-project.sh",
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/Pods/Target Support Files/Pods-TinyRest/ExpoModulesProvider.swift",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-TinyRest/expo-configure-project.sh\"\n";
+		};
+		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Promesas/Pods-Promesas-resources.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-TinyRest/Pods-TinyRest-resources.sh",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/ExpoConstants_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
@@ -442,40 +466,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Promesas/Pods-Promesas-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-TinyRest/Pods-TinyRest-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		974D671628E3D90D4D6B9DC3 /* [Expo] Configure project */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/.xcode.env",
-				"$(SRCROOT)/.xcode.env.local",
-				"$(SRCROOT)/Promesas/Promesas.entitlements",
-				"$(SRCROOT)/Pods/Target Support Files/Pods-Promesas/expo-configure-project.sh",
-			);
-			name = "[Expo] Configure project";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(SRCROOT)/Pods/Target Support Files/Pods-Promesas/ExpoModulesProvider.swift",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Promesas/expo-configure-project.sh\"\n";
-		};
-		B76E1EAC9EAB587BE5F5258D /* [CP] Embed Pods Frameworks */ = {
+		BC92BC2E318C890B09A7F8A9 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Promesas/Pods-Promesas-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-TinyRest/Pods-TinyRest-frameworks.sh",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/React-Core-prebuilt/React.framework/React",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ReactNativeDependencies/ReactNativeDependencies.framework/ReactNativeDependencies",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
@@ -488,7 +488,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Promesas/Pods-Promesas-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-TinyRest/Pods-TinyRest-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -499,7 +499,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				A177F4E13061D57580031723 /* ExpoModulesProvider.swift in Sources */,
+				9C84415E5447FCB97E6D6638 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -513,21 +513,21 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		XX47172675B79126E9E1D3XX /* PBXTargetDependency */ = {
+		XX75A88BB0C0097BBDDA2AXX /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = XX016C93A04D176FC65877XX /* widget */;
-			targetProxy = XX460D49F14721F791D239XX /* PBXContainerItemProxy */;
+			target = XX2F69133A9526A479C040XX /* widget */;
+			targetProxy = XX97363D71654E51E55FA9XX /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5F50E5FD8343071D3E4EC44D /* Pods-Promesas.debug.xcconfig */;
+			baseConfigurationReference = 4D3B57030A47E8E7227138EB /* Pods-TinyRest.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = Promesas/Promesas.entitlements;
+				CODE_SIGN_ENTITLEMENTS = TinyRest/TinyRest.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NQ6AG8RHP3;
 				ENABLE_BITCODE = NO;
@@ -535,7 +535,7 @@
 					"$(inherited)",
 					"FB_SONARKIT_ENABLED=1",
 				);
-				INFOPLIST_FILE = Promesas/Info.plist;
+				INFOPLIST_FILE = TinyRest/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -548,9 +548,9 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = com.afre92.sampleui;
-				PRODUCT_NAME = Promesas;
-				SWIFT_OBJC_BRIDGING_HEADER = "Promesas/Promesas-Bridging-Header.h";
+				PRODUCT_BUNDLE_IDENTIFIER = com.afre92.tinyrest;
+				PRODUCT_NAME = TinyRest;
+				SWIFT_OBJC_BRIDGING_HEADER = "TinyRest/TinyRest-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -560,14 +560,14 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = D655645AA1B1028D891009D0 /* Pods-Promesas.release.xcconfig */;
+			baseConfigurationReference = 93D15C9C3FB0DC714E6345C2 /* Pods-TinyRest.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = Promesas/Promesas.entitlements;
+				CODE_SIGN_ENTITLEMENTS = TinyRest/TinyRest.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = NQ6AG8RHP3;
-				INFOPLIST_FILE = Promesas/Info.plist;
+				INFOPLIST_FILE = TinyRest/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -580,9 +580,9 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = com.afre92.sampleui;
-				PRODUCT_NAME = Promesas;
-				SWIFT_OBJC_BRIDGING_HEADER = "Promesas/Promesas-Bridging-Header.h";
+				PRODUCT_BUNDLE_IDENTIFIER = com.afre92.tinyrest;
+				PRODUCT_NAME = TinyRest;
+				SWIFT_OBJC_BRIDGING_HEADER = "TinyRest/TinyRest-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -707,7 +707,7 @@
 			};
 			name = Release;
 		};
-		XX41433407ADF5BA380859XX /* Release */ = {
+		XX79DDA6E957CBAD8A5B8AXX /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -738,7 +738,7 @@
 				MARKETING_VERSION = 7.0;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = com.afre92.sampleui.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.afre92.tinyrest.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -749,7 +749,7 @@
 			};
 			name = Release;
 		};
-		XX905B3E13E405054EF39BXX /* Debug */ = {
+		XXBFC2128423AF3F5A1AE7XX /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -780,7 +780,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = com.afre92.sampleui.widget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.afre92.tinyrest.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -794,7 +794,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Promesas" */ = {
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "TinyRest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
@@ -803,7 +803,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "Promesas" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "TinyRest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
@@ -812,11 +812,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		XX6090B3F54ACDA679E534XX /* Build configuration list for PBXNativeTarget "widget" */ = {
+		XX33EE1D91CB2C5F2776D3XX /* Build configuration list for PBXNativeTarget "widget" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				XX905B3E13E405054EF39BXX /* Debug */,
-				XX41433407ADF5BA380859XX /* Release */,
+				XXBFC2128423AF3F5A1AE7XX /* Debug */,
+				XX79DDA6E957CBAD8A5B8AXX /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

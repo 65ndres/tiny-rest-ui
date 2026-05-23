@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "app-name",
-    "slug": "sample-ui",
+    "name": "TinyRest",
+    "slug": "tiny-rest",
     "version": "7.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "promesas",
+    "scheme": "tinyrest",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -15,12 +15,12 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.afre92.sampleui",
+      "bundleIdentifier": "com.afre92.tinyrest",
       "buildNumber": "7",
       "appleTeamId": "NQ6AG8RHP3",
       "entitlements": {
         "com.apple.security.application-groups": [
-          "group.com.afre92.sampleui"
+          "group.com.afre92.tinyrest"
         ]
       }
     },
@@ -30,7 +30,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.afre92.sampleui"
+      "package": "com.afre92.tinyrest"
     },
     "web": {
       "bundler": "metro",

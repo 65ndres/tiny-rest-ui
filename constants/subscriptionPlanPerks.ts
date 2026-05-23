@@ -1,4 +1,4 @@
-export const proPlanDisplayName = 'app-name Pro';
+export { PRO_PLAN_DISPLAY_NAME as proPlanDisplayName } from './appBranding';
 
 export type SubscriptionPlanPerks = {
   sectionTitle: string;

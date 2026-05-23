@@ -1,3 +1,4 @@
+import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -216,7 +217,7 @@ const Saved: React.FC = () => {
         </View>
         <View style={{ height: '20%' }}>
           <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-            <Text style={styles.appNameText}>app-name</Text>
+            <Text style={styles.appNameText}>{APP_DISPLAY_NAME}</Text>
           </View>
         </View>
       </Animated.View>

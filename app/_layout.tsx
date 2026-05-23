@@ -26,6 +26,7 @@ import SupportScreen from './screens/SupportScreen';
 import UserProfileScreen from './screens/UserProfileScreen';
 import BrowseScreen from './screens/BrowseScreen';
 import BackButton from './SampleModule/BackButton';
+import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 // Set the animation options. This is optional.
 
 const { width, height } = Dimensions.get('window');
@@ -334,7 +335,7 @@ const UnauthenticatedNavigator: React.FC = () => {
           options={{
             drawerLabel: 'HOME',
             headerLeft: () => null,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>app-name</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
           }}
         />
         <AuthDrawer.Screen
@@ -343,7 +344,7 @@ const UnauthenticatedNavigator: React.FC = () => {
           options={{
             drawerLabel: 'LOG IN',
             headerLeft: () => <BackButton text=" " />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>app-name</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
           }}
         />
         <AuthDrawer.Screen
@@ -361,7 +362,7 @@ const UnauthenticatedNavigator: React.FC = () => {
           options={{
             drawerLabel: 'SIGN UP',
             headerLeft: () => <BackButton text=" " />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>app-name</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
           }}
         />
         <AuthDrawer.Screen
@@ -370,7 +371,7 @@ const UnauthenticatedNavigator: React.FC = () => {
           options={{
             drawerLabel: 'RESET PASSWORD',
             headerLeft: () => <BackButton text=" " />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>app-name</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
           }}
         />
         <AuthDrawer.Screen
@@ -380,7 +381,7 @@ const UnauthenticatedNavigator: React.FC = () => {
             drawerLabel: () => null,
             drawerItemStyle: { display: 'none' },
             headerLeft: () => <BackButton text=" " />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>app-name</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
           }}
         />
       </AuthDrawer.Navigator>
@@ -428,7 +429,7 @@ const OnboardingRootLayout: React.FC = () => {
                 </TouchableOpacity>
               ),
               headerTitle: () => (
-                <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>app-name</Text>
+                <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>
               ),
             }}
           />

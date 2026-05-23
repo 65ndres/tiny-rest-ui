@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.afre92.sampleui'
+    namespace 'com.afre92.tinyrest'
     defaultConfig {
-        applicationId 'com.afre92.sampleui'
+        applicationId 'com.afre92.tinyrest'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -276,7 +276,7 @@ const SubscriptionScreen: React.FC = () => {
             {!isProTier && (
               <View style={styles.planCard}>
                 <View style={styles.planHeader}>
-                  <Text style={styles.planName}>Promesas Basic</Text>
+                  <Text style={styles.planName}>app-name Basic</Text>
                   {isBasicServerTier ? (
                     <View style={styles.activeBadge}>
                       <Text style={styles.activeBadgeText}>Current</Text>
@@ -325,7 +325,7 @@ const SubscriptionScreen: React.FC = () => {
               </View>
             )}
 
-            {/* Promesas Pro Plan Card */}
+            {/* app-name Pro Plan Card */}
             <View style={styles.planCard}>
               <View style={styles.planHeader}>
                 <Text style={styles.planName}>{proPlanDisplayName}</Text>
@@ -438,7 +438,7 @@ const SubscriptionScreen: React.FC = () => {
       </Animated.View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerLabel}>Promesas</Text>
+        <Text style={styles.footerLabel}>app-name</Text>
       </View>
     </ScreenComponent>
   );

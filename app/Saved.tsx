@@ -216,7 +216,7 @@ const Saved: React.FC = () => {
         </View>
         <View style={{ height: '20%' }}>
           <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-            <Text style={styles.promesasText}>Promesas</Text>
+            <Text style={styles.appNameText}>app-name</Text>
           </View>
         </View>
       </Animated.View>
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.7)',
     fontSize: screenWidth * 0.038,
   },
-  promesasText: {
+  appNameText: {
     color: 'white',
     fontSize: screenWidth * 0.035,
     fontWeight: '500',

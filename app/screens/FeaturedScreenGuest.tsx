@@ -58,7 +58,7 @@ const FeaturedScreenGuest: React.FC = () => {
         </View>
         <View style={styles.bottomSection}>
           <View style={styles.bottomContent}>
-            <Text style={styles.appNameText}>Promesas</Text>
+            <Text style={styles.appNameText}>app-name</Text>
           </View>
         </View>
       </Animated.View>

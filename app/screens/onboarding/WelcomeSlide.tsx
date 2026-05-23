@@ -18,7 +18,7 @@ const WelcomeSlide: React.FC<WelcomeSlideProps> = ({ onPressNext }) => {
     <OnboardingSlideShell>
       <View style={onboardingSlideLayoutStyles.root}>
         <View style={onboardingSlideLayoutStyles.main}>
-          <Text style={slideStyles.titleCenter}>Welcome to Promesas</Text>
+          <Text style={slideStyles.titleCenter}>Welcome to app-name</Text>
           <Text style={[slideStyles.bodyLeft, onboardingSlideLayoutStyles.bodySpacing]}>
             Thank you for creating your account—we are glad you are here.
           </Text>

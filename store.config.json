@@ -3,11 +3,11 @@
   "apple": {
     "info": {
       "en-US": {
-        "title": "Promesas",
+        "title": "app-name",
         "subtitle": "Prayer and Devotional App",
-        "description": "Promesas is a prayer and devotional app that helps you connect with God and grow in your faith.\n\nTerms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/",
-        "keywords": ["promesas", "prayers", "bible", "devotional"],
-        "privacyPolicyUrl": "https://www.andres-rojas.com/promesas/#privacy",
+        "description": "app-name is a prayer and devotional app that helps you connect with God and grow in your faith.\n\nTerms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/",
+        "keywords": ["app-name", "prayers", "bible", "devotional"],
+        "privacyPolicyUrl": "https://www.andres-rojas.com/app-name/#privacy",
         "termsOfUseUrl": "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
       }
     }

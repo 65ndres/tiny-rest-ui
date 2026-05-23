@@ -1,4 +1,4 @@
-export const proPlanDisplayName = 'Promesas Pro';
+export const proPlanDisplayName = 'app-name Pro';
 
 export type SubscriptionPlanPerks = {
   sectionTitle: string;

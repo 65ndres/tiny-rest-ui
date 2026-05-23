@@ -228,7 +228,7 @@ const NewConversationScreen: React.FC = () => {
         </View>
         <View style={{ height: "20%" }}>
           <View style={{flex: 1, justifyContent: 'flex-end'}}>
-            <Text style={{ color: 'white', fontSize: 15, fontWeight: '500', textAlign: 'center' }}>Promesas</Text>
+            <Text style={{ color: 'white', fontSize: 15, fontWeight: '500', textAlign: 'center' }}>app-name</Text>
           </View>
         </View>
       </Animated.View>

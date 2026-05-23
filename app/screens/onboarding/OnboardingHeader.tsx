@@ -5,7 +5,7 @@ import { onboardingHeight } from './onboardingLayout';
 const OnboardingHeader: React.FC = () => {
   return (
     <View style={styles.wrap}>
-      <Text style={styles.title}>Promesas</Text>
+      <Text style={styles.title}>app-name</Text>
     </View>
   );
 };

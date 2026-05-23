@@ -334,7 +334,7 @@ const UnauthenticatedNavigator: React.FC = () => {
           options={{
             drawerLabel: 'HOME',
             headerLeft: () => null,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>Promesas</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>app-name</Text>,
           }}
         />
         <AuthDrawer.Screen
@@ -343,7 +343,7 @@ const UnauthenticatedNavigator: React.FC = () => {
           options={{
             drawerLabel: 'LOG IN',
             headerLeft: () => <BackButton text=" " />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>Promesas</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>app-name</Text>,
           }}
         />
         <AuthDrawer.Screen
@@ -361,7 +361,7 @@ const UnauthenticatedNavigator: React.FC = () => {
           options={{
             drawerLabel: 'SIGN UP',
             headerLeft: () => <BackButton text=" " />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>Promesas</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>app-name</Text>,
           }}
         />
         <AuthDrawer.Screen
@@ -370,7 +370,7 @@ const UnauthenticatedNavigator: React.FC = () => {
           options={{
             drawerLabel: 'RESET PASSWORD',
             headerLeft: () => <BackButton text=" " />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>Promesas</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>app-name</Text>,
           }}
         />
         <AuthDrawer.Screen
@@ -380,7 +380,7 @@ const UnauthenticatedNavigator: React.FC = () => {
             drawerLabel: () => null,
             drawerItemStyle: { display: 'none' },
             headerLeft: () => <BackButton text=" " />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>Promesas</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>app-name</Text>,
           }}
         />
       </AuthDrawer.Navigator>
@@ -428,7 +428,7 @@ const OnboardingRootLayout: React.FC = () => {
                 </TouchableOpacity>
               ),
               headerTitle: () => (
-                <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>Promesas</Text>
+                <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>app-name</Text>
               ),
             }}
           />

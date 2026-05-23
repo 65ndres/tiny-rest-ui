@@ -19,7 +19,7 @@ const ProSlide: React.FC<ProSlideProps> = ({ onPressNext }) => {
     <OnboardingSlideShell>
       <View style={onboardingSlideLayoutStyles.root}>
         <View style={onboardingSlideLayoutStyles.main}>
-          <Text style={slideStyles.titleCenter}>Promesas Pro</Text>
+          <Text style={slideStyles.titleCenter}>app-name Pro</Text>
           <View style={onboardingBenefitListStyles.benefits}>
             <View style={onboardingBenefitListStyles.benefitRow}>
               <Text style={onboardingBenefitListStyles.bulletIcon} accessibilityLabel="Cross bullet">

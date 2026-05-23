@@ -47,11 +47,11 @@ const LandingScreen: React.FC = () => {
     <ScreenComponent style={styles.screen}>
       <View style={styles.container}>
         <View style={styles.content}>
-          <Text style={styles.headline}>Welcome to Promesas</Text>
+          <Text style={styles.headline}>Welcome to app-name</Text>
           <Text style={styles.supporting}>Explore the word of the Lord in the simplest way possible.</Text>
           <Text style={styles.trial}>
             Create a <Text style={styles.trialEmphasis}>Basic</Text> account for free or try our{' '}
-            <Text style={styles.trialEmphasis}>Pro</Text> account the get the most out of Promesas. Includes a{' '}
+            <Text style={styles.trialEmphasis}>Pro</Text> account the get the most out of app-name. Includes a{' '}
             <Text style={styles.trialEmphasis}>14-day free trial.</Text>
           </Text>
           <View style={styles.buttonsContainer}>

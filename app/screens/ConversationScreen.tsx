@@ -379,8 +379,8 @@ const ConversationScreen: React.FC = () => {
             </KeyboardAvoidingView>
           </View>
           <View style={styles.bottomArea}>
-              <View style={styles.promesasContainer}>
-                <Text style={styles.promesasText}>Promesas</Text>
+              <View style={styles.appNameContainer}>
+                <Text style={styles.appNameText}>app-name</Text>
               </View>
             </View>
         </View>
@@ -541,12 +541,12 @@ const styles = StyleSheet.create({
   sendIconButtonDisabled: {
     opacity: 0.5,
   } as ViewStyle,
-  promesasContainer: {
+  appNameContainer: {
     flex: 1,
     justifyContent: 'flex-end',
     paddingBottom: screenHeight * 0.012,
   } as ViewStyle,
-  promesasText: {
+  appNameText: {
     color: 'white',
     fontSize: screenWidth * 0.035,
     fontWeight: '500',

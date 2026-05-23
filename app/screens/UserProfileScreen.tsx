@@ -321,7 +321,7 @@ const UserProfileScreen: React.FC = () => {
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Promesas</Text>
+            <Text style={styles.footerText}>app-name</Text>
           </View>
         </View>
       </Animated.View>

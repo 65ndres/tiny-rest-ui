@@ -256,8 +256,8 @@ const ConversationsScreen: React.FC = () => {
               onPress={handleNewConversation}
             />
           </View>
-          <View style={styles.promesasContainer}>
-            <Text style={styles.promesasText}>Promesas</Text>
+          <View style={styles.appNameContainer}>
+            <Text style={styles.appNameText}>app-name</Text>
           </View>
         </View>
       </Animated.View>
@@ -401,11 +401,11 @@ const styles = StyleSheet.create({
     color: '#ac8861ff',
     fontSize: screenWidth * 0.04,
   },
-  promesasContainer: {
+  appNameContainer: {
     flex: 1,
     justifyContent: 'flex-end',
   } as ViewStyle,
-  promesasText: {
+  appNameText: {
     color: 'white',
     fontSize: screenWidth * 0.04,
     fontWeight: '500',

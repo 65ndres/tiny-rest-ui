@@ -25,12 +25,12 @@ type RootStackParamList = {
   Home: undefined;
   Conversations: undefined;
   NewConversation: {
-    verse_id?: number;
+    item_id?: number;
   };
   Conversation: {
     other_user_id?: number;
     conversation_id?: number;
-    verse_id?: number;
+    item_id?: number;
   };
 };
 
@@ -55,7 +55,7 @@ const NewConversationScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteProp>();
   const colorScheme = useColorScheme();
-  const { verse_id } = route.params || {};
+  const { item_id } = route.params || {};
   const [loaded] = useFonts({
     SpaceMono: require('../../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -147,10 +147,10 @@ const NewConversationScreen: React.FC = () => {
 
   const handleUserSelect = (user: User) => {
     debugger;
-    // Navigate to conversation screen with the other_user_id and verse_id if present
+    // Navigate to conversation screen with the other_user_id and item_id if present
     navigation.navigate('Conversation', {
       other_user_id: user.id,
-      verse_id: verse_id,
+      item_id: item_id,
     });
   };
 

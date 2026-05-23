@@ -12,7 +12,7 @@ const s = (value: number) => value * scale;
 
 interface BackButtonProps {
   text: string;
-  onPress?: () => void; // Optional custom onPress handler
+  onPress?: () => void;
 }
 
 const BackButton: React.FC<BackButtonProps> = ({ text, onPress }) => {

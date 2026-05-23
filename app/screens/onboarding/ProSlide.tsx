@@ -5,7 +5,7 @@ import OnboardingSlideShell from './OnboardingSlideShell';
 import {
   onboardingBenefitListStyles,
   onboardingSlideLayoutStyles,
-  onboardingVerseStyles,
+  onboardingSampleStyles,
   slideNextButtonStyles,
   slideStyles,
 } from './onboardingLayout';
@@ -34,8 +34,8 @@ const ProSlide: React.FC<ProSlideProps> = ({ onPressNext }) => {
                 {'\u271D\uFE0E'}
               </Text>
               <Text style={[slideStyles.bodyLeft, onboardingBenefitListStyles.benefitText]}>
-                <Text style={onboardingBenefitListStyles.boldLabel}>Search by category. </Text>
-                Filter to land on a verse that fits your moment.
+                <Text style={onboardingBenefitListStyles.boldLabel}>Browse by category. </Text>
+                Filter to find sample content that fits your moment.
               </Text>
             </View>
             <View style={[onboardingBenefitListStyles.benefitRow, onboardingSlideLayoutStyles.bodySpacing]}>
@@ -57,11 +57,11 @@ const ProSlide: React.FC<ProSlideProps> = ({ onPressNext }) => {
               </Text>
             </View>
           </View>
-          <View style={onboardingVerseStyles.container}>
-            <Text style={onboardingVerseStyles.text}>
-              "He said to them, 'Go into all the world and preach the gospel to all creation.'"
+          <View style={onboardingSampleStyles.container}>
+            <Text style={onboardingSampleStyles.text}>
+              Pro unlocks browse categories and sharing sample items in chat.
             </Text>
-            <Text style={onboardingVerseStyles.text}>Mark 16:15</Text>
+            <Text style={onboardingSampleStyles.text}>Sample Item — 3</Text>
           </View>
         </View>
         {onPressNext ? (

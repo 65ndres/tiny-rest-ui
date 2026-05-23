@@ -59,7 +59,7 @@ export const onboardingSlideLayoutStyles = StyleSheet.create({
   },
 });
 
-export const onboardingVerseStyles = StyleSheet.create({
+export const onboardingSampleStyles = StyleSheet.create({
   container: {
     marginTop: vh(30),
     alignItems: 'center',

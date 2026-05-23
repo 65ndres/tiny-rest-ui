@@ -23,7 +23,9 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Input } from '@rneui/themed';
 import { API_URL } from '../../constants/Config';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
-import BackButton from '../VerseModule/BackButton';
+import BackButton from '../SampleModule/BackButton';
+import { formatItemForMessage, getItemById, searchByQuery } from '../../lib/sampleContent';
+import type { SampleItem } from '../../types/sampleItem';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -34,7 +36,7 @@ type RootStackParamList = {
   Conversation: {
     other_user_id?: number,
     conversation_id?: number,
-    verse_id?: number,
+    item_id?: number,
   };
 };
 
@@ -58,14 +60,6 @@ interface ConversationData {
   }>;
 }
 
-interface Verse {
-  id: number;
-  book: string;
-  chapter: number;
-  verse: number;
-  text: string;
-}
-
 const ConversationScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteProp>();
@@ -74,12 +68,12 @@ const ConversationScreen: React.FC = () => {
     SpaceMono: require('../../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-  const { other_user_id, conversation_id, verse_id } = route.params || {};
+  const { other_user_id, conversation_id, item_id } = route.params || {};
   const [conversationData, setConversationData] = useState<ConversationData | null>(null);
   const [messages, setMessages] = useState<ConversationData['messages']>([]);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [inputText, setInputText] = useState<string>('');
-  const [verseResults, setVerseResults] = useState<Verse[]>([]);
+  const [itemResults, setItemResults] = useState<SampleItem[]>([]);
   const [loading, setLoading] = useState(true);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const messagesFadeAnim = useRef(new Animated.Value(0)).current;
@@ -87,7 +81,7 @@ const ConversationScreen: React.FC = () => {
   const flatListRef = useRef<FlatList>(null);
   const [moduleComponentVisibility, setModuleComponentVisibility] = useState(false);
   const [listComponentVisibility, setListComponentVisibility] = useState(true);
-  const [verseIdLoaded, setVerseIdLoaded] = useState<boolean>(false);
+  const [itemIdLoaded, setItemIdLoaded] = useState<boolean>(false);
   
   const fetchConversationData = useCallback(async () => {
     try {
@@ -151,37 +145,26 @@ const ConversationScreen: React.FC = () => {
         clearTimeout(searchTimeoutRef.current);
       }
       searchTimeoutRef.current = setTimeout(() => {
-        searchVerses(text.trim());
+        searchItems(text.trim());
       }, 500);
     } else {
-      setVerseResults([]);
+      setItemResults([]);
     }
   };
 
-  const searchVerses = async (query: string) => {
+  const searchItems = async (query: string) => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      
-      const response = await axios.get(`${API_URL}/verses/search_by_address`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { q: query },
-      });
-
-      if (response.data) {
-        const versesData = Array.isArray(response.data) 
-          ? response.data 
-          : response.data.verses || [];
-        setVerseResults(versesData);
-      }
+      const response = await searchByQuery(query);
+      setItemResults(response.items);
     } catch (e) {
-      console.error('Search verses failed', e);
-      setVerseResults([]);
+      console.error('Search sample items failed', e);
+      setItemResults([]);
     }
   };
 
-  const handleVerseSelect = async (verse: Verse) => {
-    setInputText(`${verse.book} ${verse.chapter}:${verse.verse} \n${verse.text}`);
-    setVerseResults([]);
+  const handleItemSelect = (item: SampleItem) => {
+    setInputText(formatItemForMessage(item));
+    setItemResults([]);
   };
 
   const handleSendMessage = async () => {
@@ -198,64 +181,33 @@ const ConversationScreen: React.FC = () => {
       if (response.status === 200 || response.status === 201) {
         fetchConversationData();
         setInputText("");
-        setVerseIdLoaded(false);
+        setItemIdLoaded(false);
       }
     } catch (e) {
       console.error('Send message failed', e);
     }
   };
 
-  const fetchVerseByAddress = async (address: string) => {
+  const fetchItemById = async (id: number) => {
     try {
-      const token = await AsyncStorage.getItem('token');
-      
-      const response = await axios.get(`${API_URL}/verses/search_by_address`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { q: address },
-      });
-
-      if (response.data) {
-        const versesData = Array.isArray(response.data) 
-          ? response.data 
-          : response.data.verses || [];
-        
-        if (versesData.length > 0) {
-          setModuleComponentVisibility(true);
-          setListComponentVisibility(false);
-        } else {
-          console.warn('No verse found for address:', address);
-        }
+      const item = await getItemById(id);
+      if (item) {
+        setInputText(formatItemForMessage(item));
+        setItemIdLoaded(true);
       }
     } catch (e) {
-      console.error('Fetch verse by address failed', e);
-    }
-  };
-
-  const fetchVerseById = async (verse_id: number) => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/verses/search_by_id?id=${verse_id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.data.verse) {
-        const verse = response.data.verse;
-        setInputText(`${verse.book} ${verse.chapter}:${verse.verse} \n${verse.text}`);
-        setVerseIdLoaded(true);
-      }
-    } catch (e) {
-      console.error('Fetch verse by id failed', e);
-    }
-    finally {
-      setVerseIdLoaded(true);
+      console.error('Fetch sample item by id failed', e);
+    } finally {
+      setItemIdLoaded(true);
     }
   };
 
   useEffect(() => {
-    if (verse_id && !verseIdLoaded) {
-      fetchVerseById(verse_id);
-      navigation.setParams({ verse_id: undefined });
+    if (item_id && !itemIdLoaded) {
+      fetchItemById(item_id);
+      navigation.setParams({ item_id: undefined });
     }
-  }, [verse_id, verseIdLoaded, fetchVerseById, navigation]);
+  }, [item_id, itemIdLoaded, navigation]);
 
   const handleBackPress = () => {
     navigation.goBack();
@@ -336,7 +288,7 @@ const ConversationScreen: React.FC = () => {
               {listComponentVisibility && (
                 <View style={styles.messagesWrapper}>
                   <View style={styles.container}>
-                    {verseResults.length === 0 &&
+                    {itemResults.length === 0 &&
                     <Animated.View style={[styles.messagesContainer, { opacity: messagesFadeAnim }]}>
                       <FlatList
                         ref={flatListRef}
@@ -349,25 +301,25 @@ const ConversationScreen: React.FC = () => {
                       />
                     </Animated.View>
                     }
-                    {inputText.trim().length >= 2 && verseResults.length > 0 && (
-                      <View style={styles.verseResultsContainer}>
+                    {inputText.trim().length >= 2 && itemResults.length > 0 && (
+                      <View style={styles.itemResultsContainer}>
                         <FlatList
-                          data={verseResults}
+                          data={itemResults}
                           renderItem={({ item }) => (
                             <TouchableOpacity
-                              style={styles.verseResultItem}
-                              onPress={() => handleVerseSelect(item)}
+                              style={styles.itemResultItem}
+                              onPress={() => handleItemSelect(item)}
                             >
-                              <Text style={styles.verseResultText}>
-                                {`${item.book} ${item.chapter}:${item.verse}`}
+                              <Text style={styles.itemResultText}>
+                                {item.title}
                               </Text>
-                              <Text style={styles.verseResultBody} numberOfLines={2}>
-                                {item.text}
+                              <Text style={styles.itemResultBody} numberOfLines={2}>
+                                {item.body}
                               </Text>
                             </TouchableOpacity>
                           )}
                           keyExtractor={(item) => item.id.toString()}
-                          style={styles.verseResultsList}
+                          style={styles.itemResultsList}
                           keyboardShouldPersistTaps="handled"
                         />
                       </View>
@@ -384,7 +336,7 @@ const ConversationScreen: React.FC = () => {
                         <View style={styles.inputRow}>
                           <View style={styles.inputFieldContainer}>
                           <Input
-                            placeholder="Search for verses..."
+                            placeholder="Search sample items..."
                             value={inputText}
                             onChangeText={handleInputChange}
                             placeholderTextColor={'white'}
@@ -524,29 +476,29 @@ const styles = StyleSheet.create({
   sentMessageTime: {
     color: '#ac8861ff',      
   },
-  verseModuleContainer: {
+  itemModuleContainer: {
     paddingTop: screenHeight * 0.062,
   } as ViewStyle,
-  verseResultsContainer: {
+  itemResultsContainer: {
     backgroundColor: 'transparent',
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.2)',
   } as ViewStyle,
-  verseResultsList: {
+  itemResultsList: {
     flexGrow: 0,
   },
-  verseResultItem: {
+  itemResultItem: {
     padding: screenWidth * 0.032,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   } as ViewStyle,
-  verseResultText: {
+  itemResultText: {
     color: 'white',
     fontSize: screenWidth * 0.052,
     fontWeight: '600',
     marginBottom: screenHeight * 0.005,
   },
-  verseResultBody: {
+  itemResultBody: {
     color: 'rgba(255, 255, 255, 0.8)',
     fontSize: screenWidth * 0.042,
   },

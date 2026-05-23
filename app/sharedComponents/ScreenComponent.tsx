@@ -14,7 +14,6 @@ const height = Dimensions.get("window").height;
 // Define the navigation stack param list
 type RootStackParamList = {
   Home: undefined;
-  VerseModule: undefined;
 };
 
 // Type the navigation prop

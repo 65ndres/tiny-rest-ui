@@ -5,17 +5,17 @@ import React from 'react';
 import { StyleProp, TouchableOpacity, ViewStyle } from 'react-native';
 
 type RootStackParamList = {
-  Liked: undefined;
+  Saved: undefined;
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const LikesButton: React.FC = () => {
+const SavedItemsButton: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
 
   return (
     <TouchableOpacity
-      onPress={() => navigation.navigate('Liked')}
+      onPress={() => navigation.navigate('Saved')}
       style={styles.button}
       accessibilityRole="button"
     >
@@ -24,7 +24,6 @@ const LikesButton: React.FC = () => {
   );
 };
 
-// Type the styles
 const styles = {
   button: {
     padding: 5,
@@ -32,4 +31,4 @@ const styles = {
   } as StyleProp<ViewStyle>,
 };
 
-export default LikesButton;
+export default SavedItemsButton;

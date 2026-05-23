@@ -18,12 +18,11 @@ import 'react-native-reanimated';
 import { API_URL } from '../../constants/Config';
 import { useAuth } from '../context/AuthContext';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
-import BackButton from '../VerseModule/BackButton';
+import BackButton from '../SampleModule/BackButton';
 
 // Define the navigation stack param list
 type RootStackParamList = {
   Home: undefined;
-  VerseModule: undefined;
   PasswordReset: undefined;
   PasswordCode: {
     email: string;

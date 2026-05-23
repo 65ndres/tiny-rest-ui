@@ -17,7 +17,7 @@ import ScreenComponent from '../sharedComponents/ScreenComponent';
 type AuthStackParamList = {
   Login: undefined;
   SignUp: undefined;
-  HisWillScreenGuest: undefined;
+  FeaturedScreenGuest: undefined;
 };
 
 type NavigationProp = DrawerNavigationProp<AuthStackParamList>;
@@ -40,7 +40,7 @@ const LandingScreen: React.FC = () => {
   };
 
   const handleContinueGuest = () => {
-    navigation.navigate('HisWillScreenGuest');
+    navigation.navigate('FeaturedScreenGuest');
   };
 
   return (

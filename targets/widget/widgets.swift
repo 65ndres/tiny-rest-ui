@@ -34,14 +34,14 @@ struct SimpleEntry: TimelineEntry {
     let configuration: ConfigurationAppIntent
 }
 
-struct Verse: Codable {
+struct SampleItem: Codable {
   let text: String;
   let address: String;
 }
 
-var MockData: [Verse] = [
-  Verse(text: "This is a bible Verse", address: "Psalms 1:30"),
-  Verse(text: "This is another verse", address: "Proverbs 3:45")
+var MockData: [SampleItem] = [
+  SampleItem(text: "This is sample content for your app.", address: "Sample Item — 1"),
+  SampleItem(text: "Replace this text when customizing the widget.", address: "Sample Item — 2")
 ]
 
 struct widgetEntryView : View {

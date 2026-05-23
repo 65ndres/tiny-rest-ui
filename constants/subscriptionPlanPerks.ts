@@ -8,15 +8,15 @@ export type SubscriptionPlanPerks = {
 export const subscriptionPlanPerks = {
   basic: {
     sectionTitle: 'Included with Basic:',
-    lines: ['Access to more verses', 'Save verses you love'],
+    lines: ['Access to more sample items', 'Save items you like'],
   },
   pro: {
     sectionTitle: 'Included with Pro:',
     lines: [
       'Everything in Basic',
-      'Search verses by category',
+      'Browse sample items by category',
       'Start conversations with other users',
-      'Share verses via in-app messaging',
+      'Share sample items via in-app messaging',
       'Premium support',
     ],
   },

@@ -1,40 +1,17 @@
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useRef } from 'react';
 import { Animated, Dimensions, StyleSheet, Text, View } from 'react-native';
-import { API_URL } from '../../constants/Config';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
-import VerseModule from '../VerseModule/VerseModule';
+import SampleModule from '../SampleModule/SampleModule';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const REFERENCE_HEIGHT = 812;
 const REFERENCE_WIDTH = 375;
 const scale = Math.min(screenHeight / REFERENCE_HEIGHT, screenWidth / REFERENCE_WIDTH);
 const s = (value: number) => value * scale;
-
 const quoteContentMaxWidth = Math.min(s(340), screenWidth);
 
-type AuthStackParamList = {
-  Login: undefined;
-  HisWillScreenGuest: undefined;
-  SignUp: undefined;
-  PasswordReset: undefined;
-  PasswordCode: { email: string };
-};
-
-/**
- * Non-authenticated version of His Will.
- * Like and Share buttons navigate to the Login screen instead of performing actions.
- */
-const HisWillScreenGuest: React.FC = () => {
-  const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
+const FeaturedScreen: React.FC = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  const goToLogin = () => {
-    navigation.navigate('Login');
-  };
-
-  const API_URL_HIS_WILL = `${API_URL}/verses/his_will_guest`;
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -51,20 +28,13 @@ const HisWillScreenGuest: React.FC = () => {
           <View style={styles.topContent}>
             <View style={styles.quoteColumn}>
               <Text style={styles.quoteText}>
-                {'"Trust in the LORD with all your heart..."'}
+                This is sample featured content for your customizable app.
               </Text>
             </View>
           </View>
         </View>
         <View style={styles.middleSection}>
-          <VerseModule
-            data={[]}
-            url={API_URL_HIS_WILL}
-            active={0}
-            requireAuth={false}
-            onLikePress={goToLogin}
-            onSharePress={goToLogin}
-          />
+          <SampleModule source="featured" active={0} />
         </View>
         <View style={styles.bottomSection}>
           <View style={styles.bottomContent}>
@@ -76,19 +46,12 @@ const HisWillScreenGuest: React.FC = () => {
   );
 };
 
-export default HisWillScreenGuest;
+export default FeaturedScreen;
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  fadeRoot: {
-    flex: 1,
-  },
-  topSection: {
-    flex: 2,
-    minHeight: 0,
-  },
+  screen: { flex: 1 },
+  fadeRoot: { flex: 1 },
+  topSection: { flex: 2, minHeight: 0 },
   topContent: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -101,14 +64,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     paddingHorizontal: s(24),
   },
-  middleSection: {
-    flex: 6,
-    minHeight: 0,
-  },
-  bottomSection: {
-    flex: 2,
-    minHeight: 0,
-  },
+  middleSection: { flex: 6, minHeight: 0 },
+  bottomSection: { flex: 2, minHeight: 0 },
   bottomContent: {
     flex: 1,
     justifyContent: 'flex-end',

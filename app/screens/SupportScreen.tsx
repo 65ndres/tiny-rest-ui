@@ -23,7 +23,7 @@ import 'react-native-reanimated';
 
 import { API_URL } from '../../constants/Config';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
-import BackButton from '../VerseModule/BackButton';
+import BackButton from '../SampleModule/BackButton';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -34,7 +34,7 @@ type RootStackParamList = {
   Conversation: {
     other_user_id?: number,
     conversation_id?: number,
-    verse_id?: number,
+    item_id?: number,
   };
   Support: {
     conversation_id?: number,

@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 import OnboardingSlideShell from './OnboardingSlideShell';
 import {
   onboardingSlideLayoutStyles,
-  onboardingVerseStyles,
+  onboardingSampleStyles,
   slideNextButtonStyles,
   slideStyles,
 } from './onboardingLayout';
@@ -20,14 +20,13 @@ const WelcomeSlide: React.FC<WelcomeSlideProps> = ({ onPressNext }) => {
         <View style={onboardingSlideLayoutStyles.main}>
           <Text style={slideStyles.titleCenter}>Welcome to Promesas</Text>
           <Text style={[slideStyles.bodyLeft, onboardingSlideLayoutStyles.bodySpacing]}>
-            Thank you for creating your account—we are glad you are here and walking one step closer to
-            God.
+            Thank you for creating your account—we are glad you are here.
           </Text>
-          <View style={onboardingVerseStyles.container}>
-            <Text style={onboardingVerseStyles.text}>
-              "Give thanks to the Lord, for he is good; his love endures forever."
+          <View style={onboardingSampleStyles.container}>
+            <Text style={onboardingSampleStyles.text}>
+              This is sample content for your customizable app.
             </Text>
-            <Text style={onboardingVerseStyles.text}>Psalm 100:4</Text>
+            <Text style={onboardingSampleStyles.text}>Sample Item — 1</Text>
           </View>
         </View>
         {onPressNext ? (

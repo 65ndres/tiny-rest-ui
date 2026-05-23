@@ -5,7 +5,7 @@ import OnboardingSlideShell from './OnboardingSlideShell';
 import {
   onboardingBenefitListStyles,
   onboardingSlideLayoutStyles,
-  onboardingVerseStyles,
+  onboardingSampleStyles,
   slideNextButtonStyles,
   slideStyles,
 } from './onboardingLayout';
@@ -27,7 +27,7 @@ const BasicSlide: React.FC<BasicSlideProps> = ({ onPressNext }) => {
               </Text>
               <Text style={[slideStyles.bodyLeft, onboardingBenefitListStyles.benefitText]}>
                 <Text style={onboardingBenefitListStyles.boldLabel}>Free. </Text>
-                More verses and a place to save what speaks to you.
+                More sample items and a place to save what you like.
               </Text>
             </View>
             <View style={[onboardingBenefitListStyles.benefitRow, onboardingSlideLayoutStyles.bodySpacing]}>
@@ -35,7 +35,7 @@ const BasicSlide: React.FC<BasicSlideProps> = ({ onPressNext }) => {
                 {'\u271D\uFE0E'}
               </Text>
               <Text style={[slideStyles.bodyLeft, onboardingBenefitListStyles.benefitText]}>
-                <Text style={onboardingBenefitListStyles.boldLabel}>More verses. </Text>
+                <Text style={onboardingBenefitListStyles.boldLabel}>More items. </Text>
                 Read beyond the starter set anytime.
               </Text>
             </View>
@@ -44,16 +44,16 @@ const BasicSlide: React.FC<BasicSlideProps> = ({ onPressNext }) => {
                 {'\u271D\uFE0E'}
               </Text>
               <Text style={[slideStyles.bodyLeft, onboardingBenefitListStyles.benefitText]}>
-                <Text style={onboardingBenefitListStyles.boldLabel}>Saved verses. </Text>
-                Reopen favorites when you need a word of encouragement.
+                <Text style={onboardingBenefitListStyles.boldLabel}>Saved items. </Text>
+                Reopen favorites when you need them.
               </Text>
             </View>
           </View>
-          <View style={onboardingVerseStyles.container}>
-            <Text style={onboardingVerseStyles.text}>
-              "Do not despise these small beginnings, for the Lord rejoices to see the work begin."
+          <View style={onboardingSampleStyles.container}>
+            <Text style={onboardingSampleStyles.text}>
+              Replace this quote with your own sample text in constants/sampleItems.ts.
             </Text>
-            <Text style={onboardingVerseStyles.text}>Zechariah 4:10</Text>
+            <Text style={onboardingSampleStyles.text}>Sample Item — 2</Text>
           </View>
         </View>
         {onPressNext ? (

@@ -13,7 +13,7 @@ Promesas is committed to protecting your privacy. This Privacy Policy explains h
 Information We Collect
 Promesas is designed with privacy in mind. We collect minimal information necessary to provide you with the best experience:
 
-Local Data: The App stores your favorite verses and preferences locally on your device. This information is not transmitted to our servers.
+Local Data: The App stores your saved sample items and preferences locally on your device. This information is not transmitted to our servers.
 Usage Data: We may collect anonymous usage statistics to improve the App's performance and user experience. This data does not personally identify you.
 How We Use Your Information
 We use the information we collect to:
@@ -23,7 +23,7 @@ Personalize your experience within the App
 Analyze usage patterns to enhance user experience
 Respond to your inquiries and provide customer support
 Data Storage and Security
-Your personal data, including favorite verses and preferences, is stored locally on your device. We do not transmit this data to external servers. We implement appropriate technical and organizational measures to protect your information, though no method of transmission over the Internet or electronic storage is 100% secure.
+Your personal data, including saved sample items and preferences, is stored locally on your device. We do not transmit this data to external servers. We implement appropriate technical and organizational measures to protect your information, though no method of transmission over the Internet or electronic storage is 100% secure.
 
 Third-Party Services
 Promesas may use third-party services that have their own privacy policies. We are not responsible for the privacy practices of these third parties. We encourage you to review their privacy policies.

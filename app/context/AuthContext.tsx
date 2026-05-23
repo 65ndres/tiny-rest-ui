@@ -11,7 +11,6 @@ const ONBOARDING_COMPLETED_KEY = 'onboarding_completed';
 
 type RootStackParamList = {
   Home: undefined;
-  VerseModule: undefined;
   Login: undefined; // Added to allow navigation back to Login
 };
 
@@ -49,15 +48,6 @@ interface AuthContextType {
   logout: () => Promise<void>;
   completeOnboarding: () => Promise<void>;
   refreshUser: () => Promise<void>;
-}
-
-interface Verse {
-  book: string;
-  chapter: number;
-  verse: number;
-  liked: boolean;
-  favorited: boolean;
-  text: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

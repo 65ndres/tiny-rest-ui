@@ -20,9 +20,8 @@ import ScreenComponent from './sharedComponents/ScreenComponent';
 // Define the navigation stack param list
 type RootStackParamList = {
   Home: undefined;
-  VerseModule: undefined;
-  HisWillScreen: undefined;
-  YourChoiceScreen: undefined;
+  FeaturedScreen: undefined;
+  BrowseScreen: undefined;
 };
 
 // Type the navigation prop
@@ -76,12 +75,12 @@ const Home: React.FC = () => {
 
   const isProUser = user?.subscription_type === 'pro';
 
-  const handleYourChoicePress = () => {
+  const handleBrowsePress = () => {
     if (!isProUser) {
       void presentPaywall();
       return;
     }
-    navigateWithFadeOut('YourChoiceScreen');
+    navigateWithFadeOut('BrowseScreen');
   };
 
   if (!loaded) {
@@ -98,16 +97,16 @@ const Home: React.FC = () => {
           {/* <Image source={require('../assets/images/splash-icon.png')} style={styles.logoImage} /> */}
           <View style={{flex: 1, justifyContent: 'center'}}>
           
-          <Pressable onPress={() => navigateWithFadeOut('HisWillScreen')}>
-            <Text style={styles.text}>HIS WILL</Text>
+          <Pressable onPress={() => navigateWithFadeOut('FeaturedScreen')}>
+            <Text style={styles.text}>FEATURED</Text>
           </Pressable>
           <Separator />
           <Pressable
-            onPress={handleYourChoicePress}
+            onPress={handleBrowsePress}
             accessibilityState={{ disabled: !isProUser }}
           >
             <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8 }}>
-              <Text style={[styles.text, !isProUser && styles.disabledText]}>YOUR CHOICE</Text>
+              <Text style={[styles.text, !isProUser && styles.disabledText]}>BROWSE</Text>
               {!isProUser && (
                 <View style={styles.proLabel}>
                   <Text style={styles.proLabelText}>Pro</Text>

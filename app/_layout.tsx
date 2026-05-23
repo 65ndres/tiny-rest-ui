@@ -9,11 +9,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { RevenueCatProvider, useRevenueCat } from "./context/RevenueCatContext";
 import Home from './Home';
-import LikedScreen from './Liked';
+import SavedScreen from './Saved';
 import ConversationScreen from './screens/ConversationScreen';
 import ConversationsScreen from './screens/ConversationsScreen';
-import HisWillScreen from './screens/HisWillScreen';
-import HisWillScreenGuest from './screens/HisWillScreenGuest';
+import FeaturedScreen from './screens/FeaturedScreen';
+import FeaturedScreenGuest from './screens/FeaturedScreenGuest';
 import LandingScreen from './screens/LandingScreen';
 import LoginScreen from './screens/LoginScreen';
 import NewConversationScreen from './screens/NewConversationScreen';
@@ -24,8 +24,8 @@ import SignUpScreen from './screens/SignUpScreen';
 import SubscriptionScreen from './screens/SubscriptionScreen';
 import SupportScreen from './screens/SupportScreen';
 import UserProfileScreen from './screens/UserProfileScreen';
-import YourChoiceScreen from './screens/YourChoiceScreen';
-import BackButton from './VerseModule/BackButton';
+import BrowseScreen from './screens/BrowseScreen';
+import BackButton from './SampleModule/BackButton';
 // Set the animation options. This is optional.
 
 const { width, height } = Dimensions.get('window');
@@ -33,24 +33,23 @@ const { width, height } = Dimensions.get('window');
 type RootDrawerParamList = {
   Home: undefined;
   Search: undefined;
-  VerseModule: undefined;
-  Liked: undefined;
-  HisWillScreen: undefined;
-  YourChoiceScreen: undefined;
+  Saved: undefined;
+  FeaturedScreen: undefined;
+  BrowseScreen: undefined;
   Profile: undefined;
   Subscription: undefined;
   Conversations: undefined;
   NewConversation: {
-    verse_id?: number;
+    item_id?: number;
   };
   Conversation: {
     other_user_id?: number;
     conversation_id?: number;
-    verse_id?: number;
+    item_id?: number;
   };
   Support: {
     conversation_id?: number;
-    verse_id?: number;
+    item_id?: number;
   };
 };
 
@@ -62,14 +61,14 @@ type AuthStackParamList = {
   PasswordCode: {
     email: string;
   };
-  HisWillScreenGuest: undefined;
+  FeaturedScreenGuest: undefined;
 };
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
 const AuthDrawer = createDrawerNavigator<AuthStackParamList>();
 const OnboardingStack = createStackNavigator<{
   Onboarding: undefined;
-  HisWillScreen: undefined;
+  FeaturedScreen: undefined;
 }>();
 
 const DrawerToggleButton: React.FC<{ size?: number }> = ({ size }) => {
@@ -91,7 +90,7 @@ const CustomDrawerContent: React.FC<any> = (props) => {
   const { presentPaywall } = useRevenueCat();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const isProUser = user?.subscription_type === 'pro';
-  const alwaysAllowedRoutes = new Set(['Home', 'HisWillScreen', 'Profile']);
+  const alwaysAllowedRoutes = new Set(['Home', 'FeaturedScreen', 'Profile']);
   const hiddenRoutes = new Set(['NewConversation', 'Conversation', 'Subscription']);
 
   const handleLogout = async () => {
@@ -216,23 +215,23 @@ const AuthenticatedNavigator: React.FC = () => {
           drawerLabel: 'HOME', headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>HOME</Text> }}
       />
       <Drawer.Screen
-        name="HisWillScreen"
-        component={HisWillScreen}
+        name="FeaturedScreen"
+        component={FeaturedScreen}
         options={{
-          drawerLabel: 'HIS WILL',
+          drawerLabel: 'FEATURED',
           headerLeft: () => <BackButton text="" /> ,
-          headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>HIS WILL</Text>,
+          headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>FEATURED</Text>,
         }}
       />
       <Drawer.Screen
-        name="YourChoiceScreen"
-        component={YourChoiceScreen}
-        options={{headerLeft: () => <BackButton text="" /> ,drawerLabel: 'YOUR CHOICE', headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>YOUR CHOICE</Text>}}
+        name="BrowseScreen"
+        component={BrowseScreen}
+        options={{headerLeft: () => <BackButton text="" /> ,drawerLabel: 'BROWSE', headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>BROWSE</Text>}}
       />
       <Drawer.Screen
-        name="Liked"
-        component={LikedScreen}
-        options={{ drawerLabel: 'LIKED VERSES', headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>LIKED VERSES</Text> }}
+        name="Saved"
+        component={SavedScreen}
+        options={{ drawerLabel: 'SAVED', headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>SAVED</Text> }}
       />
       <Drawer.Screen
         name="Conversations"
@@ -348,12 +347,12 @@ const UnauthenticatedNavigator: React.FC = () => {
           }}
         />
         <AuthDrawer.Screen
-          name="HisWillScreenGuest"
-          component={HisWillScreenGuest}
+          name="FeaturedScreenGuest"
+          component={FeaturedScreenGuest}
           options={({ navigation }) => ({
-            drawerLabel: 'VERSES',
+            drawerLabel: 'FEATURED',
             headerLeft: () => <BackButton text=" " onPress={() => navigation.navigate('Landing')} />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>VERSES</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>FEATURED</Text>,
           })}
         />
         <AuthDrawer.Screen
@@ -434,11 +433,11 @@ const OnboardingRootLayout: React.FC = () => {
             }}
           />
           <OnboardingStack.Screen
-            name="HisWillScreen"
-            component={HisWillScreen}
+            name="FeaturedScreen"
+            component={FeaturedScreen}
             options={{
               headerLeft: () => <BackButton text="" />,
-              headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>HIS WILL</Text>,
+              headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>FEATURED</Text>,
             }}
           />
         </OnboardingStack.Navigator>

@@ -8,7 +8,7 @@ import { Animated, Dimensions, Image, ImageStyle, StyleSheet, View, type TextSty
 import 'react-native-reanimated';
 import { API_URL } from '../../constants/Config';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
-import BackButton from '../VerseModule/BackButton';
+import BackButton from '../SampleModule/BackButton';
 
 type AuthStackParamList = {
   Login: undefined;

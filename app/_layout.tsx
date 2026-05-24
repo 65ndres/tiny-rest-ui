@@ -27,6 +27,9 @@ import UserProfileScreen from './screens/UserProfileScreen';
 import BrowseScreen from './screens/BrowseScreen';
 import BackButton from './SampleModule/BackButton';
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
+import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
+import '@/global.css';
+
 // Set the animation options. This is optional.
 
 const { width, height } = Dimensions.get('window');
@@ -77,8 +80,12 @@ const DrawerToggleButton: React.FC<{ size?: number }> = ({ size }) => {
   const iconSize = size || height * 0.035; // scales with screen height
   
   return (
-    <TouchableOpacity
-      onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
+    
+    <GluestackUIProvider mode="dark">
+      <TouchableOpacity
+      onPress={() => navigation.dispatch(DrawerActions.toggleDrawer()
+    </GluestackUIProvider>
+  )}
       style={styles.drawerToggleButton}
     >
       <Ionicons name="menu-sharp" size={iconSize} color="white" />

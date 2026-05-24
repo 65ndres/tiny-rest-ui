@@ -171,7 +171,6 @@ const LoginScreen: React.FC = () => {
 
         </View>
         <View style={styles.logoWrap}>
-            <Image source={require('../../assets/images/splash-icon.png')} style={styles.logoImage} />
           </View>
       </Animated.View>
     </ScreenComponent>

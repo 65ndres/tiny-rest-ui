@@ -1,7 +1,14 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  View,
+  type ImageStyle,
+  type ViewStyle,
+} from 'react-native';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import { Center } from '@/components/ui/center';
 import {
@@ -225,8 +232,24 @@ const LoginScreenGluestack: React.FC = () => {
           </LinkText>
         </Link>
       </VStack>
+      <View style={styles.logoWrap}>
+        <Image source={require('../../assets/images/splash-icon.png')} style={styles.logoImage} />
+      </View>
     </Center>
   );
 };
+
+const styles = StyleSheet.create({
+  logoWrap: {
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingTop: 10,
+  } as ViewStyle,
+  logoImage: {
+    height: 124,
+    width: 124,
+    alignSelf: 'center',
+  } as ImageStyle,
+});
 
 export default LoginScreenGluestack;

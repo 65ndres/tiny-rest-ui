@@ -1,13 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import DateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
-import axios from 'axios';
+import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Platform, Pressable } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, View } from 'react-native';
 import { Button, ButtonIcon, ButtonSpinner, ButtonText } from '@/components/ui/button';
-import { Center } from '@/components/ui/center';
 import {
   FormControl,
   FormControlLabel,
@@ -18,7 +16,15 @@ import { PlayIcon } from '@/components/ui/icon';
 import { Input, InputField } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { API_URL } from '@/constants/Config';
+import {
+  createLocalTimerSession,
+  formatDuration,
+  formatSessionTime,
+  loadTimerHistoryFromCache,
+  prependTimerSession,
+  saveTimerHistoryToCache,
+  type TimerSession,
+} from '@/app/utils/timerHistory';
 
 const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
 
@@ -27,6 +33,7 @@ const inputClassName =
 const inputFieldClassName = 'text-white text-lg';
 const labelClassName = 'text-white text-lg';
 const buttonTextClassName = 'text-white text-lg';
+const mutedTextClassName = 'text-white/75 text-base';
 
 type PickerTarget = 'start' | 'end';
 
@@ -38,15 +45,7 @@ const formatDateTime = (date: Date | null): string => {
   });
 };
 
-const formatElapsed = (ms: number): string => {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return [hours, minutes, seconds]
-    .map((value) => String(value).padStart(2, '0'))
-    .join(':');
-};
+const formatElapsed = (ms: number): string => formatDuration(ms);
 
 const TimerScreen: React.FC = () => {
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -56,6 +55,8 @@ const TimerScreen: React.FC = () => {
   const [canSubmit, setCanSubmit] = useState(false);
   const [activePicker, setActivePicker] = useState<PickerTarget | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [history, setHistory] = useState<TimerSession[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const startTimeRef = useRef<Date | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -72,6 +73,19 @@ const TimerScreen: React.FC = () => {
     if (!start) return;
     setElapsedMs(Date.now() - start.getTime());
   }, []);
+
+  const loadHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    const cached = await loadTimerHistoryFromCache();
+    setHistory(cached);
+    setHistoryLoading(false);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadHistory();
+    }, [loadHistory])
+  );
 
   useEffect(() => {
     startTimeRef.current = startTime;
@@ -193,33 +207,26 @@ const TimerScreen: React.FC = () => {
     isRunning || !!startTime || !!endTime || elapsedMs > 0;
 
   const handleSubmit = async () => {
-    // TODO: replace path/field names when backend contract is final
     if (!startTime || !endTime) {
       Alert.alert('Error', 'Start and end times are required.');
       return;
     }
 
+    const payload = {
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
+      duration_ms: elapsedMs,
+    };
+
     setIsSubmitting(true);
     try {
-      const token = await AsyncStorage.getItem('token');
-      await axios.post(
-        `${API_URL}/timer`,
-        {
-          start_time: startTime.toISOString(),
-          end_time: endTime.toISOString(),
-          duration_ms: elapsedMs,
-        },
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      );
-      Alert.alert('Success', 'Timer session submitted.');
-    } catch (error: unknown) {
-      console.error('Failed to submit timer:', error);
-      const err = error as { response?: { data?: { message?: string } } };
-      const errorMessage =
-        err.response?.data?.message || 'Failed to submit timer session';
-      Alert.alert('Error', errorMessage);
+      const localSession = createLocalTimerSession(payload);
+      const nextHistory = prependTimerSession(history, localSession);
+      setHistory(nextHistory);
+      await saveTimerHistoryToCache(nextHistory);
+
+      Alert.alert('Success', 'Timer session saved.');
+      resetAll();
     } finally {
       setIsSubmitting(false);
     }
@@ -233,7 +240,11 @@ const TimerScreen: React.FC = () => {
         : new Date();
 
   return (
-    <Center className="flex-1 p-6">
+    <ScrollView
+      className="flex-1"
+      contentContainerClassName="flex-grow p-6 pb-10 items-center"
+      showsVerticalScrollIndicator={false}
+    >
       <VStack space="md" className="w-full max-w-[336px] items-center">
         <VStack className="rounded-xl border border-white/90 p-6 w-full">
           <Heading size="2xl" className="text-white">
@@ -355,6 +366,43 @@ const TimerScreen: React.FC = () => {
             <ButtonText className={buttonTextClassName}>Reset</ButtonText>
           </Button>
         </VStack>
+
+        <VStack className="rounded-xl border border-white/90 p-6 w-full">
+          <Heading size="lg" className="text-white">
+            History
+          </Heading>
+
+          {historyLoading ? (
+            <Text className={`${mutedTextClassName} mt-4`}>Loading...</Text>
+          ) : null}
+
+          {!historyLoading && history.length === 0 ? (
+            <Text className={`${mutedTextClassName} mt-4`}>
+              No submitted timers yet.
+            </Text>
+          ) : null}
+
+          {!historyLoading && history.length > 0 ? (
+            <VStack className="mt-4 w-full" space="md">
+              {history.map((session, index) => (
+                <View key={session.id}>
+                  {index > 0 ? (
+                    <View className="border-t border-white/30 mb-4" />
+                  ) : null}
+                  <Text className="text-white text-base">
+                    Start: {formatSessionTime(session.start_time)}
+                  </Text>
+                  <Text className="text-white text-base mt-1">
+                    End: {formatSessionTime(session.end_time)}
+                  </Text>
+                  <Text className={`${mutedTextClassName} mt-1 font-mono`}>
+                    Duration: {formatDuration(session.duration_ms)}
+                  </Text>
+                </View>
+              ))}
+            </VStack>
+          ) : null}
+        </VStack>
       </VStack>
 
       {activePicker ? (
@@ -373,7 +421,7 @@ const TimerScreen: React.FC = () => {
           ) : null}
         </VStack>
       ) : null}
-    </Center>
+    </ScrollView>
   );
 };
 

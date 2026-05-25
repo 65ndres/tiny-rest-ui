@@ -162,6 +162,36 @@ const TimerScreen: React.FC = () => {
     }
   };
 
+  const resetAll = useCallback(() => {
+    clearTimerInterval();
+    setIsRunning(false);
+    setActivePicker(null);
+    setStartTime(null);
+    startTimeRef.current = null;
+    setEndTime(null);
+    setElapsedMs(0);
+    setCanSubmit(false);
+  }, [clearTimerInterval]);
+
+  const handleReset = () => {
+    if (isRunning) {
+      resetAll();
+      return;
+    }
+
+    if (startTime && endTime) {
+      resetAll();
+      return;
+    }
+
+    if (startTime || endTime || elapsedMs > 0) {
+      resetAll();
+    }
+  };
+
+  const canReset =
+    isRunning || !!startTime || !!endTime || elapsedMs > 0;
+
   const handleSubmit = async () => {
     // TODO: replace path/field names when backend contract is final
     if (!startTime || !endTime) {
@@ -312,6 +342,17 @@ const TimerScreen: React.FC = () => {
                 Submit
               </ButtonText>
             )}
+          </Button>
+
+          <Button
+            variant="outline"
+            className="w-full mt-4 border-2 border-white bg-transparent"
+            size="md"
+            onPress={handleReset}
+            isDisabled={isSubmitting || !canReset}
+            accessibilityLabel="Reset timer"
+          >
+            <ButtonText className={buttonTextClassName}>Reset</ButtonText>
           </Button>
         </VStack>
       </VStack>

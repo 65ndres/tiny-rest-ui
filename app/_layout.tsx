@@ -27,6 +27,7 @@ import SubscriptionScreen from './screens/SubscriptionScreen';
 import SupportScreen from './screens/SupportScreen';
 import UserProfileScreen from './screens/UserProfileScreen';
 import BrowseScreen from './screens/BrowseScreen';
+import TimerScreen from './screens/TimerScreen';
 import BackButton from './SampleModule/BackButton';
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
@@ -57,6 +58,7 @@ type RootDrawerParamList = {
     conversation_id?: number;
     item_id?: number;
   };
+  Timer: undefined;
 };
 
 type AuthStackParamList = {
@@ -70,6 +72,7 @@ type AuthStackParamList = {
     email: string;
   };
   FeaturedScreenGuest: undefined;
+  Timer: undefined;
 };
 
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
@@ -98,7 +101,7 @@ const CustomDrawerContent: React.FC<any> = (props) => {
   const { presentPaywall } = useRevenueCat();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const isProUser = user?.subscription_type === 'pro';
-  const alwaysAllowedRoutes = new Set(['Home', 'FeaturedScreen', 'Profile']);
+  const alwaysAllowedRoutes = new Set(['Home', 'FeaturedScreen', 'Profile', 'Timer']);
   const hiddenRoutes = new Set(['NewConversation', 'Conversation', 'Subscription']);
 
   const handleLogout = async () => {
@@ -237,6 +240,19 @@ const AuthenticatedNavigator: React.FC = () => {
         options={{headerLeft: () => <BackButton text="" /> ,drawerLabel: 'BROWSE', headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>BROWSE</Text>}}
       />
       <Drawer.Screen
+        name="Timer"
+        component={TimerScreen}
+        options={{
+          drawerLabel: 'TIMER',
+          headerLeft: () => <BackButton text="" />,
+          headerTitle: () => (
+            <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
+              TIMER
+            </Text>
+          ),
+        }}
+      />
+      <Drawer.Screen
         name="Saved"
         component={SavedScreen}
         options={{ drawerLabel: 'SAVED', headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>SAVED</Text> }}
@@ -343,6 +359,19 @@ const UnauthenticatedNavigator: React.FC = () => {
             drawerLabel: 'HOME',
             headerLeft: () => null,
             headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
+          }}
+        />
+        <AuthDrawer.Screen
+          name="Timer"
+          component={TimerScreen}
+          options={{
+            drawerLabel: 'TIMER',
+            headerLeft: () => <BackButton text=" " />,
+            headerTitle: () => (
+              <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
+                TIMER
+              </Text>
+            ),
           }}
         />
         <AuthDrawer.Screen

@@ -240,18 +240,18 @@ const TimerScreen: React.FC = () => {
         : new Date();
 
   return (
+    <>
+    <View style={{ height: "15%" }}></View>
+    <View style={{ height: "80%" }}>
     <ScrollView
       className="flex-1"
-      contentContainerClassName="flex-grow p-6 pb-10 items-center"
+      contentContainerClassName="flex-grow p-6 items-center"
       showsVerticalScrollIndicator={false}
     >
-      <VStack space="md" className="w-full max-w-[336px] items-center">
+      <VStack space="md" className="w-full max-w-[336px] items-center pt-10 ">
         <VStack className="rounded-xl border border-white/90 p-6 w-full">
-          <Heading size="2xl" className="text-white">
-            Timer
-          </Heading>
 
-          <FormControl size="lg" className="w-full mt-4">
+          <FormControl size="lg" className="w-full">
             <FormControlLabel>
               <FormControlLabelText size="lg" className={labelClassName}>
                 Start time
@@ -389,13 +389,13 @@ const TimerScreen: React.FC = () => {
                   {index > 0 ? (
                     <View className="border-t border-white/30 mb-4" />
                   ) : null}
-                  <Text className="text-white text-base">
+                  <Text className="text-white text-lg">
                     Start: {formatSessionTime(session.start_time)}
                   </Text>
-                  <Text className="text-white text-base mt-1">
+                  <Text className="text-white text-lg mt-1">
                     End: {formatSessionTime(session.end_time)}
                   </Text>
-                  <Text className={`${mutedTextClassName} mt-1 font-mono`}>
+                  <Text className="text-white text-2xl mt-2 font-mono tracking-wider">
                     Duration: {formatDuration(session.duration_ms)}
                   </Text>
                 </View>
@@ -422,6 +422,12 @@ const TimerScreen: React.FC = () => {
         </VStack>
       ) : null}
     </ScrollView>
+    </View>
+    <View style={{ height: "5%" }}></View>
+    </>
+
+
+
   );
 };
 

@@ -16,11 +16,13 @@ import FeaturedScreen from './screens/FeaturedScreen';
 import FeaturedScreenGuest from './screens/FeaturedScreenGuest';
 import LandingScreen from './screens/LandingScreen';
 import LoginScreen from './screens/LoginScreen';
+import LoginScreenGluestack from './screens/LoginScreenGluestack';
 import NewConversationScreen from './screens/NewConversationScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
 import PasswordCodeScreen from './screens/PasswordCodeScreen';
 import PasswordResetScreen from './screens/PasswordResetScreen';
 import SignUpScreen from './screens/SignUpScreen';
+import SignUpScreenGluestack from './screens/SignUpScreenGluestack';
 import SubscriptionScreen from './screens/SubscriptionScreen';
 import SupportScreen from './screens/SupportScreen';
 import UserProfileScreen from './screens/UserProfileScreen';
@@ -60,7 +62,9 @@ type RootDrawerParamList = {
 type AuthStackParamList = {
   Landing: undefined;
   Login: undefined;
+  LoginGluestack: undefined;
   SignUp: undefined;
+  SignUpGluestack: undefined;
   PasswordReset: undefined;
   PasswordCode: {
     email: string;
@@ -80,12 +84,8 @@ const DrawerToggleButton: React.FC<{ size?: number }> = ({ size }) => {
   const iconSize = size || height * 0.035; // scales with screen height
   
   return (
-    
-    <GluestackUIProvider mode="dark">
-      <TouchableOpacity
-      onPress={() => navigation.dispatch(DrawerActions.toggleDrawer()
-    </GluestackUIProvider>
-  )}
+    <TouchableOpacity
+      onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())}
       style={styles.drawerToggleButton}
     >
       <Ionicons name="menu-sharp" size={iconSize} color="white" />
@@ -355,6 +355,15 @@ const UnauthenticatedNavigator: React.FC = () => {
           }}
         />
         <AuthDrawer.Screen
+          name="LoginGluestack"
+          component={LoginScreenGluestack}
+          options={{
+            drawerLabel: 'LOG IN (GLUESTACK)',
+            headerLeft: () => <BackButton text=" " />,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
+          }}
+        />
+        <AuthDrawer.Screen
           name="FeaturedScreenGuest"
           component={FeaturedScreenGuest}
           options={({ navigation }) => ({
@@ -368,6 +377,15 @@ const UnauthenticatedNavigator: React.FC = () => {
           component={SignUpScreen}
           options={{
             drawerLabel: 'SIGN UP',
+            headerLeft: () => <BackButton text=" " />,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
+          }}
+        />
+        <AuthDrawer.Screen
+          name="SignUpGluestack"
+          component={SignUpScreenGluestack}
+          options={{
+            drawerLabel: 'SIGN UP (GLUESTACK)',
             headerLeft: () => <BackButton text=" " />,
             headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
           }}
@@ -597,16 +615,18 @@ export default function Layout() {
   }, []);
 
   return (
-    <AuthProvider>
-      <RevenueCatProvider>
-        <ImageBackground
-          source={BG_JPG}
-          resizeMode="cover"
-          style={{ flex: 1, backgroundColor: '#6E9AB1' } as ViewStyle}
-        >
-        <RootLayout />
-        </ImageBackground>
-      </RevenueCatProvider>
-    </AuthProvider>
+    <GluestackUIProvider mode="light">
+      <AuthProvider>
+        <RevenueCatProvider>
+          <ImageBackground
+            source={BG_JPG}
+            resizeMode="cover"
+            style={{ flex: 1, backgroundColor: '#6E9AB1' } as ViewStyle}
+          >
+            <RootLayout />
+          </ImageBackground>
+        </RevenueCatProvider>
+      </AuthProvider>
+    </GluestackUIProvider>
   );
 }

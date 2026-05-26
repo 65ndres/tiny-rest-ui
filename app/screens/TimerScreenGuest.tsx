@@ -2,7 +2,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import DateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, View } from 'react-native';
@@ -18,12 +17,12 @@ import { Input, InputField } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
-  createTimerRun,
-  fetchTimerRuns,
+  createLocalTimerSession,
   formatDuration,
   formatSessionTime,
-  mapTimerRunToSession,
-  submitTimerRun,
+  loadTimerHistoryFromCache,
+  prependTimerSession,
+  saveTimerHistoryToCache,
   type TimerSession,
 } from '@/app/utils/timerHistory';
 
@@ -48,7 +47,7 @@ const formatDateTime = (date: Date | null): string => {
 
 const formatElapsed = (ms: number): string => formatDuration(ms);
 
-const TimerScreen: React.FC = () => {
+const TimerScreenGuest: React.FC = () => {
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [isRunning, setIsRunning] = useState(false);
@@ -56,13 +55,11 @@ const TimerScreen: React.FC = () => {
   const [canSubmit, setCanSubmit] = useState(false);
   const [activePicker, setActivePicker] = useState<PickerTarget | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isStarting, setIsStarting] = useState(false);
   const [history, setHistory] = useState<TimerSession[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
   const startTimeRef = useRef<Date | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const activeTimerRunIdRef = useRef<number | null>(null);
 
   const clearTimerInterval = useCallback(() => {
     if (intervalRef.current) {
@@ -79,19 +76,9 @@ const TimerScreen: React.FC = () => {
 
   const loadHistory = useCallback(async () => {
     setHistoryLoading(true);
-    try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        setHistory([]);
-        return;
-      }
-      const sessions = await fetchTimerRuns(token);
-      setHistory(sessions);
-    } catch {
-      Alert.alert('Error', 'Could not load timer history.');
-    } finally {
-      setHistoryLoading(false);
-    }
+    const cached = await loadTimerHistoryFromCache();
+    setHistory(cached);
+    setHistoryLoading(false);
   }, []);
 
   useFocusEffect(
@@ -150,15 +137,7 @@ const TimerScreen: React.FC = () => {
     setActivePicker(null);
   };
 
-  const rollbackPlayState = useCallback(() => {
-    clearTimerInterval();
-    setIsRunning(false);
-    setEndTime(null);
-    setCanSubmit(false);
-    setElapsedMs(0);
-  }, [clearTimerInterval]);
-
-  const handlePlay = async () => {
+  const handlePlay = () => {
     const now = new Date();
     let nextStart = startTime;
 
@@ -173,28 +152,6 @@ const TimerScreen: React.FC = () => {
     setElapsedMs(0);
     setIsRunning(true);
     setElapsedMs(Date.now() - nextStart.getTime());
-
-    if (activeTimerRunIdRef.current) {
-      return;
-    }
-
-    setIsStarting(true);
-    try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        rollbackPlayState();
-        Alert.alert('Error', 'You must be signed in to start a timer.');
-        return;
-      }
-
-      const timerRun = await createTimerRun(token, nextStart.toISOString());
-      activeTimerRunIdRef.current = timerRun.id;
-    } catch {
-      rollbackPlayState();
-      Alert.alert('Error', 'Could not start timer. Please try again.');
-    } finally {
-      setIsStarting(false);
-    }
   };
 
   const handleStop = () => {
@@ -215,7 +172,7 @@ const TimerScreen: React.FC = () => {
     if (isRunning) {
       handleStop();
     } else {
-      void handlePlay();
+      handlePlay();
     }
   };
 
@@ -228,7 +185,6 @@ const TimerScreen: React.FC = () => {
     setEndTime(null);
     setElapsedMs(0);
     setCanSubmit(false);
-    activeTimerRunIdRef.current = null;
   }, [clearTimerInterval]);
 
   const handleReset = () => {
@@ -256,12 +212,6 @@ const TimerScreen: React.FC = () => {
       return;
     }
 
-    const timerRunId = activeTimerRunIdRef.current;
-    if (!timerRunId) {
-      Alert.alert('Error', 'No active timer run to submit.');
-      return;
-    }
-
     const payload = {
       start_time: startTime.toISOString(),
       end_time: endTime.toISOString(),
@@ -270,26 +220,13 @@ const TimerScreen: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        Alert.alert('Error', 'You must be signed in to submit a timer.');
-        return;
-      }
+      const localSession = createLocalTimerSession(payload);
+      const nextHistory = prependTimerSession(history, localSession);
+      setHistory(nextHistory);
+      await saveTimerHistoryToCache(nextHistory);
 
-      const timerRun = await submitTimerRun(token, timerRunId, payload);
-      const session = mapTimerRunToSession(timerRun);
-      if (session) {
-        setHistory((prev) => {
-          const withoutDuplicate = prev.filter((s) => s.id !== session.id);
-          return [session, ...withoutDuplicate];
-        });
-      }
-
-      await loadHistory();
       Alert.alert('Success', 'Timer session saved.');
       resetAll();
-    } catch {
-      Alert.alert('Error', 'Could not submit timer. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -383,7 +320,7 @@ const TimerScreen: React.FC = () => {
             className="w-full border-2 border-white bg-white mt-6"
             size="md"
             onPress={handlePlayStopPress}
-            isDisabled={isSubmitting || isStarting}
+            isDisabled={isSubmitting}
           >
             {isRunning ? (
               <>
@@ -392,8 +329,6 @@ const TimerScreen: React.FC = () => {
                   Stop
                 </ButtonText>
               </>
-            ) : isStarting ? (
-              <ButtonSpinner color="black" />
             ) : (
               <>
                 <ButtonIcon as={PlayIcon} className="text-black" />
@@ -409,7 +344,7 @@ const TimerScreen: React.FC = () => {
             className="w-full border-2 border-white bg-white mt-4"
             size="md"
             onPress={handleSubmit}
-            isDisabled={!canSubmit || isSubmitting || isStarting}
+            isDisabled={!canSubmit || isSubmitting}
           >
             {isSubmitting ? (
               <ButtonSpinner color="black" />
@@ -425,7 +360,7 @@ const TimerScreen: React.FC = () => {
             className="w-full mt-4 border-2 border-white bg-transparent"
             size="md"
             onPress={handleReset}
-            isDisabled={isSubmitting || isStarting || !canReset}
+            isDisabled={isSubmitting || !canReset}
             accessibilityLabel="Reset timer"
           >
             <ButtonText className={buttonTextClassName}>Reset</ButtonText>
@@ -490,7 +425,10 @@ const TimerScreen: React.FC = () => {
     </View>
     <View style={{ height: "5%" }}></View>
     </>
+
+
+
   );
 };
 
-export default TimerScreen;
+export default TimerScreenGuest;

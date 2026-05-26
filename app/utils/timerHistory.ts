@@ -1,8 +1,10 @@
 /**
- * Local timer history stored in AsyncStorage (timer_history key).
+ * Timer history: local AsyncStorage for guests, API for authenticated users.
  * Fields: id, start_time, end_time, duration_ms, submitted_at?
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { API_URL } from '@/constants/Config';
 
 export const TIMER_HISTORY_CACHE_KEY = 'timer_history';
 
@@ -18,6 +20,85 @@ export type TimerSubmitPayload = {
   start_time: string;
   end_time: string;
   duration_ms: number;
+};
+
+export type TimerRunApiRecord = {
+  id: number;
+  start_time: string;
+  end_time: string | null;
+  duration: number | null;
+  submitted: boolean;
+};
+
+const authHeaders = (token: string) => ({
+  Authorization: `Bearer ${token}`,
+});
+
+export const mapTimerRunToSession = (
+  record: TimerRunApiRecord
+): TimerSession | null => {
+  if (
+    !record.start_time ||
+    !record.end_time ||
+    record.duration == null ||
+    !record.submitted
+  ) {
+    return null;
+  }
+
+  return {
+    id: String(record.id),
+    start_time: record.start_time,
+    end_time: record.end_time,
+    duration_ms: record.duration,
+    submitted_at: record.end_time,
+  };
+};
+
+export const fetchTimerRuns = async (
+  token: string
+): Promise<TimerSession[]> => {
+  const response = await axios.get<{ timer_runs: TimerRunApiRecord[] }>(
+    `${API_URL}/timer_runs`,
+    { headers: authHeaders(token) }
+  );
+
+  const sessions = (response.data.timer_runs ?? [])
+    .map(mapTimerRunToSession)
+    .filter((session): session is TimerSession => session !== null);
+
+  return sortNewestFirst(sessions);
+};
+
+export const createTimerRun = async (
+  token: string,
+  startTime: string
+): Promise<TimerRunApiRecord> => {
+  const response = await axios.post<{ timer_run: TimerRunApiRecord }>(
+    `${API_URL}/timer_runs`,
+    { start_time: startTime },
+    { headers: authHeaders(token) }
+  );
+
+  return response.data.timer_run;
+};
+
+export const submitTimerRun = async (
+  token: string,
+  id: number,
+  payload: TimerSubmitPayload
+): Promise<TimerRunApiRecord> => {
+  const response = await axios.patch<{ timer_run: TimerRunApiRecord }>(
+    `${API_URL}/timer_runs/${id}`,
+    {
+      end_time: payload.end_time,
+      duration: payload.duration_ms,
+      submitted: true,
+    },
+    { headers: authHeaders(token) }
+  );
+
+  return response.data.timer_run;
 };
 
 const dateTimeFormat: Intl.DateTimeFormatOptions = {

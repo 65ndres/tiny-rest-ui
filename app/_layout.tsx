@@ -28,6 +28,7 @@ import SupportScreen from './screens/SupportScreen';
 import UserProfileScreen from './screens/UserProfileScreen';
 import BrowseScreen from './screens/BrowseScreen';
 import TimerScreen from './screens/TimerScreen';
+import TimerScreenGuest from './screens/TimerScreenGuest';
 import BackButton from './SampleModule/BackButton';
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
@@ -363,7 +364,7 @@ const UnauthenticatedNavigator: React.FC = () => {
         />
         <AuthDrawer.Screen
           name="Timer"
-          component={TimerScreen}
+          component={TimerScreenGuest}
           options={{
             drawerLabel: 'TIMER',
             headerLeft: () => <BackButton text=" " />,

@@ -4,7 +4,7 @@ import DateTimePicker, {
 } from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, View } from 'react-native';
+import { Alert, Platform, Pressable, View } from 'react-native';
 import { Button, ButtonIcon, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import {
   FormControl,
@@ -16,10 +16,16 @@ import { Input, InputField } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
+  buttonTextClassName,
+  cardCenteredClassName,
+  cardClassName,
+} from '@/app/constants/screenLayout';
+import {
   createTimerRun,
   formatDuration,
   submitTimerRun,
 } from '@/app/utils/timerHistory';
+import ScreenScrollLayout from '@/app/sharedComponents/ScreenScrollLayout';
 
 const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
 
@@ -27,7 +33,6 @@ const inputClassName =
   'border-white data-[hover=true]:border-white data-[focus=true]:border-white';
 const inputFieldClassName = 'text-white text-lg';
 const labelClassName = 'text-white text-lg';
-const buttonTextClassName = 'text-white text-lg';
 
 type PickerTarget = 'start' | 'end';
 
@@ -262,140 +267,128 @@ const TimerScreen: React.FC = () => {
         : new Date();
 
   return (
-    <>
-    <View style={{ height: "15%" }}></View>
-    <View style={{ height: "80%" }}>
-      <ScrollView
-        className="flex-1 w-full px-6"
-        contentContainerClassName="flex-grow p-6 items-center"
-        showsVerticalScrollIndicator={false}
-      >
-      <VStack space="md" className="w-full max-w-[336px] items-center ">
+    <ScreenScrollLayout>
+      <VStack className={cardCenteredClassName}>
+        <Text className="text-white text-5xl font-mono tracking-wider">
+          {formatElapsed(elapsedMs)}
+        </Text>
 
-
-        <VStack className="rounded-xl border border-white/90 p-6 w-full items-center">
-          <Text className="text-white text-5xl font-mono tracking-wider">
-            {formatElapsed(elapsedMs)}
-          </Text>
-
-          <Button
-            variant="solid"
-            className="w-full border-2 border-white bg-white mt-6"
-            size="md"
-            onPress={handlePlayStopPress}
-            isDisabled={isSubmitting || isStarting}
-          >
-            {isRunning ? (
-              <>
-                <Ionicons name="stop-circle" size={22} color="black" />
-                <ButtonText className={`${buttonTextClassName} text-black`}>
-                  Stop
-                </ButtonText>
-              </>
-            ) : isStarting ? (
-              <ButtonSpinner color="black" />
-            ) : (
-              <>
-                <ButtonIcon as={PlayIcon} className="text-black" />
-                <ButtonText className={`${buttonTextClassName} text-black`}>
-                  Play
-                </ButtonText>
-              </>
-            )}
-          </Button>
-
-          <Button
-            variant="solid"
-            className="w-full border-2 border-white bg-white mt-4"
-            size="md"
-            onPress={handleSubmit}
-            isDisabled={!canSubmit || isSubmitting || isStarting}
-          >
-            {isSubmitting ? (
-              <ButtonSpinner color="black" />
-            ) : (
+        <Button
+          variant="solid"
+          className="w-full border-2 border-white bg-white mt-6"
+          size="md"
+          onPress={handlePlayStopPress}
+          isDisabled={isSubmitting || isStarting}
+        >
+          {isRunning ? (
+            <>
+              <Ionicons name="stop-circle" size={22} color="black" />
               <ButtonText className={`${buttonTextClassName} text-black`}>
-                Submit
+                Stop
               </ButtonText>
-            )}
-          </Button>
+            </>
+          ) : isStarting ? (
+            <ButtonSpinner color="black" />
+          ) : (
+            <>
+              <ButtonIcon as={PlayIcon} className="text-black" />
+              <ButtonText className={`${buttonTextClassName} text-black`}>
+                Play
+              </ButtonText>
+            </>
+          )}
+        </Button>
 
-          <Button
-            variant="outline"
-            className="w-full mt-4 border-2 border-white bg-transparent"
-            size="md"
-            onPress={handleReset}
-            isDisabled={isSubmitting || isStarting || !canReset}
-            accessibilityLabel="Reset timer"
+        <Button
+          variant="solid"
+          className="w-full border-2 border-white bg-white mt-4"
+          size="md"
+          onPress={handleSubmit}
+          isDisabled={!canSubmit || isSubmitting || isStarting}
+        >
+          {isSubmitting ? (
+            <ButtonSpinner color="black" />
+          ) : (
+            <ButtonText className={`${buttonTextClassName} text-black`}>
+              Submit
+            </ButtonText>
+          )}
+        </Button>
+
+        <Button
+          variant="outline"
+          className="w-full mt-4 border-2 border-white bg-transparent"
+          size="md"
+          onPress={handleReset}
+          isDisabled={isSubmitting || isStarting || !canReset}
+          accessibilityLabel="Reset timer"
+        >
+          <ButtonText className={buttonTextClassName}>Reset</ButtonText>
+        </Button>
+      </VStack>
+
+      <VStack className={cardClassName}>
+        <FormControl size="lg" className="w-full">
+          <FormControlLabel>
+            <FormControlLabelText size="lg" className={labelClassName}>
+              Start time
+            </FormControlLabelText>
+          </FormControlLabel>
+          <Pressable
+            onPress={() => openPicker('start')}
+            disabled={isRunning}
+            accessibilityRole="button"
+            accessibilityLabel="Select start time"
           >
-            <ButtonText className={buttonTextClassName}>Reset</ButtonText>
-          </Button>
-        </VStack>
-
-        <VStack className="rounded-xl border border-white/90 p-6 w-full">
-
-          <FormControl size="lg" className="w-full">
-            <FormControlLabel>
-              <FormControlLabelText size="lg" className={labelClassName}>
-                Start time
-              </FormControlLabelText>
-            </FormControlLabel>
-            <Pressable
-              onPress={() => openPicker('start')}
-              disabled={isRunning}
-              accessibilityRole="button"
-              accessibilityLabel="Select start time"
+            <Input
+              size="lg"
+              isDisabled={isRunning}
+              className={inputClassName}
+              pointerEvents="none"
             >
-              <Input
-                size="lg"
-                isDisabled={isRunning}
-                className={inputClassName}
-                pointerEvents="none"
-              >
-                <InputField
-                  value={formatDateTime(startTime)}
-                  editable={false}
-                  placeholder="Select date and time"
-                  placeholderTextColor={PLACEHOLDER_COLOR}
-                  className={inputFieldClassName}
-                />
-              </Input>
-            </Pressable>
-          </FormControl>
+              <InputField
+                value={formatDateTime(startTime)}
+                editable={false}
+                placeholder="Select date and time"
+                placeholderTextColor={PLACEHOLDER_COLOR}
+                className={inputFieldClassName}
+              />
+            </Input>
+          </Pressable>
+        </FormControl>
 
-          <FormControl size="lg" className="w-full mt-6">
-            <FormControlLabel>
-              <FormControlLabelText size="lg" className={labelClassName}>
-                End time
-              </FormControlLabelText>
-            </FormControlLabel>
-            <Pressable
-              onPress={() => openPicker('end')}
-              disabled={isRunning}
-              accessibilityRole="button"
-              accessibilityLabel="Select end time"
+        <FormControl size="lg" className="w-full mt-6">
+          <FormControlLabel>
+            <FormControlLabelText size="lg" className={labelClassName}>
+              End time
+            </FormControlLabelText>
+          </FormControlLabel>
+          <Pressable
+            onPress={() => openPicker('end')}
+            disabled={isRunning}
+            accessibilityRole="button"
+            accessibilityLabel="Select end time"
+          >
+            <Input
+              size="lg"
+              isDisabled={isRunning}
+              className={inputClassName}
+              pointerEvents="none"
             >
-              <Input
-                size="lg"
-                isDisabled={isRunning}
-                className={inputClassName}
-                pointerEvents="none"
-              >
-                <InputField
-                  value={formatDateTime(endTime)}
-                  editable={false}
-                  placeholder="Select date and time"
-                  placeholderTextColor={PLACEHOLDER_COLOR}
-                  className={inputFieldClassName}
-                />
-              </Input>
-            </Pressable>
-          </FormControl>
-        </VStack>
+              <InputField
+                value={formatDateTime(endTime)}
+                editable={false}
+                placeholder="Select date and time"
+                placeholderTextColor={PLACEHOLDER_COLOR}
+                className={inputFieldClassName}
+              />
+            </Input>
+          </Pressable>
+        </FormControl>
       </VStack>
 
       {activePicker ? (
-        <VStack className="w-full max-w-[336px] mt-4 items-center">
+        <View className="w-full mt-4 items-center">
           <DateTimePicker
             value={pickerValue}
             mode="datetime"
@@ -408,12 +401,9 @@ const TimerScreen: React.FC = () => {
               <Text className="text-white text-lg font-semibold">Done</Text>
             </Pressable>
           ) : null}
-        </VStack>
+        </View>
       ) : null}
-      </ScrollView>
-    </View>
-    <View style={{ height: "5%" }}></View>
-    </>
+    </ScreenScrollLayout>
   );
 };
 

@@ -3,13 +3,12 @@ import { View } from 'react-native';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
+import { cardClassName, mutedTextClassName } from '@/app/constants/screenLayout';
 import {
   formatDuration,
   formatSessionTime,
   type TimerSession,
 } from '@/app/utils/timerHistory';
-
-const mutedTextClassName = 'text-white/75 text-base';
 
 type TimerHistoryPanelProps = {
   sessions: TimerSession[];
@@ -20,7 +19,7 @@ const TimerHistoryPanel: React.FC<TimerHistoryPanelProps> = ({
   sessions,
   isLoading,
 }) => (
-  <VStack className="rounded-xl border border-white/90 p-6 w-full">
+  <VStack className={cardClassName}>
     <Heading size="lg" className="text-white">
       History
     </Heading>

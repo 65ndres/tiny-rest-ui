@@ -10,6 +10,7 @@ import { Alert, Animated, Dimensions, StyleSheet, Text, View, type TextStyle, ty
 import 'react-native-reanimated';
 import PasswordInputs from '../../components/PasswordInputs';
 import { API_URL } from '../../constants/Config';
+import { fetchUserProfile, updateUserProfile } from '@/app/utils/userProfile';
 import { useAuth } from '../context/AuthContext';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 
@@ -35,6 +36,7 @@ const UserProfileScreen: React.FC = () => {
   const [lastName, setLastName] = useState<string>('');
   const [username, setUsername] = useState<string>('');
   const [email, setEmail] = useState<string>('');
+  const [babyName, setBabyName] = useState<string>('');
   const [oldPassword, setOldPassword] = useState<string>('');
   const [newPassword, setNewPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -60,16 +62,14 @@ const UserProfileScreen: React.FC = () => {
     try {
       setIsLoadingProfile(true);
       const token = await AsyncStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/user`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      if (!token) return;
 
-      if (response.data) {
-        setFirstName(response.data.first_name || '');
-        setLastName(response.data.last_name || '');
-        setUsername(response.data.username || '');
-        setEmail(response.data.email || '');
-      }
+      const profile = await fetchUserProfile(token);
+      setFirstName(profile.first_name || '');
+      setLastName(profile.last_name || '');
+      setUsername(profile.username || '');
+      setEmail(profile.email || '');
+      setBabyName(profile.baby_name || '');
     } catch (error) {
       console.error('Failed to fetch profile:', error);
       Alert.alert('Error', 'Failed to load profile data');
@@ -79,7 +79,7 @@ const UserProfileScreen: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!isLoadingProfile && (firstName || lastName || email || username)) {
+    if (!isLoadingProfile && (firstName || lastName || email || username || babyName)) {
       contentFadeAnim.setValue(0);
       Animated.timing(contentFadeAnim, {
         toValue: 1,
@@ -87,7 +87,7 @@ const UserProfileScreen: React.FC = () => {
         useNativeDriver: true,
       }).start();
     }
-  }, [isLoadingProfile, firstName, lastName, email, username, contentFadeAnim]);
+  }, [isLoadingProfile, firstName, lastName, email, username, babyName, contentFadeAnim]);
 
   const updateProfile = async () => {
     setFirstNameError('');
@@ -124,24 +124,20 @@ const UserProfileScreen: React.FC = () => {
       setIsLoading(true);
       const token = await AsyncStorage.getItem('token');
 
-      const payload: {
-        first_name: string;
-        last_name: string;
-        email: string;
-        new_password?: string;
-      } = {
+      await updateUserProfile(token, {
         first_name: firstName,
         last_name: lastName,
         email: email.toLowerCase(),
-      };
+        baby_name: babyName.trim() || null,
+      });
 
       if (oldPassword.trim() && newPassword.trim()) {
-        payload.new_password = newPassword;
+        await axios.post(
+          `${API_URL}/user`,
+          { new_password: newPassword },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
       }
-
-      await axios.post(`${API_URL}/user`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
 
       Alert.alert('Success', 'Profile updated successfully');
 
@@ -235,6 +231,19 @@ const UserProfileScreen: React.FC = () => {
                 }}
                 errorMessage={lastNameError}
                 errorStyle={styles.errorStyle}
+                disabled={isLoadingProfile || isLoading}
+              />
+              <Input
+                cursorColor="#ffffff"
+                placeholder="Baby's name"
+                selectionColor="white"
+                placeholderTextColor="#d8d8d8ff"
+                leftIcon={{ type: 'font-awesome', name: 'heart', color: '#ffffffff', size: s(22) }}
+                inputStyle={styles.inputStyle}
+                labelStyle={styles.labelStyle}
+                inputContainerStyle={styles.inputContainerStyle}
+                value={babyName}
+                onChangeText={setBabyName}
                 disabled={isLoadingProfile || isLoading}
               />
               <Input

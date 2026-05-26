@@ -3,7 +3,6 @@ import DateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, View } from 'react-native';
 import { Button, ButtonIcon, ButtonSpinner, ButtonText } from '@/components/ui/button';
@@ -12,19 +11,14 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from '@/components/ui/form-control';
-import { Heading } from '@/components/ui/heading';
 import { PlayIcon } from '@/components/ui/icon';
 import { Input, InputField } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
   createTimerRun,
-  fetchTimerRuns,
   formatDuration,
-  formatSessionTime,
-  mapTimerRunToSession,
   submitTimerRun,
-  type TimerSession,
 } from '@/app/utils/timerHistory';
 
 const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
@@ -34,7 +28,6 @@ const inputClassName =
 const inputFieldClassName = 'text-white text-lg';
 const labelClassName = 'text-white text-lg';
 const buttonTextClassName = 'text-white text-lg';
-const mutedTextClassName = 'text-white/75 text-base';
 
 type PickerTarget = 'start' | 'end';
 
@@ -57,8 +50,6 @@ const TimerScreen: React.FC = () => {
   const [activePicker, setActivePicker] = useState<PickerTarget | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
-  const [history, setHistory] = useState<TimerSession[]>([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
 
   const startTimeRef = useRef<Date | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -76,29 +67,6 @@ const TimerScreen: React.FC = () => {
     if (!start) return;
     setElapsedMs(Date.now() - start.getTime());
   }, []);
-
-  const loadHistory = useCallback(async () => {
-    setHistoryLoading(true);
-    try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        setHistory([]);
-        return;
-      }
-      const sessions = await fetchTimerRuns(token);
-      setHistory(sessions);
-    } catch {
-      Alert.alert('Error', 'Could not load timer history.');
-    } finally {
-      setHistoryLoading(false);
-    }
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      loadHistory();
-    }, [loadHistory])
-  );
 
   useEffect(() => {
     startTimeRef.current = startTime;
@@ -276,16 +244,7 @@ const TimerScreen: React.FC = () => {
         return;
       }
 
-      const timerRun = await submitTimerRun(token, timerRunId, payload);
-      const session = mapTimerRunToSession(timerRun);
-      if (session) {
-        setHistory((prev) => {
-          const withoutDuplicate = prev.filter((s) => s.id !== session.id);
-          return [session, ...withoutDuplicate];
-        });
-      }
-
-      await loadHistory();
+      await submitTimerRun(token, timerRunId, payload);
       Alert.alert('Success', 'Timer session saved.');
       resetAll();
     } catch {
@@ -306,72 +265,13 @@ const TimerScreen: React.FC = () => {
     <>
     <View style={{ height: "15%" }}></View>
     <View style={{ height: "80%" }}>
-    <ScrollView
-      className="flex-1"
-      contentContainerClassName="flex-grow p-6 items-center"
-      showsVerticalScrollIndicator={false}
-    >
-      <VStack space="md" className="w-full max-w-[336px] items-center pt-10 ">
-        <VStack className="rounded-xl border border-white/90 p-6 w-full">
+      <ScrollView
+        className="flex-1 w-full px-6"
+        contentContainerClassName="flex-grow p-6 items-center"
+        showsVerticalScrollIndicator={false}
+      >
+      <VStack space="md" className="w-full max-w-[336px] items-center ">
 
-          <FormControl size="lg" className="w-full">
-            <FormControlLabel>
-              <FormControlLabelText size="lg" className={labelClassName}>
-                Start time
-              </FormControlLabelText>
-            </FormControlLabel>
-            <Pressable
-              onPress={() => openPicker('start')}
-              disabled={isRunning}
-              accessibilityRole="button"
-              accessibilityLabel="Select start time"
-            >
-              <Input
-                size="lg"
-                isDisabled={isRunning}
-                className={inputClassName}
-                pointerEvents="none"
-              >
-                <InputField
-                  value={formatDateTime(startTime)}
-                  editable={false}
-                  placeholder="Select date and time"
-                  placeholderTextColor={PLACEHOLDER_COLOR}
-                  className={inputFieldClassName}
-                />
-              </Input>
-            </Pressable>
-          </FormControl>
-
-          <FormControl size="lg" className="w-full mt-6">
-            <FormControlLabel>
-              <FormControlLabelText size="lg" className={labelClassName}>
-                End time
-              </FormControlLabelText>
-            </FormControlLabel>
-            <Pressable
-              onPress={() => openPicker('end')}
-              disabled={isRunning}
-              accessibilityRole="button"
-              accessibilityLabel="Select end time"
-            >
-              <Input
-                size="lg"
-                isDisabled={isRunning}
-                className={inputClassName}
-                pointerEvents="none"
-              >
-                <InputField
-                  value={formatDateTime(endTime)}
-                  editable={false}
-                  placeholder="Select date and time"
-                  placeholderTextColor={PLACEHOLDER_COLOR}
-                  className={inputFieldClassName}
-                />
-              </Input>
-            </Pressable>
-          </FormControl>
-        </VStack>
 
         <VStack className="rounded-xl border border-white/90 p-6 w-full items-center">
           <Text className="text-white text-5xl font-mono tracking-wider">
@@ -433,40 +333,64 @@ const TimerScreen: React.FC = () => {
         </VStack>
 
         <VStack className="rounded-xl border border-white/90 p-6 w-full">
-          <Heading size="lg" className="text-white">
-            History
-          </Heading>
 
-          {historyLoading ? (
-            <Text className={`${mutedTextClassName} mt-4`}>Loading...</Text>
-          ) : null}
+          <FormControl size="lg" className="w-full">
+            <FormControlLabel>
+              <FormControlLabelText size="lg" className={labelClassName}>
+                Start time
+              </FormControlLabelText>
+            </FormControlLabel>
+            <Pressable
+              onPress={() => openPicker('start')}
+              disabled={isRunning}
+              accessibilityRole="button"
+              accessibilityLabel="Select start time"
+            >
+              <Input
+                size="lg"
+                isDisabled={isRunning}
+                className={inputClassName}
+                pointerEvents="none"
+              >
+                <InputField
+                  value={formatDateTime(startTime)}
+                  editable={false}
+                  placeholder="Select date and time"
+                  placeholderTextColor={PLACEHOLDER_COLOR}
+                  className={inputFieldClassName}
+                />
+              </Input>
+            </Pressable>
+          </FormControl>
 
-          {!historyLoading && history.length === 0 ? (
-            <Text className={`${mutedTextClassName} mt-4`}>
-              No submitted timers yet.
-            </Text>
-          ) : null}
-
-          {!historyLoading && history.length > 0 ? (
-            <VStack className="mt-4 w-full" space="md">
-              {history.map((session, index) => (
-                <View key={session.id}>
-                  {index > 0 ? (
-                    <View className="border-t border-white/30 mb-4" />
-                  ) : null}
-                  <Text className="text-white text-lg">
-                    Start: {formatSessionTime(session.start_time)}
-                  </Text>
-                  <Text className="text-white text-lg mt-1">
-                    End: {formatSessionTime(session.end_time)}
-                  </Text>
-                  <Text className="text-white text-2xl mt-2 font-mono tracking-wider">
-                    Duration: {formatDuration(session.duration_ms)}
-                  </Text>
-                </View>
-              ))}
-            </VStack>
-          ) : null}
+          <FormControl size="lg" className="w-full mt-6">
+            <FormControlLabel>
+              <FormControlLabelText size="lg" className={labelClassName}>
+                End time
+              </FormControlLabelText>
+            </FormControlLabel>
+            <Pressable
+              onPress={() => openPicker('end')}
+              disabled={isRunning}
+              accessibilityRole="button"
+              accessibilityLabel="Select end time"
+            >
+              <Input
+                size="lg"
+                isDisabled={isRunning}
+                className={inputClassName}
+                pointerEvents="none"
+              >
+                <InputField
+                  value={formatDateTime(endTime)}
+                  editable={false}
+                  placeholder="Select date and time"
+                  placeholderTextColor={PLACEHOLDER_COLOR}
+                  className={inputFieldClassName}
+                />
+              </Input>
+            </Pressable>
+          </FormControl>
         </VStack>
       </VStack>
 
@@ -486,7 +410,7 @@ const TimerScreen: React.FC = () => {
           ) : null}
         </VStack>
       ) : null}
-    </ScrollView>
+      </ScrollView>
     </View>
     <View style={{ height: "5%" }}></View>
     </>

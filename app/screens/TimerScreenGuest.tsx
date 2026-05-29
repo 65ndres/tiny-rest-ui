@@ -18,13 +18,12 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
   createLocalTimerSession,
-  formatDuration,
-  formatSessionTime,
   loadTimerHistoryFromCache,
   prependTimerSession,
   saveTimerHistoryToCache,
   type TimerSession,
 } from '@/app/utils/timerHistory';
+import TimerHistoryPanel from '@/app/sharedComponents/TimerHistoryPanel';
 
 const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
 
@@ -239,6 +238,9 @@ const TimerScreenGuest: React.FC = () => {
         ? endTime ?? new Date()
         : new Date();
 
+  const playButtonLabel =
+    !isRunning && startTime && canSubmit ? 'Resume' : 'Start';
+
   return (
     <>
     <View style={{ height: "15%" }}></View>
@@ -321,6 +323,7 @@ const TimerScreenGuest: React.FC = () => {
             size="md"
             onPress={handlePlayStopPress}
             isDisabled={isSubmitting}
+            accessibilityLabel={isRunning ? 'Stop' : playButtonLabel}
           >
             {isRunning ? (
               <>
@@ -333,7 +336,7 @@ const TimerScreenGuest: React.FC = () => {
               <>
                 <ButtonIcon as={PlayIcon} className="text-black" />
                 <ButtonText className={`${buttonTextClassName} text-black`}>
-                  Play
+                  {playButtonLabel}
                 </ButtonText>
               </>
             )}
@@ -367,42 +370,7 @@ const TimerScreenGuest: React.FC = () => {
           </Button>
         </VStack>
 
-        <VStack className="rounded-xl border border-white/90 p-6 w-full">
-          <Heading size="lg" className="text-white">
-            History
-          </Heading>
-
-          {historyLoading ? (
-            <Text className={`${mutedTextClassName} mt-4`}>Loading...</Text>
-          ) : null}
-
-          {!historyLoading && history.length === 0 ? (
-            <Text className={`${mutedTextClassName} mt-4`}>
-              No submitted timers yet.
-            </Text>
-          ) : null}
-
-          {!historyLoading && history.length > 0 ? (
-            <VStack className="mt-4 w-full" space="md">
-              {history.map((session, index) => (
-                <View key={session.id}>
-                  {index > 0 ? (
-                    <View className="border-t border-white/30 mb-4" />
-                  ) : null}
-                  <Text className="text-white text-lg">
-                    Start: {formatSessionTime(session.start_time)}
-                  </Text>
-                  <Text className="text-white text-lg mt-1">
-                    End: {formatSessionTime(session.end_time)}
-                  </Text>
-                  <Text className="text-white text-2xl mt-2 font-mono tracking-wider">
-                    Duration: {formatDuration(session.duration_ms)}
-                  </Text>
-                </View>
-              ))}
-            </VStack>
-          ) : null}
-        </VStack>
+        <TimerHistoryPanel sessions={history} isLoading={historyLoading} />
       </VStack>
 
       {activePicker ? (

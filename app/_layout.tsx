@@ -229,20 +229,6 @@ const AuthenticatedNavigator: React.FC = () => {
           drawerLabel: 'HOME', headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>HOME</Text> }}
       />
       <Drawer.Screen
-        name="FeaturedScreen"
-        component={FeaturedScreen}
-        options={{
-          drawerLabel: 'FEATURED',
-          headerLeft: () => <BackButton text="" /> ,
-          headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>FEATURED</Text>,
-        }}
-      />
-      <Drawer.Screen
-        name="BrowseScreen"
-        component={BrowseScreen}
-        options={{headerLeft: () => <BackButton text="" /> ,drawerLabel: 'BROWSE', headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>BROWSE</Text>}}
-      />
-      <Drawer.Screen
         name="Timer"
         component={TimerScreen}
         options={{
@@ -266,38 +252,6 @@ const AuthenticatedNavigator: React.FC = () => {
               SETTINGS
             </Text>
           ),
-        }}
-      />
-      <Drawer.Screen
-        name="Saved"
-        component={SavedScreen}
-        options={{ drawerLabel: 'SAVED', headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>SAVED</Text> }}
-      />
-      <Drawer.Screen
-        name="Conversations"
-        component={ConversationsScreen}
-        options={{
-          drawerLabel: 'CONVERSATIONS', headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>CONVERSATIONS</Text>,
-          headerLeft: () => <BackButton text="" />,
-        }}
-      />
-      <Drawer.Screen
-        name="NewConversation"
-        component={NewConversationScreen}
-        options={{ 
-          drawerLabel: () => null, // Hide from drawer
-          drawerItemStyle: { display: 'none' }, 
-          headerLeft: () => <BackButton text="" />,
-          headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>NEW CONVERSATION</Text>,
-        }}
-      />
-      <Drawer.Screen
-        name="Conversation"
-        component={ConversationScreen}
-        options={{ 
-          drawerLabel: () => null, // Hide from drawer
-          drawerItemStyle: { display: 'none' }, 
-          headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>CONVERSATION</Text>,
         }}
       />
       <Drawer.Screen

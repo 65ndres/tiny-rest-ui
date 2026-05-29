@@ -106,6 +106,96 @@ const dateTimeFormat: Intl.DateTimeFormatOptions = {
   timeStyle: 'short',
 };
 
+const clockTimeFormat: Intl.DateTimeFormatOptions = {
+  timeStyle: 'short',
+};
+
+const startOfLocalDay = (date: Date): Date => {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+};
+
+export const getLocalDayKey = (iso: string): string => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return 'invalid';
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+export const getSessionDayKey = (session: TimerSession): string =>
+  getLocalDayKey(session.submitted_at ?? session.end_time);
+
+export const formatDayGroupLabel = (dayKey: string): string => {
+  const [year, month, day] = dayKey.split('-').map(Number);
+  const date = new Date(year, month - 1, day);
+  if (Number.isNaN(date.getTime())) {
+    return dayKey;
+  }
+
+  const today = startOfLocalDay(new Date());
+  const target = startOfLocalDay(date);
+  const diffDays = Math.round(
+    (today.getTime() - target.getTime()) / (24 * 60 * 60 * 1000)
+  );
+
+  if (diffDays === 0) {
+    return 'Today';
+  }
+  if (diffDays === 1) {
+    return 'Yesterday';
+  }
+
+  return date.toLocaleDateString(undefined, {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  });
+};
+
+export const formatSessionClockTime = (iso: string): string => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return 'Invalid time';
+  }
+  return date.toLocaleString(undefined, clockTimeFormat);
+};
+
+export type TimerSessionDayGroup = {
+  dayKey: string;
+  label: string;
+  sessions: TimerSession[];
+};
+
+export const groupSessionsByDay = (
+  sessions: TimerSession[]
+): TimerSessionDayGroup[] => {
+  const groups = new Map<string, TimerSession[]>();
+
+  for (const session of sessions) {
+    const dayKey = getSessionDayKey(session);
+    const existing = groups.get(dayKey);
+    if (existing) {
+      existing.push(session);
+    } else {
+      groups.set(dayKey, [session]);
+    }
+  }
+
+  return [...groups.keys()]
+    .sort((a, b) => b.localeCompare(a))
+    .map((dayKey) => ({
+      dayKey,
+      label: formatDayGroupLabel(dayKey),
+      sessions: groups.get(dayKey) ?? [],
+    }));
+};
+
 export const formatDuration = (ms: number): string => {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
   const hours = Math.floor(totalSeconds / 3600);

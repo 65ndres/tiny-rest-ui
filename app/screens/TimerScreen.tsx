@@ -266,6 +266,9 @@ const TimerScreen: React.FC = () => {
         ? endTime ?? new Date()
         : new Date();
 
+  const playButtonLabel =
+    !isRunning && startTime && canSubmit ? 'Resume' : 'Start';
+
   return (
     <ScreenScrollLayout>
       <VStack className={cardCenteredClassName}>
@@ -279,6 +282,7 @@ const TimerScreen: React.FC = () => {
           size="md"
           onPress={handlePlayStopPress}
           isDisabled={isSubmitting || isStarting}
+          accessibilityLabel={isRunning ? 'Stop' : playButtonLabel}
         >
           {isRunning ? (
             <>
@@ -293,7 +297,7 @@ const TimerScreen: React.FC = () => {
             <>
               <ButtonIcon as={PlayIcon} className="text-black" />
               <ButtonText className={`${buttonTextClassName} text-black`}>
-                Play
+                {playButtonLabel}
               </ButtonText>
             </>
           )}

@@ -14,8 +14,8 @@ type ScreenScrollLayoutProps = {
 
 const ScreenScrollLayout: React.FC<ScreenScrollLayoutProps> = ({ children }) => (
   <ScreenComponent>
-    <View style={{ height: '15%' }} />
-    <View style={{ height: '80%' }}>
+    <View style={{ height: '7%' }} />
+    <View style={{ height: '83%' }}>
       <ScrollView
         className={scrollViewClassName}
         contentContainerClassName={scrollContentClassName}
@@ -26,7 +26,7 @@ const ScreenScrollLayout: React.FC<ScreenScrollLayoutProps> = ({ children }) => 
         </VStack>
       </ScrollView>
     </View>
-    <View style={{ height: '5%' }} />
+    <View style={{ height: '10%' }} />
   </ScreenComponent>
 );
 

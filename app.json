@@ -46,6 +46,29 @@
     "experiments": {
       "typedRoutes": true
     },
-    "owner": "afre92"
+    "owner": "afre92",
+    "extra": {
+      "router": {},
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "bundleIdentifier": "com.afre92.tinyrest.widget",
+                  "targetName": "widget",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.afre92.tinyrest"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "01e9739f-9cb0-428a-a998-249f0d50b7aa"
+      }
+    }
   }
 }

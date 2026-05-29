@@ -19,6 +19,7 @@
     "build:ios": "eas build --platform ios",
     "build:all": "eas build --platform all",
     "prewidget": "EXPO_NO_GIT_STATUS=1 npx expo prebuild --template ./node_modules/@bacons/apple-targets/prebuild-blank.tgz --clean",
+    "sync:ios-app-groups": "node scripts/sync-ios-app-groups.js",
     "postinstall": "patch-package"
   },
   "dependencies": {

@@ -20,19 +20,16 @@ import {
   cardCenteredClassName,
   cardClassName,
 } from '@/app/constants/screenLayout';
-import {
-  createTimerRun,
-  formatDuration,
-  submitTimerRun,
-} from '@/app/utils/timerHistory';
+import { createTimerRun, submitTimerRun } from '@/app/utils/timerHistory';
 import ScreenScrollLayout from '@/app/sharedComponents/ScreenScrollLayout';
+import TimerElapsedDisplay from '@/app/sharedComponents/TimerElapsedDisplay';
 
 const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
 
 const inputClassName =
   'border-white data-[hover=true]:border-white data-[focus=true]:border-white';
 const inputFieldClassName = 'text-white text-lg';
-const labelClassName = 'text-white text-lg';
+const labelClassName = 'text-white text-lg font-bold';
 
 type PickerTarget = 'start' | 'end';
 
@@ -45,8 +42,6 @@ const formatDateTime = (date: Date | null): string => {
     minute: '2-digit',
   });
 };
-
-const formatElapsed = (ms: number): string => formatDuration(ms);
 
 const TimerScreen: React.FC = () => {
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -272,15 +267,13 @@ const TimerScreen: React.FC = () => {
     !isRunning && startTime && canSubmit ? 'Resume' : 'Start';
 
   return (
-    <ScreenScrollLayout>
-      <VStack className={cardCenteredClassName}>
-        <Text className="text-white text-5xl font-mono tracking-wider">
-          {formatElapsed(elapsedMs)}
-        </Text>
+    <ScreenScrollLayout contentContainerClassName="flex-grow items-center px-6 pb-4 pt-2">
+      <TimerElapsedDisplay elapsedMs={elapsedMs} />
 
+      <VStack className={cardCenteredClassName}>
         <Button
           variant="solid"
-          className="w-full border-2 border-white bg-white mt-6"
+          className="w-full border-2 border-white bg-white"
           size="md"
           onPress={handlePlayStopPress}
           isDisabled={isSubmitting || isStarting}

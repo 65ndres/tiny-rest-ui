@@ -11,7 +11,6 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from '@/components/ui/form-control';
-import { Heading } from '@/components/ui/heading';
 import { PlayIcon } from '@/components/ui/icon';
 import { Input, InputField } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
@@ -23,6 +22,7 @@ import {
   saveTimerHistoryToCache,
   type TimerSession,
 } from '@/app/utils/timerHistory';
+import TimerElapsedDisplay from '@/app/sharedComponents/TimerElapsedDisplay';
 import TimerHistoryPanel from '@/app/sharedComponents/TimerHistoryPanel';
 
 const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
@@ -30,9 +30,8 @@ const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
 const inputClassName =
   'border-white data-[hover=true]:border-white data-[focus=true]:border-white';
 const inputFieldClassName = 'text-white text-lg';
-const labelClassName = 'text-white text-lg';
+const labelClassName = 'text-white text-lg font-bold';
 const buttonTextClassName = 'text-white text-lg';
-const mutedTextClassName = 'text-white/75 text-base';
 
 type PickerTarget = 'start' | 'end';
 
@@ -45,8 +44,6 @@ const formatDateTime = (date: Date | null): string => {
     minute: '2-digit',
   });
 };
-
-const formatElapsed = (ms: number): string => formatDuration(ms);
 
 const TimerScreenGuest: React.FC = () => {
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -249,10 +246,12 @@ const TimerScreenGuest: React.FC = () => {
     <View style={{ height: "80%" }}>
     <ScrollView
       className="flex-1"
-      contentContainerClassName="flex-grow p-6 items-center"
+      contentContainerClassName="flex-grow px-6 pb-4 pt-2 items-center"
       showsVerticalScrollIndicator={false}
     >
-      <VStack space="md" className="w-full max-w-[336px] items-center pt-10 ">
+      <VStack space="md" className="w-full max-w-[336px] items-center">
+        <TimerElapsedDisplay elapsedMs={elapsedMs} />
+
         <VStack className="rounded-xl border border-white/90 p-6 w-full">
 
           <FormControl size="lg" className="w-full">
@@ -315,13 +314,9 @@ const TimerScreenGuest: React.FC = () => {
         </VStack>
 
         <VStack className="rounded-xl border border-white/90 p-6 w-full items-center">
-          <Text className="text-white text-5xl font-mono tracking-wider">
-            {formatElapsed(elapsedMs)}
-          </Text>
-
           <Button
             variant="solid"
-            className="w-full border-2 border-white bg-white mt-6"
+            className="w-full border-2 border-white bg-white"
             size="md"
             onPress={handlePlayStopPress}
             isDisabled={isSubmitting}

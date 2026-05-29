@@ -10,15 +10,21 @@ import ScreenComponent from './ScreenComponent';
 
 type ScreenScrollLayoutProps = {
   children: React.ReactNode;
+  contentContainerClassName?: string;
 };
 
-const ScreenScrollLayout: React.FC<ScreenScrollLayoutProps> = ({ children }) => (
+const ScreenScrollLayout: React.FC<ScreenScrollLayoutProps> = ({
+  children,
+  contentContainerClassName,
+}) => (
   <ScreenComponent>
     <View style={{ height: '7%' }} />
     <View style={{ height: '83%' }}>
       <ScrollView
         className={scrollViewClassName}
-        contentContainerClassName={scrollContentClassName}
+        contentContainerClassName={
+          contentContainerClassName ?? scrollContentClassName
+        }
         showsVerticalScrollIndicator={false}
       >
         <VStack space="md" className={contentStackClassName}>

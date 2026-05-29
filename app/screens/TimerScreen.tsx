@@ -39,8 +39,10 @@ type PickerTarget = 'start' | 'end';
 const formatDateTime = (date: Date | null): string => {
   if (!date) return 'Select date and time';
   return date.toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   });
 };
 

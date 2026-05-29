@@ -1,10 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import DateTimePicker, {
-  type DateTimePickerEvent,
-} from '@react-native-community/datetimepicker';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { Button, ButtonIcon, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import {
   FormControl,
@@ -13,7 +10,6 @@ import {
 } from '@/components/ui/form-control';
 import { PlayIcon } from '@/components/ui/icon';
 import { Input, InputField } from '@/components/ui/input';
-import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
   createLocalTimerSession,
@@ -22,6 +18,7 @@ import {
   saveTimerHistoryToCache,
   type TimerSession,
 } from '@/app/utils/timerHistory';
+import TimerDateTimePickerDrawer from '@/app/sharedComponents/TimerDateTimePickerDrawer';
 import TimerElapsedDisplay from '@/app/sharedComponents/TimerElapsedDisplay';
 import TimerHistoryPanel from '@/app/sharedComponents/TimerHistoryPanel';
 
@@ -50,7 +47,7 @@ const TimerScreenGuest: React.FC = () => {
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
-  const [canSubmit, setCanSubmit] = useState(false);
+  const [hasStoppedSession, setHasStoppedSession] = useState(false);
   const [activePicker, setActivePicker] = useState<PickerTarget | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [history, setHistory] = useState<TimerSession[]>([]);
@@ -90,6 +87,11 @@ const TimerScreenGuest: React.FC = () => {
   }, [startTime]);
 
   useEffect(() => {
+    if (isRunning || !startTime || !endTime) return;
+    setElapsedMs(Math.max(0, endTime.getTime() - startTime.getTime()));
+  }, [startTime, endTime, isRunning]);
+
+  useEffect(() => {
     if (!isRunning) {
       clearTimerInterval();
       return;
@@ -115,24 +117,17 @@ const TimerScreenGuest: React.FC = () => {
     setActivePicker(target);
   };
 
-  const handlePickerChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
-      setActivePicker(null);
-      if (event.type === 'dismissed') return;
-    }
+  const closePicker = () => {
+    setActivePicker(null);
+  };
 
-    if (!selectedDate) return;
-
+  const handlePickerDateChange = (selectedDate: Date) => {
     if (activePicker === 'start') {
       setStartTime(selectedDate);
       startTimeRef.current = selectedDate;
     } else if (activePicker === 'end') {
       setEndTime(selectedDate);
     }
-  };
-
-  const closePicker = () => {
-    setActivePicker(null);
   };
 
   const handlePlay = () => {
@@ -146,7 +141,7 @@ const TimerScreenGuest: React.FC = () => {
     }
 
     setEndTime(null);
-    setCanSubmit(false);
+    setHasStoppedSession(false);
     setElapsedMs(0);
     setIsRunning(true);
     setElapsedMs(Date.now() - nextStart.getTime());
@@ -163,7 +158,7 @@ const TimerScreenGuest: React.FC = () => {
       setElapsedMs(now.getTime() - start.getTime());
     }
 
-    setCanSubmit(true);
+    setHasStoppedSession(true);
   };
 
   const handlePlayStopPress = () => {
@@ -182,7 +177,7 @@ const TimerScreenGuest: React.FC = () => {
     startTimeRef.current = null;
     setEndTime(null);
     setElapsedMs(0);
-    setCanSubmit(false);
+    setHasStoppedSession(false);
   }, [clearTimerInterval]);
 
   const handleReset = () => {
@@ -237,8 +232,10 @@ const TimerScreenGuest: React.FC = () => {
         ? endTime ?? new Date()
         : new Date();
 
+  const isSubmitEnabled = Boolean(startTime && endTime) && !isRunning;
+
   const playButtonLabel =
-    !isRunning && startTime && canSubmit ? 'Resume' : 'Start';
+    !isRunning && startTime && hasStoppedSession ? 'Resume' : 'Start';
 
   return (
     <>
@@ -344,7 +341,7 @@ const TimerScreenGuest: React.FC = () => {
             className="w-full border-2 border-white bg-white mt-4"
             size="md"
             onPress={handleSubmit}
-            isDisabled={!canSubmit || isSubmitting}
+            isDisabled={!isSubmitEnabled || isSubmitting}
           >
             {isSubmitting ? (
               <ButtonSpinner color="black" />
@@ -370,22 +367,13 @@ const TimerScreenGuest: React.FC = () => {
         <TimerHistoryPanel sessions={history} isLoading={historyLoading} />
       </VStack>
 
-      {activePicker ? (
-        <VStack className="w-full max-w-[336px] mt-4 items-center">
-          <DateTimePicker
-            value={pickerValue}
-            mode="datetime"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={handlePickerChange}
-            themeVariant="dark"
-          />
-          {Platform.OS === 'ios' ? (
-            <Pressable onPress={closePicker} className="mt-2 py-2 px-4">
-              <Text className="text-white text-lg font-semibold">Done</Text>
-            </Pressable>
-          ) : null}
-        </VStack>
-      ) : null}
+      <TimerDateTimePickerDrawer
+        isOpen={activePicker !== null}
+        title={activePicker === 'end' ? 'End time' : 'Start time'}
+        value={pickerValue}
+        onChange={handlePickerDateChange}
+        onClose={closePicker}
+      />
     </ScrollView>
     </View>
     <View style={{ height: "5%" }}></View>

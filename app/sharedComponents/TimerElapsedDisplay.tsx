@@ -32,9 +32,9 @@ const TimerElapsedDisplay: React.FC<TimerElapsedDisplayProps> = ({ elapsedMs }) 
       accessibilityLabel={`Elapsed time ${formatDuration(elapsedMs)}`}
     >
       <View className="flex-row items-start justify-center">
-        <Segment value={hours} label="Hours" />
+        <Segment value={hours} label="HOURS" />
         <Colon />
-        <Segment value={minutes} label="Min" />
+        <Segment value={minutes} label="MIN" />
         <Colon />
         <Segment value={seconds} label="SEC" />
       </View>

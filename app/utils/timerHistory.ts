@@ -4,6 +4,7 @@
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import type { TimelineEventProps } from 'react-native-calendars';
 import { API_URL } from '@/constants/Config';
 
 export const TIMER_HISTORY_CACHE_KEY = 'timer_history';
@@ -68,6 +69,176 @@ export const fetchTimerRuns = async (
     .filter((session): session is TimerSession => session !== null);
 
   return sortNewestFirst(sessions);
+};
+
+export const fetchTimerRunsInRange = async (
+  token: string,
+  from: string,
+  to: string
+): Promise<TimerSession[]> => {
+  const response = await axios.get<{ timer_runs: TimerRunApiRecord[] }>(
+    `${API_URL}/timer_runs`,
+    {
+      headers: authHeaders(token),
+      params: { from, to },
+    }
+  );
+
+  const sessions = (response.data.timer_runs ?? [])
+    .map(mapTimerRunToSession)
+    .filter((session): session is TimerSession => session !== null);
+
+  return sessions;
+};
+
+export const TIMELINE_FIRST_DAY = 1;
+
+export const formatDateParam = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+export const getWeekStart = (
+  date: Date,
+  firstDay: number = TIMELINE_FIRST_DAY
+): Date => {
+  const normalized = startOfLocalDay(date);
+  const day = normalized.getDay();
+  const diff = (day - firstDay + 7) % 7;
+  normalized.setDate(normalized.getDate() - diff);
+  return normalized;
+};
+
+export const getWeekEnd = (
+  date: Date,
+  firstDay: number = TIMELINE_FIRST_DAY
+): Date => {
+  const weekStart = getWeekStart(date, firstDay);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  return weekEnd;
+};
+
+export const getWeekRangeForDate = (
+  date: Date,
+  firstDay: number = TIMELINE_FIRST_DAY
+): { from: string; to: string } => {
+  const weekStart = getWeekStart(date, firstDay);
+  const weekEnd = getWeekEnd(date, firstDay);
+  return {
+    from: formatDateParam(weekStart),
+    to: formatDateParam(weekEnd),
+  };
+};
+
+export const getBufferedWeekRange = (
+  date: Date,
+  bufferWeeks: number = 1,
+  firstDay: number = TIMELINE_FIRST_DAY
+): { from: string; to: string } => {
+  const weekStart = getWeekStart(date, firstDay);
+  const rangeStart = new Date(weekStart);
+  rangeStart.setDate(rangeStart.getDate() - bufferWeeks * 7);
+
+  const weekEnd = getWeekEnd(date, firstDay);
+  const rangeEnd = new Date(weekEnd);
+  rangeEnd.setDate(rangeEnd.getDate() + bufferWeeks * 7);
+
+  return {
+    from: formatDateParam(rangeStart),
+    to: formatDateParam(rangeEnd),
+  };
+};
+
+export const filterSessionsInRange = (
+  sessions: TimerSession[],
+  from: string,
+  to: string
+): TimerSession[] => {
+  const rangeStart = startOfLocalDay(new Date(`${from}T00:00:00`));
+  const rangeEnd = startOfLocalDay(new Date(`${to}T00:00:00`));
+  rangeEnd.setHours(23, 59, 59, 999);
+
+  return sessions.filter((session) => {
+    const start = new Date(session.start_time);
+    const end = new Date(session.end_time);
+    return start < rangeEnd && end >= rangeStart;
+  });
+};
+
+export const NAP_TIMELINE_EVENT_COLOR = '#4ade80';
+
+export const sessionToTimelineEvent = (
+  session: TimerSession
+): TimelineEventProps => ({
+  id: session.id,
+  start: session.start_time,
+  end: session.end_time,
+  title: formatDuration(session.duration_ms),
+  summary: 'Nap',
+  color: NAP_TIMELINE_EVENT_COLOR,
+});
+
+export const buildTimelineEventsByDate = (
+  sessions: TimerSession[]
+): Record<string, TimelineEventProps[]> => {
+  const eventsByDate: Record<string, TimelineEventProps[]> = {};
+
+  for (const session of sessions) {
+    const dayKey = getLocalDayKey(session.start_time);
+    const event = sessionToTimelineEvent(session);
+    const existing = eventsByDate[dayKey];
+    if (existing) {
+      existing.push(event);
+    } else {
+      eventsByDate[dayKey] = [event];
+    }
+  }
+
+  return eventsByDate;
+};
+
+export const buildMarkedDatesFromEvents = (
+  eventsByDate: Record<string, TimelineEventProps[]>
+): Record<string, { marked: boolean }> => {
+  const marked: Record<string, { marked: boolean }> = {};
+  for (const dayKey of Object.keys(eventsByDate)) {
+    if (eventsByDate[dayKey]?.length) {
+      marked[dayKey] = { marked: true };
+    }
+  }
+  return marked;
+};
+
+export const mergeTimelineEventsByDate = (
+  current: Record<string, TimelineEventProps[]>,
+  incoming: Record<string, TimelineEventProps[]>
+): Record<string, TimelineEventProps[]> => {
+  const merged = { ...current };
+
+  for (const [dayKey, events] of Object.entries(incoming)) {
+    const existing = merged[dayKey] ?? [];
+    const byId = new Map(existing.map((event) => [event.id ?? event.start, event]));
+    for (const event of events) {
+      byId.set(event.id ?? event.start, event);
+    }
+    merged[dayKey] = [...byId.values()];
+  }
+
+  return merged;
+};
+
+export const mergeTimerSessions = (
+  current: TimerSession[],
+  incoming: TimerSession[]
+): TimerSession[] => {
+  const byId = new Map(current.map((session) => [session.id, session]));
+  for (const session of incoming) {
+    byId.set(session.id, session);
+  }
+  return [...byId.values()];
 };
 
 export const createTimerRun = async (

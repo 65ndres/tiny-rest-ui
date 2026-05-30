@@ -27,6 +27,7 @@ import ScreenScrollLayout from './sharedComponents/ScreenScrollLayout';
 type RootDrawerParamList = {
   Home: undefined;
   Timer: undefined;
+  NapTimeline: undefined;
 };
 
 type NavigationProp = DrawerNavigationProp<RootDrawerParamList, 'Home'>;
@@ -112,11 +113,11 @@ const Home: React.FC = () => {
         </Button>
         <Button
           variant="outline"
-          className="w-full border-2 border-white/50 bg-transparent opacity-60"
+          className="w-full border-2 border-white bg-transparent"
           size="md"
-          isDisabled
+          onPress={() => navigation.navigate('NapTimeline')}
         >
-          <ButtonText className={buttonTextClassName}>Coming soon</ButtonText>
+          <ButtonText className={buttonTextClassName}>View timeline</ButtonText>
         </Button>
       </VStack>
     </ScreenScrollLayout>

@@ -14,7 +14,7 @@ import {
   cardClassName,
   mutedTextClassName,
 } from '@/app/constants/screenLayout';
-import { fetchTimerRuns, type TimerSession } from '@/app/utils/timerHistory';
+import { fetchTimerRuns } from '@/app/utils/timerHistory';
 import {
   formatNextNapTime,
   getBabyDisplayName,
@@ -23,7 +23,6 @@ import {
 } from '@/app/utils/nextNapPrediction';
 import { fetchUserProfile } from '@/app/utils/userProfile';
 import ScreenScrollLayout from './sharedComponents/ScreenScrollLayout';
-import TimerHistoryPanel from './sharedComponents/TimerHistoryPanel';
 
 type RootDrawerParamList = {
   Home: undefined;
@@ -36,7 +35,6 @@ const Home: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const [babyName, setBabyName] = useState('');
   const [nextNapLabel, setNextNapLabel] = useState('--:--');
-  const [history, setHistory] = useState<TimerSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -49,7 +47,6 @@ const Home: React.FC = () => {
       if (!token) {
         setBabyName('Baby');
         setNextNapLabel('--:--');
-        setHistory([]);
         return;
       }
 
@@ -61,14 +58,12 @@ const Home: React.FC = () => {
       const napCount = normalizeDailyNapCount(profile.daily_nap_count);
       const displayName = getBabyDisplayName(profile.baby_name);
       setBabyName(displayName);
-      setHistory(timerSessions);
 
       const nextNap = predictNextNap(napCount, timerSessions);
       setNextNapLabel(formatNextNapTime(nextNap));
     } catch {
       setBabyName('Baby');
       setNextNapLabel('--:--');
-      setHistory([]);
     } finally {
       setIsLoading(false);
     }
@@ -124,8 +119,6 @@ const Home: React.FC = () => {
           <ButtonText className={buttonTextClassName}>Coming soon</ButtonText>
         </Button>
       </VStack>
-
-      <TimerHistoryPanel sessions={history} isLoading={isLoading} />
     </ScreenScrollLayout>
   );
 };

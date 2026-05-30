@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable } from 'react-native';
 import { Button, ButtonIcon, ButtonSpinner, ButtonText } from '@/components/ui/button';
@@ -16,10 +17,16 @@ import {
   cardCenteredClassName,
   cardClassName,
 } from '@/app/constants/screenLayout';
-import { createTimerRun, submitTimerRun } from '@/app/utils/timerHistory';
+import {
+  createTimerRun,
+  fetchTimerRuns,
+  submitTimerRun,
+  type TimerSession,
+} from '@/app/utils/timerHistory';
 import ScreenScrollLayout from '@/app/sharedComponents/ScreenScrollLayout';
 import TimerDateTimePickerDrawer from '@/app/sharedComponents/TimerDateTimePickerDrawer';
 import TimerElapsedDisplay from '@/app/sharedComponents/TimerElapsedDisplay';
+import TimerHistoryPanel from '@/app/sharedComponents/TimerHistoryPanel';
 
 const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
 
@@ -49,6 +56,8 @@ const TimerScreen: React.FC = () => {
   const [activePicker, setActivePicker] = useState<PickerTarget | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const [history, setHistory] = useState<TimerSession[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const startTimeRef = useRef<Date | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -95,6 +104,28 @@ const TimerScreen: React.FC = () => {
       clearTimerInterval();
     };
   }, [clearTimerInterval]);
+
+  const loadHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        setHistory([]);
+        return;
+      }
+      setHistory(await fetchTimerRuns(token));
+    } catch {
+      setHistory([]);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadHistory();
+    }, [loadHistory])
+  );
 
   const openPicker = (target: PickerTarget) => {
     if (target === 'start' && isRunning) return;
@@ -244,6 +275,7 @@ const TimerScreen: React.FC = () => {
       await submitTimerRun(token, timerRunId, payload);
       Alert.alert('Success', 'Timer session saved.');
       resetAll();
+      void loadHistory();
     } catch {
       Alert.alert('Error', 'Could not submit timer. Please try again.');
     } finally {
@@ -382,6 +414,8 @@ const TimerScreen: React.FC = () => {
           </Pressable>
         </FormControl>
       </VStack>
+
+      <TimerHistoryPanel sessions={history} isLoading={historyLoading} />
 
       <TimerDateTimePickerDrawer
         isOpen={activePicker !== null}

@@ -360,37 +360,10 @@ const UnauthenticatedNavigator: React.FC = () => {
           }}
         />
         <AuthDrawer.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{
-            drawerLabel: 'LOG IN',
-            headerLeft: () => <BackButton text=" " />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
-          }}
-        />
-        <AuthDrawer.Screen
           name="LoginGluestack"
           component={LoginScreenGluestack}
           options={{
-            drawerLabel: 'LOG IN (GLUESTACK)',
-            headerLeft: () => <BackButton text=" " />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
-          }}
-        />
-        <AuthDrawer.Screen
-          name="FeaturedScreenGuest"
-          component={FeaturedScreenGuest}
-          options={({ navigation }) => ({
-            drawerLabel: 'FEATURED',
-            headerLeft: () => <BackButton text=" " onPress={() => navigation.navigate('Landing')} />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>FEATURED</Text>,
-          })}
-        />
-        <AuthDrawer.Screen
-          name="SignUp"
-          component={SignUpScreen}
-          options={{
-            drawerLabel: 'SIGN UP',
+            drawerLabel: 'LOG IN',
             headerLeft: () => <BackButton text=" " />,
             headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
           }}
@@ -399,7 +372,7 @@ const UnauthenticatedNavigator: React.FC = () => {
           name="SignUpGluestack"
           component={SignUpScreenGluestack}
           options={{
-            drawerLabel: 'SIGN UP (GLUESTACK)',
+            drawerLabel: 'SIGN UP',
             headerLeft: () => <BackButton text=" " />,
             headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
           }}

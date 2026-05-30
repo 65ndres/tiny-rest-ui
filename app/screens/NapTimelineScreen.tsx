@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import {
   CalendarProvider,
+  ExpandableCalendar,
   TimelineEventProps,
   TimelineList,
   WeekCalendar,
@@ -25,9 +26,12 @@ import {
   getWeekRangeForDate,
   loadTimerHistoryFromCache,
   mergeTimelineEventsByDate,
-  mergeTimerSessions,
   type TimerSession,
 } from '@/app/utils/timerHistory';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { Positions } from 'react-native-calendars/src/expandableCalendar';
+
+const INITIAL_TIME = { hour: 9, minutes: 0 };
 
 const calendarTheme = {
   backgroundColor: 'transparent',
@@ -150,12 +154,19 @@ const NapTimelineScreen: React.FC = () => {
   );
 
   const handleDateChanged = useCallback(
-    (date: string) => {
+    (date: string, _source?: string) => {
       setCurrentDate(date);
       const { from, to } = getWeekRangeForDate(new Date(`${date}T12:00:00`));
       void loadRange(from, to);
     },
     [loadRange]
+  );
+
+  const handleMonthChange = useCallback(
+    (month: { dateString: string }) => {
+      void loadBufferedRange(new Date(`${month.dateString}T12:00:00`));
+    },
+    [loadBufferedRange]
   );
 
   const handleEventPress = useCallback((event: TimelineEventProps) => {
@@ -167,9 +178,9 @@ const NapTimelineScreen: React.FC = () => {
 
   const timelineProps = useMemo(
     () => ({
-      format24h: false,
+      format24h: true,
       overlapEventsSpacing: 8,
-      rightEdgeSpacing: 16,
+      rightEdgeSpacing: 24,
       theme: timelineTheme,
       onEventPress: handleEventPress,
     }),
@@ -177,6 +188,10 @@ const NapTimelineScreen: React.FC = () => {
   );
 
   return (
+
+    <>  
+    <View style={{ height: "10%" }}></View>
+    <View style={{ height: "80%" }}> 
     <View style={styles.container}>
       {isLoading ? (
         <View style={styles.loadingOverlay}>
@@ -186,24 +201,38 @@ const NapTimelineScreen: React.FC = () => {
 
       <CalendarProvider
         date={currentDate}
-        numberOfDays={7}
         onDateChanged={handleDateChanged}
-        theme={calendarTheme}
+        onMonthChange={handleMonthChange}
+        showTodayButton
+        // disabledOpacity={0.6}
+        // theme={calendarTheme}
         style={styles.provider}
       >
+        {/* <ExpandableCalendar
+          // firstDay={1}
+          markedDates={markedDates}
+            // initialPosition={Positions.OPEN}
+          theme={calendarTheme}
+          leftArrowImageSource={require('@/assets/images/left-arrow.png')}
+          rightArrowImageSource={require('@/assets/images/right-arrow.png')} 
+          >
+        </ExpandableCalendar> */}
+
         <WeekCalendar
-          firstDay={1}
           markedDates={markedDates}
           theme={calendarTheme}
-          allowShadow={false}
-          style={styles.weekCalendar}
+          // leftArrowImageSource={require('@/assets/images/left-arrow.png')}
+          // rightArrowImageSource={require('@/assets/images/right-arrow.png')} 
         />
+        {/* <View style={{ height: "70%" }}> */}
         <TimelineList
           events={eventsByDate}
           timelineProps={timelineProps}
           showNowIndicator
-          scrollToNow
+          scrollToFirst
+          initialTime={INITIAL_TIME}
         />
+        {/* </View> */}
       </CalendarProvider>
 
       {!isLoading && Object.keys(eventsByDate).length === 0 ? (
@@ -212,6 +241,9 @@ const NapTimelineScreen: React.FC = () => {
         </View>
       ) : null}
     </View>
+    </View>
+    <View style={{ height: "10%" }}></View>
+    </>
   );
 };
 
@@ -224,9 +256,6 @@ const styles = StyleSheet.create({
   provider: {
     flex: 1,
     backgroundColor: 'transparent',
-  },
-  weekCalendar: {
-    paddingBottom: 8,
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,

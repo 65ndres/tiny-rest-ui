@@ -49,6 +49,13 @@ const calendarTheme = {
 };
 
 const timelineTheme = {
+  calendarBackground: 'transparent',
+  contentStyle: {
+    backgroundColor: 'transparent',
+  },
+  timelineContainer: {
+    backgroundColor: 'transparent',
+  },
   event: {
     opacity: 0.95,
     borderRadius: 6,
@@ -212,9 +219,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
+    backgroundColor: 'transparent',
   },
   provider: {
     flex: 1,
+    backgroundColor: 'transparent',
   },
   weekCalendar: {
     paddingBottom: 8,

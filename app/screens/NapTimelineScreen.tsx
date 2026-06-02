@@ -188,6 +188,10 @@ const NapTimelineScreen: React.FC = () => {
   );
 
   return (
+
+    <>  
+    <View style={{ height: "10%" }}></View>
+    <View style={{ height: "80%" }}> 
     <View style={styles.container}>
       {isLoading ? (
         <View style={styles.loadingOverlay}>
@@ -224,6 +228,9 @@ const NapTimelineScreen: React.FC = () => {
         </View>
       ) : null}
     </View>
+    </View>
+    <View style={{ height: "10%" }}></View>
+    </>
   );
 };
 

@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Dimensions, Image, ImageBackground, ImageStyle, StatusBar, StyleSheet, Text, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AudioPlaybackProvider } from "./context/AudioPlaybackContext";
 import { RevenueCatProvider, useRevenueCat } from "./context/RevenueCatContext";
 import Home from './Home';
 import SavedScreen from './Saved';
@@ -32,6 +33,7 @@ import TimerScreenGuest from './screens/TimerScreenGuest';
 import SettingsScreen from './screens/SettingsScreen';
 import NapTimelineScreen from './screens/NapTimelineScreen';
 import AddFeedingScreen from './screens/AddFeedingScreen';
+import SoundsScreen from './screens/SoundsScreen';
 import BackButton from './SampleModule/BackButton';
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
@@ -66,6 +68,7 @@ type RootDrawerParamList = {
   Settings: undefined;
   NapTimeline: undefined;
   AddFeeding: undefined;
+  Sounds: undefined;
 };
 
 type AuthStackParamList = {
@@ -108,7 +111,7 @@ const CustomDrawerContent: React.FC<any> = (props) => {
   const { presentPaywall } = useRevenueCat();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const isProUser = user?.subscription_type === 'pro';
-  const alwaysAllowedRoutes = new Set(['Home', 'FeaturedScreen', 'Profile', 'Timer', 'Settings', 'NapTimeline', 'AddFeeding']);
+  const alwaysAllowedRoutes = new Set(['Home', 'FeaturedScreen', 'Profile', 'Timer', 'Settings', 'NapTimeline', 'AddFeeding', 'Sounds']);
   const hiddenRoutes = new Set(['NewConversation', 'Conversation', 'Subscription']);
 
   const handleLogout = async () => {
@@ -191,6 +194,7 @@ const UnauthenticatedDrawerContent: React.FC<any> = (props) => (
 
 const AuthenticatedNavigator: React.FC = () => {
   return (
+    <AudioPlaybackProvider>
     <>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <Drawer.Navigator
@@ -272,6 +276,19 @@ const AuthenticatedNavigator: React.FC = () => {
         }}
       />
       <Drawer.Screen
+        name="Sounds"
+        component={SoundsScreen}
+        options={{
+          drawerLabel: 'SOUNDS',
+          headerLeft: () => <BackButton text="" />,
+          headerTitle: () => (
+            <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
+              SOUNDS
+            </Text>
+          ),
+        }}
+      />
+      <Drawer.Screen
         name="AddFeeding"
         component={AddFeedingScreen}
         options={{
@@ -314,6 +331,7 @@ const AuthenticatedNavigator: React.FC = () => {
       />
     </Drawer.Navigator>
     </>
+    </AudioPlaybackProvider>
   );
 };
 

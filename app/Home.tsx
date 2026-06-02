@@ -29,6 +29,7 @@ type RootDrawerParamList = {
   Timer: undefined;
   NapTimeline: undefined;
   AddFeeding: undefined;
+  Sounds: undefined;
 };
 
 type NavigationProp = DrawerNavigationProp<RootDrawerParamList, 'Home'>;
@@ -127,6 +128,14 @@ const Home: React.FC = () => {
           onPress={() => navigation.navigate('NapTimeline')}
         >
           <ButtonText className={buttonTextClassName}>View timeline</ButtonText>
+        </Button>
+        <Button
+          variant="outline"
+          className="w-full border-2 border-white bg-transparent"
+          size="md"
+          onPress={() => navigation.navigate('Sounds')}
+        >
+          <ButtonText className={buttonTextClassName}>Sounds</ButtonText>
         </Button>
       </VStack>
     </ScreenScrollLayout>

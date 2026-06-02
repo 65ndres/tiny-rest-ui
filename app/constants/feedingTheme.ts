@@ -1,12 +1,12 @@
 export const FEEDING_COLORS = {
-  background: '#121b2b',
+  background: 'transparent',
   accent: '#a3d133',
-  link: '#4db8cf',
+  link: '#ffffff',
   nursingCircle: '#ff7f50',
   text: '#ffffff',
   textMuted: 'rgba(255, 255, 255, 0.75)',
   segmentInactive: 'rgba(255, 255, 255, 0.12)',
-  border: 'rgba(255, 255, 255, 0.2)',
+  border: 'rgba(255, 255, 255, 0.9)',
 } as const;
 
 export const FEEDING_TYPE_OPTIONS = [

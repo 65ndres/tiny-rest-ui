@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import {
   CalendarProvider,
-  ExpandableCalendar,
   TimelineEventProps,
   TimelineList,
   WeekCalendar,
@@ -28,8 +27,6 @@ import {
   mergeTimelineEventsByDate,
   type TimerSession,
 } from '@/app/utils/timerHistory';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import { Positions } from 'react-native-calendars/src/expandableCalendar';
 
 const INITIAL_TIME = { hour: 9, minutes: 0 };
 
@@ -47,6 +44,7 @@ const calendarTheme = {
   arrowColor: '#ffffff',
   monthTextColor: '#ffffff',
   indicatorColor: '#ffffff',
+  expandableKnobColor: 'rgba(255,255,255,0.45)',
   textDayFontWeight: '400' as const,
   textMonthFontWeight: '500' as const,
   textDayHeaderFontWeight: '500' as const,
@@ -190,10 +188,6 @@ const NapTimelineScreen: React.FC = () => {
   );
 
   return (
-
-    <>  
-    <View style={{ height: "10%" }}></View>
-    <View style={{ height: "80%" }}> 
     <View style={styles.container}>
       {isLoading ? (
         <View style={styles.loadingOverlay}>
@@ -206,27 +200,15 @@ const NapTimelineScreen: React.FC = () => {
         onDateChanged={handleDateChanged}
         onMonthChange={handleMonthChange}
         showTodayButton
-        // disabledOpacity={0.6}
-        // theme={calendarTheme}
+        disabledOpacity={0.6}
+        theme={calendarTheme}
         style={styles.provider}
       >
-        {/* <ExpandableCalendar
-          // firstDay={1}
-          markedDates={markedDates}
-            // initialPosition={Positions.OPEN}
-          theme={calendarTheme}
-          leftArrowImageSource={require('@/assets/images/left-arrow.png')}
-          rightArrowImageSource={require('@/assets/images/right-arrow.png')} 
-          >
-        </ExpandableCalendar> */}
-
         <WeekCalendar
           markedDates={markedDates}
           theme={calendarTheme}
-          // leftArrowImageSource={require('@/assets/images/left-arrow.png')}
-          // rightArrowImageSource={require('@/assets/images/right-arrow.png')} 
+          allowShadow={false}
         />
-        {/* <View style={{ height: "70%" }}> */}
         <TimelineList
           events={eventsByDate}
           timelineProps={timelineProps}
@@ -234,7 +216,6 @@ const NapTimelineScreen: React.FC = () => {
           scrollToFirst
           initialTime={INITIAL_TIME}
         />
-        {/* </View> */}
       </CalendarProvider>
 
       {!isLoading && Object.keys(eventsByDate).length === 0 ? (
@@ -243,9 +224,6 @@ const NapTimelineScreen: React.FC = () => {
         </View>
       ) : null}
     </View>
-    </View>
-    <View style={{ height: "10%" }}></View>
-    </>
   );
 };
 

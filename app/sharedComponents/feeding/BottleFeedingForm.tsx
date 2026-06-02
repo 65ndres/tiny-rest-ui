@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
+import { buttonTextClassName } from '@/app/constants/screenLayout';
 import {
   FEEDING_COLORS,
   FEEDING_TYPE_OPTIONS,
@@ -149,15 +150,17 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
 
       <Button
         variant="solid"
-        className="w-full mt-6"
-        style={styles.saveButton}
+        className="w-full mt-6 border-2 border-white bg-white"
+        size="md"
         onPress={onSave}
         isDisabled={isSaving}
       >
         {isSaving ? (
-          <ButtonSpinner color="#121b2b" />
+          <ButtonSpinner color="black" />
         ) : (
-          <ButtonText style={styles.saveLabel}>Save</ButtonText>
+          <ButtonText className={`${buttonTextClassName} text-black`}>
+            Save
+          </ButtonText>
         )}
       </Button>
     </View>
@@ -207,14 +210,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: FEEDING_COLORS.link,
+    borderColor: FEEDING_COLORS.border,
   },
   unitSegment: {
     paddingHorizontal: 20,
     paddingVertical: 8,
   },
   unitSegmentActive: {
-    backgroundColor: FEEDING_COLORS.link,
+    backgroundColor: '#ffffff',
   },
   unitLabel: {
     color: FEEDING_COLORS.text,
@@ -222,7 +225,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   unitLabelActive: {
-    color: FEEDING_COLORS.text,
+    color: '#000000',
   },
   amountBlock: {
     flexDirection: 'row',
@@ -285,16 +288,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'right',
     minHeight: 40,
-  },
-  saveButton: {
-    backgroundColor: FEEDING_COLORS.accent,
-    borderColor: FEEDING_COLORS.accent,
-    borderRadius: 12,
-  },
-  saveLabel: {
-    color: '#121b2b',
-    fontSize: 18,
-    fontWeight: '700',
   },
 });
 

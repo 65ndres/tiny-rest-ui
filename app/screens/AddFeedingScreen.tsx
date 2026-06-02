@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
+import { buttonTextClassName, cardClassName } from '@/app/constants/screenLayout';
 import { FEEDING_COLORS } from '@/app/constants/feedingTheme';
 import BottleFeedingForm from '@/app/sharedComponents/feeding/BottleFeedingForm';
 import FeedingSegmentTabs, {
@@ -333,7 +334,7 @@ const AddFeedingScreen: React.FC = () => {
   return (
     <View style={styles.screen}>
       <ScreenScrollLayout contentContainerClassName="flex-grow px-4 pb-4 pt-2">
-        <View style={styles.panel}>
+        <View className={cardClassName} style={styles.panel}>
           <FeedingSegmentTabs activeTab={activeTab} onChange={setActiveTab} />
 
           {activeTab === 'nursing' ? (
@@ -372,22 +373,24 @@ const AddFeedingScreen: React.FC = () => {
               {isNursingSubmitEnabled && (
                 <Button
                   variant="solid"
-                  className="w-full mt-6"
-                  style={styles.saveButton}
+                  className="w-full mt-6 border-2 border-white bg-white"
+                  size="md"
                   onPress={() => void handleNursingSubmit()}
                   isDisabled={isSubmitting}
                 >
                   {isSubmitting ? (
-                    <ButtonSpinner color="#121b2b" />
+                    <ButtonSpinner color="black" />
                   ) : (
-                    <ButtonText style={styles.saveLabel}>Save</ButtonText>
+                    <ButtonText className={`${buttonTextClassName} text-black`}>
+                      Save
+                    </ButtonText>
                   )}
                 </Button>
               )}
 
               {(isRunning || hasStoppedSession || startTime) && (
                 <Pressable onPress={resetNursing} style={styles.resetLink}>
-                  <Text style={styles.link}>Reset</Text>
+                  <Text style={styles.resetText}>Reset</Text>
                 </Pressable>
               )}
             </>
@@ -434,11 +437,6 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
     alignSelf: 'center',
-    backgroundColor: FEEDING_COLORS.background,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: FEEDING_COLORS.border,
   },
   startTimeRow: {
     flexDirection: 'row',
@@ -463,19 +461,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     gap: 12,
   },
-  saveButton: {
-    backgroundColor: FEEDING_COLORS.accent,
-    borderColor: FEEDING_COLORS.accent,
-    borderRadius: 12,
-  },
-  saveLabel: {
-    color: '#121b2b',
-    fontSize: 18,
-    fontWeight: '700',
-  },
   resetLink: {
     alignSelf: 'center',
     marginTop: 16,
+  },
+  resetText: {
+    color: FEEDING_COLORS.text,
+    fontSize: 17,
   },
 });
 

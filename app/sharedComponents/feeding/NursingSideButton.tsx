@@ -36,10 +36,12 @@ const NursingSideButton: React.FC<NursingSideButtonProps> = ({
       <Ionicons
         name={isRunning ? 'stop' : 'play'}
         size={36}
-        color="#000000"
+        color={isRunning ? '#000000' : '#ffffff'}
         style={styles.icon}
       />
-      <Text style={styles.sideLabel}>{side.toUpperCase()}</Text>
+      <Text style={[styles.sideLabel, isRunning && styles.sideLabelRunning]}>
+        {side.toUpperCase()}
+      </Text>
     </Pressable>
   </View>
 );
@@ -68,24 +70,29 @@ const styles = StyleSheet.create({
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: FEEDING_COLORS.nursingCircle,
+    backgroundColor: 'transparent',
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: FEEDING_COLORS.nursingCircle,
+    borderColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
   },
   circleRunning: {
+    backgroundColor: FEEDING_COLORS.nursingCircle,
+    borderStyle: 'solid',
     borderColor: '#ffffff',
   },
   icon: {
     marginBottom: 4,
   },
   sideLabel: {
-    color: '#000000',
+    color: '#ffffff',
     fontSize: 18,
     fontWeight: '800',
     letterSpacing: 1,
+  },
+  sideLabelRunning: {
+    color: '#000000',
   },
 });
 

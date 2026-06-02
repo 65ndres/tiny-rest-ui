@@ -36,17 +36,20 @@ const FeedingSegmentTabs: React.FC<FeedingSegmentTabsProps> = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: FEEDING_COLORS.segmentInactive,
+    gap: 8,
   },
   segment: {
     flex: 1,
     paddingVertical: 12,
     alignItems: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: FEEDING_COLORS.border,
+    backgroundColor: 'transparent',
   },
   segmentActive: {
-    backgroundColor: FEEDING_COLORS.accent,
+    backgroundColor: '#ffffff',
+    borderColor: '#ffffff',
   },
   label: {
     color: FEEDING_COLORS.text,
@@ -54,7 +57,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   labelActive: {
-    color: '#121b2b',
+    color: '#000000',
   },
 });
 

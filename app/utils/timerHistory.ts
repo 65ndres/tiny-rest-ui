@@ -333,6 +333,55 @@ export const fetchActiveTimerRun = async (
 
 export const NURSING_RUN_TYPES: TimerRunType[] = ['nursing_left', 'nursing_right'];
 
+export const FEEDING_RUN_TYPES: TimerRunType[] = [
+  ...NURSING_RUN_TYPES,
+  'bottle',
+];
+
+export const isFeedingSession = (session: TimerSession): boolean =>
+  session.run_type != null && FEEDING_RUN_TYPES.includes(session.run_type);
+
+export const filterFeedingSessions = (
+  sessions: TimerSession[]
+): TimerSession[] => sortNewestFirst(sessions.filter(isFeedingSession));
+
+export const formatFeedingSessionTitle = (session: TimerSession): string => {
+  switch (session.run_type) {
+    case 'nursing_left':
+      return 'Nursing · Left';
+    case 'nursing_right':
+      return 'Nursing · Right';
+    case 'bottle':
+      return 'Bottle';
+    default:
+      return 'Feeding';
+  }
+};
+
+export const formatFeedingSessionDetails = (session: TimerSession): string => {
+  if (session.run_type !== 'bottle') {
+    return '';
+  }
+
+  const meta = session.metadata;
+  if (!meta) {
+    return '';
+  }
+
+  const parts: string[] = [];
+  if (meta.amount != null && meta.amount > 0) {
+    parts.push(`${meta.amount} ${meta.unit ?? 'oz'}`);
+  }
+  if (meta.feeding_type) {
+    parts.push(meta.feeding_type);
+  }
+  if (meta.notes?.trim()) {
+    parts.push(meta.notes.trim());
+  }
+
+  return parts.join(' · ');
+};
+
 export const getLastNursingSide = (
   sessions: TimerSession[]
 ): 'left' | 'right' | null => {

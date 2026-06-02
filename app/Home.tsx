@@ -28,6 +28,7 @@ type RootDrawerParamList = {
   Home: undefined;
   Timer: undefined;
   NapTimeline: undefined;
+  AddFeeding: undefined;
 };
 
 type NavigationProp = DrawerNavigationProp<RootDrawerParamList, 'Home'>;
@@ -53,7 +54,7 @@ const Home: React.FC = () => {
 
       const [profile, timerSessions] = await Promise.all([
         fetchUserProfile(token),
-        fetchTimerRuns(token),
+        fetchTimerRuns(token, { run_type: 'sleeping' }),
       ]);
 
       const napCount = normalizeDailyNapCount(profile.daily_nap_count);
@@ -110,6 +111,14 @@ const Home: React.FC = () => {
           <ButtonText className={`${buttonTextClassName} text-black`}>
             Start timer
           </ButtonText>
+        </Button>
+        <Button
+          variant="outline"
+          className="w-full border-2 border-white bg-transparent"
+          size="md"
+          onPress={() => navigation.navigate('AddFeeding')}
+        >
+          <ButtonText className={buttonTextClassName}>Add feeding</ButtonText>
         </Button>
         <Button
           variant="outline"

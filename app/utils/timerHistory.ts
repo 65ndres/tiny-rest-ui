@@ -9,12 +9,27 @@ import { API_URL } from '@/constants/Config';
 
 export const TIMER_HISTORY_CACHE_KEY = 'timer_history';
 
+export type TimerRunType =
+  | 'sleeping'
+  | 'nursing_left'
+  | 'nursing_right'
+  | 'bottle';
+
+export type BottleMetadata = {
+  feeding_type?: string;
+  unit?: 'oz' | 'mL';
+  amount?: number;
+  notes?: string;
+};
+
 export type TimerSession = {
   id: string;
   start_time: string;
   end_time: string;
   duration_ms: number;
   submitted_at?: string;
+  run_type?: TimerRunType;
+  metadata?: BottleMetadata;
 };
 
 export type TimerSubmitPayload = {
@@ -29,6 +44,19 @@ export type TimerRunApiRecord = {
   end_time: string | null;
   duration: number | null;
   submitted: boolean;
+  active?: boolean;
+  paused?: boolean;
+  run_type?: TimerRunType;
+  metadata?: BottleMetadata;
+};
+
+export type CreateTimerRunOptions = {
+  run_type?: TimerRunType;
+  metadata?: BottleMetadata;
+};
+
+export type FetchTimerRunsOptions = {
+  run_type?: TimerRunType;
 };
 
 const authHeaders = (token: string) => ({
@@ -53,15 +81,21 @@ export const mapTimerRunToSession = (
     end_time: record.end_time,
     duration_ms: record.duration,
     submitted_at: record.end_time,
+    run_type: record.run_type,
+    metadata: record.metadata,
   };
 };
 
 export const fetchTimerRuns = async (
-  token: string
+  token: string,
+  options?: FetchTimerRunsOptions
 ): Promise<TimerSession[]> => {
   const response = await axios.get<{ timer_runs: TimerRunApiRecord[] }>(
     `${API_URL}/timer_runs`,
-    { headers: authHeaders(token) }
+    {
+      headers: authHeaders(token),
+      params: options?.run_type ? { run_type: options.run_type } : undefined,
+    }
   );
 
   const sessions = (response.data.timer_runs ?? [])
@@ -74,13 +108,18 @@ export const fetchTimerRuns = async (
 export const fetchTimerRunsInRange = async (
   token: string,
   from: string,
-  to: string
+  to: string,
+  options?: FetchTimerRunsOptions
 ): Promise<TimerSession[]> => {
   const response = await axios.get<{ timer_runs: TimerRunApiRecord[] }>(
     `${API_URL}/timer_runs`,
     {
       headers: authHeaders(token),
-      params: { from, to },
+      params: {
+        from,
+        to,
+        ...(options?.run_type ? { run_type: options.run_type } : {}),
+      },
     }
   );
 
@@ -243,15 +282,73 @@ export const mergeTimerSessions = (
 
 export const createTimerRun = async (
   token: string,
-  startTime: string
+  startTime: string,
+  options?: CreateTimerRunOptions
 ): Promise<TimerRunApiRecord> => {
   const response = await axios.post<{ timer_run: TimerRunApiRecord }>(
     `${API_URL}/timer_runs`,
-    { start_time: startTime },
+    {
+      start_time: startTime,
+      ...(options?.run_type ? { run_type: options.run_type } : {}),
+      ...(options?.metadata ? { metadata: options.metadata } : {}),
+    },
     { headers: authHeaders(token) }
   );
 
   return response.data.timer_run;
+};
+
+export const createBottleFeeding = async (
+  token: string,
+  payload: { start_time: string; metadata?: BottleMetadata }
+): Promise<TimerRunApiRecord> => {
+  const response = await axios.post<{ timer_run: TimerRunApiRecord }>(
+    `${API_URL}/timer_runs`,
+    {
+      start_time: payload.start_time,
+      run_type: 'bottle',
+      submitted: true,
+      metadata: payload.metadata ?? {},
+    },
+    { headers: authHeaders(token) }
+  );
+
+  return response.data.timer_run;
+};
+
+export const fetchActiveTimerRun = async (
+  token: string,
+  options?: FetchTimerRunsOptions
+): Promise<TimerRunApiRecord | null> => {
+  const response = await axios.get<{ timer_run: TimerRunApiRecord | null }>(
+    `${API_URL}/timer_runs/active`,
+    {
+      headers: authHeaders(token),
+      params: options?.run_type ? { run_type: options.run_type } : undefined,
+    }
+  );
+
+  return response.data.timer_run ?? null;
+};
+
+export const NURSING_RUN_TYPES: TimerRunType[] = ['nursing_left', 'nursing_right'];
+
+export const getLastNursingSide = (
+  sessions: TimerSession[]
+): 'left' | 'right' | null => {
+  const nursing = sessions
+    .filter(
+      (s) =>
+        s.run_type === 'nursing_left' || s.run_type === 'nursing_right'
+    )
+    .sort((a, b) => {
+      const aTime = new Date(a.submitted_at ?? a.end_time).getTime();
+      const bTime = new Date(b.submitted_at ?? b.end_time).getTime();
+      return bTime - aTime;
+    });
+
+  if (nursing.length === 0) return null;
+  return nursing[0].run_type === 'nursing_right' ? 'right' : 'left';
 };
 
 export const submitTimerRun = async (

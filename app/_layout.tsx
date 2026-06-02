@@ -31,6 +31,7 @@ import TimerScreen from './screens/TimerScreen';
 import TimerScreenGuest from './screens/TimerScreenGuest';
 import SettingsScreen from './screens/SettingsScreen';
 import NapTimelineScreen from './screens/NapTimelineScreen';
+import AddFeedingScreen from './screens/AddFeedingScreen';
 import BackButton from './SampleModule/BackButton';
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
@@ -64,6 +65,7 @@ type RootDrawerParamList = {
   Timer: undefined;
   Settings: undefined;
   NapTimeline: undefined;
+  AddFeeding: undefined;
 };
 
 type AuthStackParamList = {
@@ -106,7 +108,7 @@ const CustomDrawerContent: React.FC<any> = (props) => {
   const { presentPaywall } = useRevenueCat();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const isProUser = user?.subscription_type === 'pro';
-  const alwaysAllowedRoutes = new Set(['Home', 'FeaturedScreen', 'Profile', 'Timer', 'Settings', 'NapTimeline']);
+  const alwaysAllowedRoutes = new Set(['Home', 'FeaturedScreen', 'Profile', 'Timer', 'Settings', 'NapTimeline', 'AddFeeding']);
   const hiddenRoutes = new Set(['NewConversation', 'Conversation', 'Subscription']);
 
   const handleLogout = async () => {
@@ -265,6 +267,20 @@ const AuthenticatedNavigator: React.FC = () => {
           headerTitle: () => (
             <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
               TIMELINE
+            </Text>
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="AddFeeding"
+        component={AddFeedingScreen}
+        options={{
+          drawerLabel: () => null,
+          drawerItemStyle: { display: 'none' },
+          headerLeft: () => <BackButton text="" />,
+          headerTitle: () => (
+            <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
+              Add feeding
             </Text>
           ),
         }}

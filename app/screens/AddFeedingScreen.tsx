@@ -16,6 +16,7 @@ import BottleFeedingForm from '@/app/sharedComponents/feeding/BottleFeedingForm'
 import FeedingSegmentTabs, {
   type FeedingTab,
 } from '@/app/sharedComponents/feeding/FeedingSegmentTabs';
+import FeedingHistoryPanel from '@/app/sharedComponents/feeding/FeedingHistoryPanel';
 import NursingSideButton from '@/app/sharedComponents/feeding/NursingSideButton';
 import ScreenScrollLayout from '@/app/sharedComponents/ScreenScrollLayout';
 import TimerDateTimePickerDrawer from '@/app/sharedComponents/TimerDateTimePickerDrawer';
@@ -25,11 +26,13 @@ import {
   createTimerRun,
   fetchActiveTimerRun,
   fetchTimerRuns,
+  filterFeedingSessions,
   getLastNursingSide,
   NURSING_RUN_TYPES,
   submitTimerRun,
   type BottleMetadata,
   type TimerRunType,
+  type TimerSession,
 } from '@/app/utils/timerHistory';
 
 type RootDrawerParamList = {
@@ -83,6 +86,8 @@ const AddFeedingScreen: React.FC = () => {
     amount: 0,
   });
   const [isSavingBottle, setIsSavingBottle] = useState(false);
+  const [history, setHistory] = useState<TimerSession[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const startTimeRef = useRef<Date | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -122,43 +127,59 @@ const AddFeedingScreen: React.FC = () => {
 
   useEffect(() => () => clearTimerInterval(), [clearTimerInterval]);
 
-  const loadNursingContext = useCallback(async () => {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) return;
+  const applyNursingContextFromRuns = useCallback(
+    (allRuns: TimerSession[], activeRun: Awaited<ReturnType<typeof fetchActiveTimerRun>>) => {
+      setLastSide(getLastNursingSide(allRuns));
 
-    const [activeRun, history] = await Promise.all([
-      fetchActiveTimerRun(token),
-      fetchTimerRuns(token),
-    ]);
+      if (
+        activeRun &&
+        activeRun.run_type &&
+        NURSING_RUN_TYPES.includes(activeRun.run_type)
+      ) {
+        const side = sideForRunType(activeRun.run_type);
+        if (!side) return;
 
-    setLastSide(getLastNursingSide(history));
+        const parsedStart = new Date(activeRun.start_time);
+        setStartTime(parsedStart);
+        startTimeRef.current = parsedStart;
+        setActiveSide(side);
+        setIsRunning(true);
+        setEndTime(null);
+        setHasStoppedSession(false);
+        activeTimerRunIdRef.current = activeRun.id;
+        setElapsedMs(Date.now() - parsedStart.getTime());
+      }
+    },
+    []
+  );
 
-    if (
-      activeRun &&
-      activeRun.run_type &&
-      NURSING_RUN_TYPES.includes(activeRun.run_type)
-    ) {
-      const side = sideForRunType(activeRun.run_type);
-      if (!side) return;
+  const loadFeedingHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        setHistory([]);
+        return;
+      }
 
-      const parsedStart = new Date(activeRun.start_time);
-      setStartTime(parsedStart);
-      startTimeRef.current = parsedStart;
-      setActiveSide(side);
-      setIsRunning(true);
-      setEndTime(null);
-      setHasStoppedSession(false);
-      activeTimerRunIdRef.current = activeRun.id;
-      setElapsedMs(Date.now() - parsedStart.getTime());
+      const [activeRun, allRuns] = await Promise.all([
+        fetchActiveTimerRun(token),
+        fetchTimerRuns(token),
+      ]);
+
+      setHistory(filterFeedingSessions(allRuns));
+      applyNursingContextFromRuns(allRuns, activeRun);
+    } catch {
+      setHistory([]);
+    } finally {
+      setHistoryLoading(false);
     }
-  }, []);
+  }, [applyNursingContextFromRuns]);
 
   useFocusEffect(
     useCallback(() => {
-      if (activeTab === 'nursing') {
-        void loadNursingContext();
-      }
-    }, [activeTab, loadNursingContext])
+      void loadFeedingHistory();
+    }, [loadFeedingHistory])
   );
 
   const rollbackPlayState = useCallback(() => {
@@ -297,7 +318,7 @@ const AddFeedingScreen: React.FC = () => {
 
       Alert.alert('Success', 'Nursing session saved.');
       resetNursing();
-      void loadNursingContext();
+      void loadFeedingHistory();
     } catch {
       Alert.alert('Error', 'Could not save nursing session.');
     } finally {
@@ -405,6 +426,8 @@ const AddFeedingScreen: React.FC = () => {
             />
           )}
         </View>
+
+        <FeedingHistoryPanel sessions={history} isLoading={historyLoading} />
       </ScreenScrollLayout>
 
       <TimerDateTimePickerDrawer

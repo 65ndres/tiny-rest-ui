@@ -113,7 +113,7 @@ const TimerScreen: React.FC = () => {
         setHistory([]);
         return;
       }
-      setHistory(await fetchTimerRuns(token));
+      setHistory(await fetchTimerRuns(token, { run_type: 'sleeping' }));
     } catch {
       setHistory([]);
     } finally {
@@ -183,7 +183,9 @@ const TimerScreen: React.FC = () => {
         return;
       }
 
-      const timerRun = await createTimerRun(token, nextStart.toISOString());
+      const timerRun = await createTimerRun(token, nextStart.toISOString(), {
+        run_type: 'sleeping',
+      });
       activeTimerRunIdRef.current = timerRun.id;
     } catch {
       rollbackPlayState();

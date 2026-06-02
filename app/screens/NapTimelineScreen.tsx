@@ -117,7 +117,9 @@ const NapTimelineScreen: React.FC = () => {
 
       const token = await AsyncStorage.getItem('token');
       if (token) {
-        const sessions = await fetchTimerRunsInRange(token, from, to);
+        const sessions = await fetchTimerRunsInRange(token, from, to, {
+          run_type: 'sleeping',
+        });
         applySessions(sessions);
         return;
       }

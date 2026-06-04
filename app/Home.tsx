@@ -3,15 +3,12 @@ import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator } from 'react-native';
-import { Button, ButtonText } from '@/components/ui/button';
+import { ActivityIndicator, Pressable } from 'react-native';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
-  buttonTextClassName,
-  cardCenteredClassName,
-  cardClassName,
+  glassActionTileClassName,
   mutedTextClassName,
 } from '@/app/constants/screenLayout';
 import { fetchTimerRuns } from '@/app/utils/timerHistory';
@@ -33,6 +30,16 @@ type RootDrawerParamList = {
 };
 
 type NavigationProp = DrawerNavigationProp<RootDrawerParamList, 'Home'>;
+
+const HOME_ACTIONS: {
+  label: string;
+  route: keyof RootDrawerParamList;
+}[] = [
+  { label: 'Start timer', route: 'Timer' },
+  { label: 'Add feeding', route: 'AddFeeding' },
+  { label: 'View timeline', route: 'NapTimeline' },
+  { label: 'Sounds', route: 'Sounds' },
+];
 
 const Home: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -84,7 +91,7 @@ const Home: React.FC = () => {
 
   return (
     <ScreenScrollLayout>
-      <VStack className={cardCenteredClassName}>
+      <VStack className="w-full items-center py-4">
         {isLoading ? (
           <ActivityIndicator color="white" size="large" />
         ) : (
@@ -102,41 +109,18 @@ const Home: React.FC = () => {
         )}
       </VStack>
 
-      <VStack className={cardClassName} space="md">
-        <Button
-          variant="solid"
-          className="w-full border-2 border-white bg-white"
-          size="md"
-          onPress={() => navigation.navigate('Timer')}
-        >
-          <ButtonText className={`${buttonTextClassName} text-black`}>
-            Start timer
-          </ButtonText>
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full border-2 border-white bg-transparent"
-          size="md"
-          onPress={() => navigation.navigate('AddFeeding')}
-        >
-          <ButtonText className={buttonTextClassName}>Add feeding</ButtonText>
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full border-2 border-white bg-transparent"
-          size="md"
-          onPress={() => navigation.navigate('NapTimeline')}
-        >
-          <ButtonText className={buttonTextClassName}>View timeline</ButtonText>
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full border-2 border-white bg-transparent"
-          size="md"
-          onPress={() => navigation.navigate('Sounds')}
-        >
-          <ButtonText className={buttonTextClassName}>Sounds</ButtonText>
-        </Button>
+      <VStack className="w-full" space="md">
+        {HOME_ACTIONS.map(({ label, route }) => (
+          <Pressable
+            key={route}
+            className={glassActionTileClassName}
+            onPress={() => navigation.navigate(route)}
+            accessibilityRole="button"
+            accessibilityLabel={label}
+          >
+            <Text className="text-white text-xl font-semibold">{label}</Text>
+          </Pressable>
+        ))}
       </VStack>
     </ScreenScrollLayout>
   );

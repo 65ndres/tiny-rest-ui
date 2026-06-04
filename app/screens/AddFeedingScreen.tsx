@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
-import { buttonTextClassName, cardClassName } from '@/app/constants/screenLayout';
+import { buttonTextClassName, glassCardClassName } from '@/app/constants/screenLayout';
 import { FEEDING_COLORS } from '@/app/constants/feedingTheme';
 import BottleFeedingForm from '@/app/sharedComponents/feeding/BottleFeedingForm';
 import FeedingSegmentTabs, {
@@ -355,7 +355,7 @@ const AddFeedingScreen: React.FC = () => {
   return (
     <View style={styles.screen}>
       <ScreenScrollLayout contentContainerClassName="flex-grow px-4 pb-4 pt-2">
-        <View className={cardClassName} style={styles.panel}>
+        <View className={glassCardClassName} style={styles.panel}>
           <FeedingSegmentTabs activeTab={activeTab} onChange={setActiveTab} />
 
           {activeTab === 'nursing' ? (

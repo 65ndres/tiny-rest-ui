@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: FEEDING_COLORS.border,
-    backgroundColor: 'transparent',
+    backgroundColor: FEEDING_COLORS.segmentInactive,
   },
   segmentActive: {
     backgroundColor: '#ffffff',

@@ -13,7 +13,7 @@ import { ChevronDownIcon } from '@/components/ui/icon';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { cardClassName, mutedTextClassName } from '@/app/constants/screenLayout';
+import { glassCardClassName, mutedTextClassName } from '@/app/constants/screenLayout';
 import {
   formatDuration,
   formatFeedingSessionDetails,
@@ -35,7 +35,7 @@ const FeedingHistoryPanel: React.FC<FeedingHistoryPanelProps> = ({
   const dayGroups = useMemo(() => groupSessionsByDay(sessions), [sessions]);
 
   return (
-    <VStack className={cardClassName}>
+    <VStack className={glassCardClassName}>
       <Heading size="xl" className="text-white">
         History
       </Heading>
@@ -63,7 +63,7 @@ const FeedingHistoryPanel: React.FC<FeedingHistoryPanelProps> = ({
               key={group.dayKey}
               value={group.dayKey}
               className={
-                groupIndex > 0 ? 'border-t border-white/30' : undefined
+                groupIndex > 0 ? 'border-t border-white/20' : undefined
               }
             >
               <AccordionHeader>

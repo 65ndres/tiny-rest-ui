@@ -6,6 +6,10 @@ export const cardClassName = 'rounded-xl border border-white/90 p-6 w-full';
 /** Matches SubscriptionScreen planCard (glass panel). */
 export const glassCardClassName =
   'rounded-[15px] border border-white/20 bg-white/10 p-6 w-full';
+export const glassCardCenteredClassName =
+  'rounded-[15px] border border-white/20 bg-white/10 p-6 w-full items-center';
+export const glassInputClassName =
+  'border-white/20 data-[hover=true]:border-white/20 data-[focus=true]:border-white/20';
 export const cardCenteredClassName =
   'rounded-xl border border-white/90 p-6 w-full items-center';
 export const buttonTextClassName = 'text-white text-lg';

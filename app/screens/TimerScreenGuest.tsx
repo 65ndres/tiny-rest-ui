@@ -12,6 +12,12 @@ import { PlayIcon } from '@/components/ui/icon';
 import { Input, InputField } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 import {
+  buttonTextClassName,
+  glassCardCenteredClassName,
+  glassCardClassName,
+  glassInputClassName,
+} from '@/app/constants/screenLayout';
+import {
   createLocalTimerSession,
   loadTimerHistoryFromCache,
   prependTimerSession,
@@ -24,11 +30,8 @@ import TimerHistoryPanel from '@/app/sharedComponents/TimerHistoryPanel';
 
 const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
 
-const inputClassName =
-  'border-white data-[hover=true]:border-white data-[focus=true]:border-white';
 const inputFieldClassName = 'text-white text-lg';
 const labelClassName = 'text-white text-lg font-bold';
-const buttonTextClassName = 'text-white text-lg';
 
 type PickerTarget = 'start' | 'end';
 
@@ -249,7 +252,7 @@ const TimerScreenGuest: React.FC = () => {
       <VStack space="md" className="w-full max-w-[336px] items-center">
         <TimerElapsedDisplay elapsedMs={elapsedMs} />
 
-        <VStack className="rounded-xl border border-white/90 p-6 w-full">
+        <VStack className={glassCardClassName}>
 
           <FormControl size="lg" className="w-full">
             <FormControlLabel>
@@ -266,7 +269,7 @@ const TimerScreenGuest: React.FC = () => {
               <Input
                 size="lg"
                 isDisabled={isRunning}
-                className={inputClassName}
+                className={glassInputClassName}
                 pointerEvents="none"
               >
                 <InputField
@@ -295,7 +298,7 @@ const TimerScreenGuest: React.FC = () => {
               <Input
                 size="lg"
                 isDisabled={isRunning}
-                className={inputClassName}
+                className={glassInputClassName}
                 pointerEvents="none"
               >
                 <InputField
@@ -310,7 +313,7 @@ const TimerScreenGuest: React.FC = () => {
           </FormControl>
         </VStack>
 
-        <VStack className="rounded-xl border border-white/90 p-6 w-full items-center">
+        <VStack className={glassCardCenteredClassName}>
           <Button
             variant="solid"
             className="w-full border-2 border-white bg-white"
@@ -354,7 +357,7 @@ const TimerScreenGuest: React.FC = () => {
 
           <Button
             variant="outline"
-            className="w-full mt-4 border-2 border-white bg-transparent"
+            className="w-full mt-4 border border-white/20 bg-transparent"
             size="md"
             onPress={handleReset}
             isDisabled={isSubmitting || !canReset}

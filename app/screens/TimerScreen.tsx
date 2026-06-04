@@ -14,8 +14,9 @@ import { Input, InputField } from '@/components/ui/input';
 import { VStack } from '@/components/ui/vstack';
 import {
   buttonTextClassName,
-  cardCenteredClassName,
-  cardClassName,
+  glassCardCenteredClassName,
+  glassCardClassName,
+  glassInputClassName,
 } from '@/app/constants/screenLayout';
 import {
   createTimerRun,
@@ -30,8 +31,6 @@ import TimerHistoryPanel from '@/app/sharedComponents/TimerHistoryPanel';
 
 const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
 
-const inputClassName =
-  'border-white data-[hover=true]:border-white data-[focus=true]:border-white';
 const inputFieldClassName = 'text-white text-lg';
 const labelClassName = 'text-white text-lg font-bold';
 
@@ -301,7 +300,7 @@ const TimerScreen: React.FC = () => {
     <ScreenScrollLayout contentContainerClassName="flex-grow items-center px-6 pb-4 pt-2">
       <TimerElapsedDisplay elapsedMs={elapsedMs} />
 
-      <VStack className={cardCenteredClassName}>
+      <VStack className={glassCardCenteredClassName}>
         <Button
           variant="solid"
           className="w-full border-2 border-white bg-white"
@@ -347,7 +346,7 @@ const TimerScreen: React.FC = () => {
 
         <Button
           variant="outline"
-          className="w-full mt-4 border-2 border-white bg-transparent"
+          className="w-full mt-4 border border-white/20 bg-transparent"
           size="md"
           onPress={handleReset}
           isDisabled={isSubmitting || isStarting || !canReset}
@@ -357,7 +356,7 @@ const TimerScreen: React.FC = () => {
         </Button>
       </VStack>
 
-      <VStack className={cardClassName}>
+      <VStack className={glassCardClassName}>
         <FormControl size="lg" className="w-full">
           <FormControlLabel>
             <FormControlLabelText size="lg" className={labelClassName}>
@@ -373,7 +372,7 @@ const TimerScreen: React.FC = () => {
             <Input
               size="lg"
               isDisabled={isRunning}
-              className={inputClassName}
+              className={glassInputClassName}
               pointerEvents="none"
             >
               <InputField
@@ -402,7 +401,7 @@ const TimerScreen: React.FC = () => {
             <Input
               size="lg"
               isDisabled={isRunning}
-              className={inputClassName}
+              className={glassInputClassName}
               pointerEvents="none"
             >
               <InputField

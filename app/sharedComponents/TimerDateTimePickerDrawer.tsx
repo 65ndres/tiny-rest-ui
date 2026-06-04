@@ -54,7 +54,7 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
   return (
     <Drawer isOpen={isOpen} onClose={onClose} anchor="bottom" size="md">
       <DrawerBackdrop className="bg-black/60" />
-      <DrawerContent className="border-t border-white/90 bg-black/90 rounded-t-2xl p-6">
+      <DrawerContent className="border-t border-white/20 bg-black/90 rounded-t-2xl p-6">
         <DrawerHeader>
           <Heading size="lg" className="text-white font-bold">
             {title}

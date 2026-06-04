@@ -21,7 +21,7 @@ const SoundsScreen: React.FC = () => {
 
   const tileSize = useMemo(() => {
     const screenWidth = Dimensions.get('window').width;
-    const contentWidth = screenWidth * 0.84;
+    const contentWidth = screenWidth * 0.92;
     return (contentWidth - GRID_PADDING * 2 - GRID_GAP) / 2;
   }, []);
 

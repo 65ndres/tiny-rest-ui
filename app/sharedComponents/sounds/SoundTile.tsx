@@ -7,8 +7,11 @@ import {
   View,
 } from 'react-native';
 import type { SoundTrack } from '@/app/constants/soundCatalog';
-
-const ACTIVE_BORDER_COLOR = '#3498db';
+import {
+  GLASS_BACKGROUND_COLOR,
+  GLASS_BORDER_COLOR,
+  GLASS_BORDER_COLOR_ACTIVE,
+} from '@/app/constants/screenLayout';
 
 type SoundTileProps = {
   track: SoundTrack;
@@ -26,13 +29,14 @@ const SoundTile: React.FC<SoundTileProps> = ({
   return (
     <Pressable
       onPress={onPress}
-      style={[
+      style={({ pressed }) => [
         styles.wrapper,
         {
           width: tileSize,
           height: tileSize,
         },
         isActive && styles.wrapperActive,
+        pressed && styles.wrapperPressed,
       ]}
     >
       <ImageBackground
@@ -55,20 +59,24 @@ export default SoundTile;
 const styles = StyleSheet.create({
   wrapper: {
     marginBottom: 12,
-    borderRadius: 12,
-    borderWidth: 3,
-    borderColor: 'transparent',
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: GLASS_BORDER_COLOR,
+    backgroundColor: GLASS_BACKGROUND_COLOR,
     overflow: 'hidden',
   },
   wrapperActive: {
-    borderColor: ACTIVE_BORDER_COLOR,
+    borderColor: GLASS_BORDER_COLOR_ACTIVE,
+  },
+  wrapperPressed: {
+    opacity: 0.8,
   },
   image: {
     flex: 1,
     justifyContent: 'flex-end',
   },
   imageRadius: {
-    borderRadius: 9,
+    borderRadius: 14,
   },
   labelContainer: {
     backgroundColor: 'rgba(0, 0, 0, 0.45)',

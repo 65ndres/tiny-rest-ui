@@ -2,6 +2,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import Slider from '@react-native-community/slider';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
+import {
+  GLASS_BACKGROUND_COLOR,
+  GLASS_BORDER_COLOR,
+} from '@/app/constants/screenLayout';
 
 type VolumeOverlayProps = {
   volume: number;
@@ -21,7 +25,7 @@ const VolumeOverlay: React.FC<VolumeOverlayProps> = ({
         maximumValue={1}
         value={volume}
         onValueChange={onVolumeChange}
-        minimumTrackTintColor="#3498db"
+        minimumTrackTintColor="rgba(255, 255, 255, 0.9)"
         maximumTrackTintColor="rgba(255, 255, 255, 0.35)"
         thumbTintColor="#d0d0d0"
       />
@@ -42,7 +46,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 14,
-    backgroundColor: 'rgba(0, 0, 0, 0.72)',
+    backgroundColor: GLASS_BACKGROUND_COLOR,
+    borderTopWidth: 1,
+    borderTopColor: GLASS_BORDER_COLOR,
     gap: 8,
   },
   slider: {

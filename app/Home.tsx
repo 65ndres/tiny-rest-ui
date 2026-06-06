@@ -9,6 +9,7 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
   glassActionTileClassName,
+  homeActionTileTextClassName,
   mutedTextClassName,
 } from '@/app/constants/screenLayout';
 import { fetchTimerRuns } from '@/app/utils/timerHistory';
@@ -118,7 +119,7 @@ const Home: React.FC = () => {
             accessibilityRole="button"
             accessibilityLabel={label}
           >
-            <Text className="text-white text-xl font-semibold">{label}</Text>
+            <Text className={homeActionTileTextClassName}>{label}</Text>
           </Pressable>
         ))}
       </VStack>

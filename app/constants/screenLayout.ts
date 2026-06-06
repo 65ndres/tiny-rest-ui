@@ -15,9 +15,11 @@ export const glassCardCenteredClassName =
   'rounded-[15px] border border-white/20 bg-white/10 p-6 w-full items-center';
 export const glassInputClassName =
   'border-white/20 data-[hover=true]:border-white/20 data-[focus=true]:border-white/20';
-/** Large pressable tile; matches glassCard background/border. */
+export const HOME_TILE_PURPLE = '#3B1F5C';
+export const homeActionTileTextClassName = 'text-[#3B1F5C] text-xl font-semibold';
+/** Large pressable tile on the home screen. */
 export const glassActionTileClassName =
-  'rounded-[15px] border border-white/20 bg-white/10 w-full min-h-[80px] px-6 py-5 items-center justify-center active:opacity-80';
+  'rounded-[15px] border border-[#3B1F5C]/15 bg-white w-full min-h-[80px] px-6 py-5 items-center justify-center active:opacity-80';
 export const cardCenteredClassName =
   'rounded-xl border border-white/90 p-6 w-full items-center';
 export const buttonTextClassName = 'text-white text-lg';

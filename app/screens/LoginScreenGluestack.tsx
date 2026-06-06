@@ -3,14 +3,9 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
   Alert,
-  Image,
-  StyleSheet,
-  View,
-  type ImageStyle,
-  type ViewStyle,
+  ScrollView,
 } from 'react-native';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
-import { Center } from '@/components/ui/center';
 import {
   Checkbox,
   CheckboxIcon,
@@ -38,6 +33,7 @@ import { Link, LinkText } from '@/components/ui/link';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { useAuth } from '../context/AuthContext';
+import ScreenComponent from '../sharedComponents/ScreenComponent';
 
 type AuthStackParamList = {
   SignUpGluestack: undefined;
@@ -91,7 +87,13 @@ const LoginScreenGluestack: React.FC = () => {
   };
 
   return (
-    <Center className="flex-1 p-6">
+    <ScreenComponent>
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="flex-grow px-6 pb-4 items-center justify-center"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
       <VStack space="md" className="w-full max-w-[336px] items-center">
         <VStack className="rounded-xl border border-white/90 p-6 w-full">
           <Heading size="2xl" className="text-white">
@@ -232,24 +234,9 @@ const LoginScreenGluestack: React.FC = () => {
           </LinkText>
         </Link>
       </VStack>
-      <View style={styles.logoWrap}>
-        <Image source={require('../../assets/images/splash-icon.png')} style={styles.logoImage} />
-      </View>
-    </Center>
+      </ScrollView>
+    </ScreenComponent>
   );
 };
-
-const styles = StyleSheet.create({
-  logoWrap: {
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingTop: 10,
-  } as ViewStyle,
-  logoImage: {
-    height: 124,
-    width: 124,
-    alignSelf: 'center',
-  } as ImageStyle,
-});
 
 export default LoginScreenGluestack;

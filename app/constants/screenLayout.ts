@@ -1,3 +1,7 @@
+export const SCREEN_TOP_HEIGHT = '10%';
+export const SCREEN_CONTENT_HEIGHT = '75%';
+export const SCREEN_FOOTER_HEIGHT = '15%';
+
 export const scrollViewClassName = 'flex-1 w-full';
 export const scrollContentClassName =
   'flex-grow items-center px-6 pb-4 pt-6 mt-6';

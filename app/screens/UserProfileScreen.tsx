@@ -329,10 +329,6 @@ const UserProfileScreen: React.FC = () => {
               />
             </View>
           </View>
-
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>{APP_DISPLAY_NAME}</Text>
-          </View>
         </View>
       </Animated.View>
     </ScreenComponent>
@@ -443,17 +439,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#e53935',
     fontSize: s(16),
-  } as TextStyle,
-  footer: {
-    paddingTop: s(10),
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  } as ViewStyle,
-  footerText: {
-    color: 'white',
-    fontSize: s(14),
-    fontWeight: '500',
-    textAlign: 'center',
   } as TextStyle,
 });
 

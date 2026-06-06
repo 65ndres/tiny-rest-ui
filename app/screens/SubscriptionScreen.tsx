@@ -437,10 +437,6 @@ const SubscriptionScreen: React.FC = () => {
           </View>
         </ScrollView>
       </Animated.View>
-
-      <View style={styles.footer}>
-        <Text style={styles.footerLabel}>{APP_DISPLAY_NAME}</Text>
-      </View>
     </ScreenComponent>
   );
 };
@@ -480,18 +476,6 @@ const styles = StyleSheet.create({
   plansContainer: {
     gap: s(20),
   } as ViewStyle,
-  footer: {
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: s(18),
-    paddingTop: s(8),
-  } as ViewStyle,
-  footerLabel: {
-    color: 'white',
-    fontSize: s(15),
-    fontWeight: '500',
-    textAlign: 'center',
-  } as TextStyle,
   primaryPlanButton: {
     backgroundColor: 'white',
     borderWidth: s(2),

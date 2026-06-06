@@ -3,7 +3,7 @@ import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, Image, Pressable } from 'react-native';
+import { ActivityIndicator, Pressable } from 'react-native';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
@@ -50,7 +50,6 @@ const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    PlaywriteGBJ: require('../assets/fonts/PlaywriteGBJ-VariableFont_wght.ttf'),
   });
 
   const loadHomeData = useCallback(async () => {
@@ -124,19 +123,6 @@ const Home: React.FC = () => {
             <Text className={homeActionTileTextClassName}>{label}</Text>
           </Pressable>
         ))}
-      </VStack>
-      <VStack className="w-full items-center" space="sm">
-        <Image
-          source={require('@/assets/images/newer-logo.png')}
-          style={{ height: '30%', aspectRatio: 1, alignSelf: 'center' }}
-          resizeMode="contain"
-        />
-        <Text
-          className="text-white text-center text-3xl"
-          style={{ fontFamily: 'PlaywriteGBJ', fontWeight: '700' }}
-        >
-          Tiny Rest
-        </Text>
       </VStack>
   </ScreenScrollLayout>
   );

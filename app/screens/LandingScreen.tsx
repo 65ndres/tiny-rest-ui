@@ -1,11 +1,9 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import { Button, Text } from '@rneui/themed';
-import { Image } from 'expo-image';
 import React from 'react';
 import {
   Dimensions,
-  ImageStyle,
   Pressable,
   StyleSheet,
   View,
@@ -81,11 +79,7 @@ const LandingScreen: React.FC = () => {
             </Pressable>
           </View>
         </View>
-
       </View>
-      <View style={styles.bottomImageWrap}>
-          <Image source={require('../../assets/images/splash-icon.png')} style={styles.splashIcon} />
-        </View>
     </ScreenComponent>
   );
 };
@@ -99,10 +93,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingTop: s(28),
     paddingBottom: s(18),
-  } as ViewStyle,
-  bottomImageWrap: {
-    justifyContent: 'flex-end',
-    alignItems: 'center',
   } as ViewStyle,
   content: {
     paddingHorizontal: s(24),
@@ -172,17 +162,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textDecorationLine: 'underline',
   } as TextStyle,
-  logoImage: {
-    width: s(64),
-    height: s(64),
-    alignSelf: 'center',
-  } as ImageStyle,
-  splashIcon: {
-    width: s(64),
-    height: s(64),
-    alignSelf: 'center',
-    marginTop: s(12),
-  } as ImageStyle,
 });
 
 export default LandingScreen;

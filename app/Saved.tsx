@@ -1,4 +1,3 @@
-import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -160,10 +159,8 @@ const Saved: React.FC = () => {
 
   return (
     <ScreenComponent>
-      <Animated.View style={{ opacity: fadeAnim }}>
-        <View style={{ height: '15%' }} />
-        <View style={{ height: '65%' }}>
-          <ScrollView style={{ height: '100%' }}>
+      <Animated.View style={{ opacity: fadeAnim, flex: 1 }}>
+        <ScrollView style={{ flex: 1 }}>
             {listComponentVisibility && (
               <Animated.View style={[styles.container, { opacity: listFadeAnim }]}>
                 {loading ? null : error ? (
@@ -214,12 +211,6 @@ const Saved: React.FC = () => {
               </Animated.View>
             )}
           </ScrollView>
-        </View>
-        <View style={{ height: '20%' }}>
-          <View style={{ flex: 1, justifyContent: 'flex-end' }}>
-            <Text style={styles.appNameText}>{APP_DISPLAY_NAME}</Text>
-          </View>
-        </View>
       </Animated.View>
     </ScreenComponent>
   );
@@ -267,12 +258,6 @@ const styles = StyleSheet.create({
   lastMessage: {
     color: 'rgba(255, 255, 255, 0.7)',
     fontSize: screenWidth * 0.038,
-  },
-  appNameText: {
-    color: 'white',
-    fontSize: screenWidth * 0.035,
-    fontWeight: '500',
-    textAlign: 'center',
   },
 });
 

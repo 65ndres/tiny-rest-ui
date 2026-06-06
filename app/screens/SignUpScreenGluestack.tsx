@@ -1,9 +1,8 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, ScrollView } from 'react-native';
 import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
-import { Center } from '@/components/ui/center';
 import {
   FormControl,
   FormControlError,
@@ -19,6 +18,7 @@ import { Link, LinkText } from '@/components/ui/link';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { useAuth } from '../context/AuthContext';
+import ScreenComponent from '../sharedComponents/ScreenComponent';
 
 type AuthStackParamList = {
   LoginGluestack: undefined;
@@ -107,7 +107,13 @@ const SignUpScreenGluestack: React.FC = () => {
   };
 
   return (
-    <Center className="flex-1 p-6">
+    <ScreenComponent>
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="flex-grow px-6 pb-4 items-center justify-center"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
       <VStack space="md" className="w-full max-w-[336px] items-center">
         <VStack className="rounded-xl border border-white/90 p-6 w-full">
           <Heading size="2xl" className="text-white">
@@ -271,7 +277,8 @@ const SignUpScreenGluestack: React.FC = () => {
           </LinkText>
         </Link>
       </VStack>
-    </Center>
+      </ScrollView>
+    </ScreenComponent>
   );
 };
 

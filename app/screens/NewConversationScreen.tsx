@@ -1,4 +1,3 @@
-import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
@@ -161,11 +160,8 @@ const NewConversationScreen: React.FC = () => {
 
   return (
     <ScreenComponent>
-      <Animated.View style={{ opacity: fadeAnim }}>
-        <View style={{ height: "15%" }}>
-        </View>
-        <View style={{ height: "65%" }}> 
-          <View style={styles.searchContainer}>
+      <Animated.View style={{ opacity: fadeAnim, flex: 1 }}>
+        <View style={styles.searchContainer}>
             <Input
               placeholder="Search for a user..."
               value={searchQuery}
@@ -226,12 +222,6 @@ const NewConversationScreen: React.FC = () => {
             )}
           </View>
           </ScrollView>
-        </View>
-        <View style={{ height: "20%" }}>
-          <View style={{flex: 1, justifyContent: 'flex-end'}}>
-            <Text style={{ color: 'white', fontSize: 15, fontWeight: '500', textAlign: 'center' }}>{APP_DISPLAY_NAME}</Text>
-          </View>
-        </View>
       </Animated.View>
     </ScreenComponent>
   );

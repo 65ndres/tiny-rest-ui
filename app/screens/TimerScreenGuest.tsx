@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable } from 'react-native';
 import { Button, ButtonIcon, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import {
   FormControl,
@@ -27,6 +27,7 @@ import {
 import TimerDateTimePickerDrawer from '@/app/sharedComponents/TimerDateTimePickerDrawer';
 import TimerElapsedDisplay from '@/app/sharedComponents/TimerElapsedDisplay';
 import TimerHistoryPanel from '@/app/sharedComponents/TimerHistoryPanel';
+import ScreenScrollLayout from '@/app/sharedComponents/ScreenScrollLayout';
 
 const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
 
@@ -241,15 +242,7 @@ const TimerScreenGuest: React.FC = () => {
     !isRunning && startTime && hasStoppedSession ? 'Resume' : 'Start';
 
   return (
-    <>
-    <View style={{ height: "15%" }}></View>
-    <View style={{ height: "80%" }}>
-    <ScrollView
-      className="flex-1"
-      contentContainerClassName="flex-grow px-6 pb-4 pt-2 items-center"
-      showsVerticalScrollIndicator={false}
-    >
-      <VStack space="md" className="w-full max-w-[336px] items-center">
+    <ScreenScrollLayout contentContainerClassName="flex-grow px-6 pb-4 pt-2 items-center">
         <TimerElapsedDisplay elapsedMs={elapsedMs} />
 
         <VStack className={glassCardClassName}>
@@ -367,8 +360,7 @@ const TimerScreenGuest: React.FC = () => {
           </Button>
         </VStack>
 
-        <TimerHistoryPanel sessions={history} isLoading={historyLoading} />
-      </VStack>
+      <TimerHistoryPanel sessions={history} isLoading={historyLoading} />
 
       <TimerDateTimePickerDrawer
         isOpen={activePicker !== null}
@@ -377,13 +369,7 @@ const TimerScreenGuest: React.FC = () => {
         onChange={handlePickerDateChange}
         onClose={closePicker}
       />
-    </ScrollView>
-    </View>
-    <View style={{ height: "5%" }}></View>
-    </>
-
-
-
+    </ScreenScrollLayout>
   );
 };
 

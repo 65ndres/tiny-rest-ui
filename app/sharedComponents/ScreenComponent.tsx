@@ -4,40 +4,34 @@ import {
   StyleSheet,
   Text,
   View,
-  ViewStyle
+  ViewStyle,
 } from 'react-native';
 import 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  SCREEN_CONTENT_HEIGHT,
+  SCREEN_FOOTER_HEIGHT,
+  SCREEN_TOP_HEIGHT,
+} from '@/app/constants/screenLayout';
+import AppScreenFooter from './AppScreenFooter';
 
-const width = Dimensions.get("window").width;
-const height = Dimensions.get("window").height;
-// Define the navigation stack param list
-type RootStackParamList = {
-  Home: undefined;
-};
+const width = Dimensions.get('window').width;
 
-// Type the navigation prop
-
-// Type the Home component
 interface ScreenComponentProps {
   children?: React.ReactNode;
   style?: ViewStyle;
 }
 
 const ScreenComponent: React.FC<ScreenComponentProps> = ({ children, style }) => {
-  // Helper function to wrap string/number children in Text component
   const processChildren = (children: React.ReactNode): React.ReactNode => {
-    // Handle null, undefined, or boolean
     if (children == null || typeof children === 'boolean') {
       return null;
     }
 
-    // If children is a single string or number, wrap it directly
     if (typeof children === 'string' || typeof children === 'number') {
       return <Text>{children}</Text>;
     }
 
-    // If children is an array, process each child
     if (Array.isArray(children)) {
       return children.map((child, index) => {
         if (child == null || typeof child === 'boolean') {
@@ -46,7 +40,6 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({ children, style }) =>
         if (typeof child === 'string' || typeof child === 'number') {
           return <Text key={index}>{child}</Text>;
         }
-        // If it's a valid React element, recursively process its children if needed
         if (React.isValidElement(child)) {
           const props = child.props as { children?: React.ReactNode };
           if (props.children) {
@@ -61,7 +54,6 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({ children, style }) =>
       });
     }
 
-    // If it's a valid React element with children, recursively process
     if (React.isValidElement(children)) {
       const props = children.props as { children?: React.ReactNode };
       if (props.children) {
@@ -72,36 +64,34 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({ children, style }) =>
       }
     }
 
-    // Return as-is for other cases
     return children;
   };
 
   return (
-
-      <SafeAreaView style={styles.safeArea}>
-        <View style={[styles.screenContainer, style]}>
-      {processChildren(children)}
+    <SafeAreaView style={styles.safeArea}>
+      <View style={[styles.screenContainer, style]}>
+        <View style={{ height: SCREEN_TOP_HEIGHT }} />
+        <View style={{ height: SCREEN_CONTENT_HEIGHT }}>
+          {processChildren(children)}
         </View>
-      </SafeAreaView>
-  
+        <View style={{ height: SCREEN_FOOTER_HEIGHT }}>
+          <AppScreenFooter />
+        </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    // Same as app.json splash — avoids a transparent flash before bg.jpg decodes on new screens
-    backgroundColor: '#6E9AB1',
-  } as ViewStyle,
   screenContainer: {
+    flex: 1,
     width: width * 0.84,
-  } as ViewStyle, 
+  } as ViewStyle,
   safeArea: {
     flex: 1,
     backgroundColor: 'transparent',
-    justifyContent: 'center',
     alignItems: 'center',
-    
   } as ViewStyle,
-  })
+});
+
 export default ScreenComponent;

@@ -27,6 +27,7 @@ import {
   mergeTimelineEventsByDate,
   type TimerSession,
 } from '@/app/utils/timerHistory';
+import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
 
 const INITIAL_TIME = { hour: 9, minutes: 0 };
 
@@ -188,11 +189,8 @@ const NapTimelineScreen: React.FC = () => {
   );
 
   return (
-
-    <>  
-    <View style={{ height: "10%" }}></View>
-    <View style={{ height: "80%" }}> 
-    <View style={styles.container}>
+    <ScreenComponent>
+      <View style={styles.container}>
       {isLoading ? (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator color="white" size="large" />
@@ -227,10 +225,8 @@ const NapTimelineScreen: React.FC = () => {
           <Text style={styles.emptyText}>No naps recorded for this period.</Text>
         </View>
       ) : null}
-    </View>
-    </View>
-    <View style={{ height: "10%" }}></View>
-    </>
+      </View>
+    </ScreenComponent>
   );
 };
 

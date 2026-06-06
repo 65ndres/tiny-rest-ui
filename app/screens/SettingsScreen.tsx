@@ -62,13 +62,11 @@ const SettingsScreen: React.FC = () => {
 
   return (
     <ScreenComponent>
-      <View style={{ height: '15%' }} />
-      <View style={{ height: '80%' }}>
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName="flex-grow p-6 items-center"
-          showsVerticalScrollIndicator={false}
-        >
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="flex-grow p-6 items-center"
+        showsVerticalScrollIndicator={false}
+      >
           <VStack space="md" className="w-full max-w-[336px] items-center pt-10">
             <VStack className="rounded-xl border border-white/90 p-6 w-full">
               <Heading size="lg" className="text-white">
@@ -118,8 +116,6 @@ const SettingsScreen: React.FC = () => {
             </VStack>
           </VStack>
         </ScrollView>
-      </View>
-      <View style={{ height: '5%' }} />
     </ScreenComponent>
   );
 };

@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Image, Pressable, View } from 'react-native';
+import { Alert, Pressable } from 'react-native';
 import { Button, ButtonIcon, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import {
   FormControl,
@@ -297,9 +297,6 @@ const TimerScreen: React.FC = () => {
     !isRunning && startTime && hasStoppedSession ? 'Resume' : 'Start';
 
   return (
-    <>
-    <View style={{ height: '5%' }} />
-    <View style={{ height: '80%' }}>
     <ScreenScrollLayout contentContainerClassName="items-center">
       <TimerElapsedDisplay elapsedMs={elapsedMs} />
 
@@ -429,14 +426,6 @@ const TimerScreen: React.FC = () => {
         onClose={closePicker}
       />
     </ScreenScrollLayout>
-    </View>
-    <View style={{ height: '25%' }}>
-      
-      </View>
-
-    
-    </>
-
   );
 };
 

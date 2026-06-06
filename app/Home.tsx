@@ -3,12 +3,13 @@ import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable } from 'react-native';
+import { ActivityIndicator, Image, Pressable } from 'react-native';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
   glassActionTileClassName,
+  glassCardCenteredClassName,
   homeActionTileTextClassName,
   mutedTextClassName,
 } from '@/app/constants/screenLayout';
@@ -36,7 +37,7 @@ const HOME_ACTIONS: {
   label: string;
   route: keyof RootDrawerParamList;
 }[] = [
-  { label: 'Start timer', route: 'Timer' },
+  { label: 'Add sleep', route: 'Timer' },
   { label: 'Add feeding', route: 'AddFeeding' },
   { label: 'View timeline', route: 'NapTimeline' },
   { label: 'Sounds', route: 'Sounds' },
@@ -49,6 +50,7 @@ const Home: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    PlaywriteGBJ: require('../assets/fonts/PlaywriteGBJ-VariableFont_wght.ttf'),
   });
 
   const loadHomeData = useCallback(async () => {
@@ -92,7 +94,7 @@ const Home: React.FC = () => {
 
   return (
     <ScreenScrollLayout>
-      <VStack className="w-full items-center py-4">
+      <VStack className={glassCardCenteredClassName} style={{ marginBottom: 20 }}>
         {isLoading ? (
           <ActivityIndicator color="white" size="large" />
         ) : (
@@ -123,7 +125,20 @@ const Home: React.FC = () => {
           </Pressable>
         ))}
       </VStack>
-    </ScreenScrollLayout>
+      <VStack className="w-full items-center" space="sm">
+        <Image
+          source={require('@/assets/images/newer-logo.png')}
+          style={{ height: '30%', aspectRatio: 1, alignSelf: 'center' }}
+          resizeMode="contain"
+        />
+        <Text
+          className="text-white text-center text-3xl"
+          style={{ fontFamily: 'PlaywriteGBJ', fontWeight: '700' }}
+        >
+          Tiny Rest
+        </Text>
+      </VStack>
+  </ScreenScrollLayout>
   );
 };
 

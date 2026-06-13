@@ -93,10 +93,6 @@ const Home: React.FC = () => {
       contentContainerClassName={homeScrollContentClassName}
     >
       <VStack space="md" className={homeContentStackClassName}>
-        <Heading size="2xl" className={homePageTitleClassName}>
-          {routineTitle}
-        </Heading>
-
         <VStack className={glassCardCenteredClassName}>
           {isLoading ? (
             <ActivityIndicator color="white" size="large" />

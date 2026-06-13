@@ -40,3 +40,17 @@ export const homeSectionLabelClassName =
 export const homeRoutineCardClassName =
   'rounded-[15px] border border-white/20 bg-white/10 p-4 w-full flex-row items-center active:opacity-80';
 export const homeAddStepClassName = 'text-white/75 text-sm mt-2 ml-4';
+
+/** Timer section cards (Hatch-inspired). */
+export const timerScrollContentClassName = homeScrollContentClassName;
+export const timerContentStackClassName = homeContentStackClassName;
+export const timerPageTitleClassName = homePageTitleClassName;
+export const timerHintClassName = homeHintClassName;
+export const timerSectionLabelClassName = 'text-white text-base font-semibold mb-3';
+export const timerSettingRowClassName =
+  'flex-row items-center justify-between py-3 border-t border-white/10';
+export const timerOutlineButtonClassName =
+  'w-full rounded-[15px] border border-white/30 py-4 items-center justify-center flex-row active:opacity-80';
+export const timerPrimaryButtonClassName =
+  'w-full rounded-[15px] border border-white/50 bg-white/30 py-4 items-center justify-center flex-row active:opacity-80';
+export const timerResetLinkClassName = 'text-white/75 text-sm text-center mt-3';

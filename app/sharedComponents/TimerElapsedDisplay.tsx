@@ -28,7 +28,7 @@ const TimerElapsedDisplay: React.FC<TimerElapsedDisplayProps> = ({ elapsedMs }) 
 
   return (
     <View
-      className="w-full items-center py-2"
+      className="w-full items-center py-1"
       accessibilityLabel={`Elapsed time ${formatDuration(elapsedMs)}`}
     >
       <View className="flex-row items-start justify-center">

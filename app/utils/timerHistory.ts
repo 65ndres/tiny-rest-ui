@@ -483,6 +483,11 @@ export const formatSessionClockTime = (iso: string): string => {
   return date.toLocaleString(undefined, clockTimeFormat);
 };
 
+export const formatClockTime = (date: Date | null): string => {
+  if (!date) return '';
+  return date.toLocaleString(undefined, clockTimeFormat);
+};
+
 export type TimerSessionDayGroup = {
   dayKey: string;
   label: string;

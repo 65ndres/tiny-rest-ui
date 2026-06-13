@@ -1,50 +1,33 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable } from 'react-native';
-import { Button, ButtonIcon, ButtonSpinner, ButtonText } from '@/components/ui/button';
-import {
-  FormControl,
-  FormControlLabel,
-  FormControlLabelText,
-} from '@/components/ui/form-control';
-import { PlayIcon } from '@/components/ui/icon';
-import { Input, InputField } from '@/components/ui/input';
+import { Heading } from '@/components/ui/heading';
+import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
-  buttonTextClassName,
-  glassCardCenteredClassName,
-  glassCardClassName,
-  glassInputClassName,
+  timerContentStackClassName,
+  timerHintClassName,
+  timerPageTitleClassName,
+  timerResetLinkClassName,
+  timerScrollContentClassName,
 } from '@/app/constants/screenLayout';
 import {
   createLocalTimerSession,
+  formatClockTime,
   loadTimerHistoryFromCache,
   prependTimerSession,
   saveTimerHistoryToCache,
   type TimerSession,
 } from '@/app/utils/timerHistory';
+import ScreenScrollLayout from '@/app/sharedComponents/ScreenScrollLayout';
 import TimerDateTimePickerDrawer from '@/app/sharedComponents/TimerDateTimePickerDrawer';
 import TimerElapsedDisplay from '@/app/sharedComponents/TimerElapsedDisplay';
 import TimerHistoryPanel from '@/app/sharedComponents/TimerHistoryPanel';
-import ScreenScrollLayout from '@/app/sharedComponents/ScreenScrollLayout';
-
-const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
-
-const inputFieldClassName = 'text-white text-lg';
-const labelClassName = 'text-white text-lg font-bold';
+import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
+import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
+import TimerSettingRow from '@/app/sharedComponents/timer/TimerSettingRow';
 
 type PickerTarget = 'start' | 'end';
-
-const formatDateTime = (date: Date | null): string => {
-  if (!date) return 'Select date and time';
-  return date.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-};
 
 const TimerScreenGuest: React.FC = () => {
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -242,125 +225,71 @@ const TimerScreenGuest: React.FC = () => {
     !isRunning && startTime && hasStoppedSession ? 'Resume' : 'Start';
 
   return (
-    <ScreenScrollLayout contentContainerClassName="flex-grow px-6 pb-4 pt-2 items-center">
+    <ScreenScrollLayout contentContainerClassName={timerScrollContentClassName}>
+      <VStack space="md" className={timerContentStackClassName}>
+        <Heading size="2xl" className={timerPageTitleClassName}>
+          Add Sleep
+        </Heading>
+
+        <Text className={timerHintClassName}>
+          Tap Start when nap begins.
+        </Text>
+
         <TimerElapsedDisplay elapsedMs={elapsedMs} />
 
-        <VStack className={glassCardClassName}>
-
-          <FormControl size="lg" className="w-full">
-            <FormControlLabel>
-              <FormControlLabelText size="lg" className={labelClassName}>
-                Start time
-              </FormControlLabelText>
-            </FormControlLabel>
-            <Pressable
-              onPress={() => openPicker('start')}
-              disabled={isRunning}
-              accessibilityRole="button"
-              accessibilityLabel="Select start time"
-            >
-              <Input
-                size="lg"
-                isDisabled={isRunning}
-                className={glassInputClassName}
-                pointerEvents="none"
-              >
-                <InputField
-                  value={formatDateTime(startTime)}
-                  editable={false}
-                  placeholder="Select date and time"
-                  placeholderTextColor={PLACEHOLDER_COLOR}
-                  className={inputFieldClassName}
-                />
-              </Input>
-            </Pressable>
-          </FormControl>
-
-          <FormControl size="lg" className="w-full mt-6">
-            <FormControlLabel>
-              <FormControlLabelText size="lg" className={labelClassName}>
-                End time
-              </FormControlLabelText>
-            </FormControlLabel>
-            <Pressable
-              onPress={() => openPicker('end')}
-              disabled={isRunning}
-              accessibilityRole="button"
-              accessibilityLabel="Select end time"
-            >
-              <Input
-                size="lg"
-                isDisabled={isRunning}
-                className={glassInputClassName}
-                pointerEvents="none"
-              >
-                <InputField
-                  value={formatDateTime(endTime)}
-                  editable={false}
-                  placeholder="Select date and time"
-                  placeholderTextColor={PLACEHOLDER_COLOR}
-                  className={inputFieldClassName}
-                />
-              </Input>
-            </Pressable>
-          </FormControl>
-        </VStack>
-
-        <VStack className={glassCardCenteredClassName}>
-          <Button
-            variant="solid"
-            className="w-full border-2 border-white bg-white"
-            size="md"
+        <TimerSectionCard title="Session">
+          <TimerOutlineButton
+            label={isRunning ? 'Stop' : playButtonLabel}
+            iconName={isRunning ? 'stop-circle-outline' : 'play-outline'}
             onPress={handlePlayStopPress}
-            isDisabled={isSubmitting}
+            disabled={isSubmitting}
+            variant="primary"
             accessibilityLabel={isRunning ? 'Stop' : playButtonLabel}
-          >
-            {isRunning ? (
-              <>
-                <Ionicons name="stop-circle" size={22} color="black" />
-                <ButtonText className={`${buttonTextClassName} text-black`}>
-                  Stop
-                </ButtonText>
-              </>
-            ) : (
-              <>
-                <ButtonIcon as={PlayIcon} className="text-black" />
-                <ButtonText className={`${buttonTextClassName} text-black`}>
-                  {playButtonLabel}
-                </ButtonText>
-              </>
-            )}
-          </Button>
-
-          <Button
-            variant="solid"
-            className="w-full border-2 border-white bg-white mt-4"
-            size="md"
-            onPress={handleSubmit}
-            isDisabled={!isSubmitEnabled || isSubmitting}
-          >
-            {isSubmitting ? (
-              <ButtonSpinner color="black" />
-            ) : (
-              <ButtonText className={`${buttonTextClassName} text-black`}>
-                Submit
-              </ButtonText>
-            )}
-          </Button>
-
-          <Button
-            variant="outline"
-            className="w-full mt-4 border border-white/20 bg-transparent"
-            size="md"
+          />
+          <TimerOutlineButton
+            label="Save session"
+            iconName="save-outline"
+            onPress={() => void handleSubmit()}
+            disabled={!isSubmitEnabled || isSubmitting}
+            isLoading={isSubmitting}
+            className="mt-3"
+          />
+          <Pressable
             onPress={handleReset}
-            isDisabled={isSubmitting || !canReset}
+            disabled={isSubmitting || !canReset}
+            accessibilityRole="button"
             accessibilityLabel="Reset timer"
           >
-            <ButtonText className={buttonTextClassName}>Reset</ButtonText>
-          </Button>
-        </VStack>
+            <Text
+              className={`${timerResetLinkClassName}${isSubmitting || !canReset ? ' opacity-40' : ''}`}
+            >
+              Reset
+            </Text>
+          </Pressable>
+        </TimerSectionCard>
 
-      <TimerHistoryPanel sessions={history} isLoading={historyLoading} />
+        <TimerSectionCard title="Time" showAccent>
+          <TimerSettingRow
+            label="Nap started at:"
+            value={formatClockTime(startTime)}
+            placeholder="Select time"
+            onPress={() => openPicker('start')}
+            disabled={isRunning}
+            accessibilityLabel="Select start time"
+            isFirst
+          />
+          <TimerSettingRow
+            label="Nap ended at:"
+            value={formatClockTime(endTime)}
+            placeholder="Select time"
+            onPress={() => openPicker('end')}
+            disabled={isRunning}
+            accessibilityLabel="Select end time"
+          />
+        </TimerSectionCard>
+
+        <TimerHistoryPanel sessions={history} isLoading={historyLoading} />
+      </VStack>
 
       <TimerDateTimePickerDrawer
         isOpen={activePicker !== null}

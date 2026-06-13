@@ -10,16 +10,16 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { ChevronDownIcon } from '@/components/ui/icon';
-import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { glassCardClassName, mutedTextClassName } from '@/app/constants/screenLayout';
+import { mutedTextClassName } from '@/app/constants/screenLayout';
 import {
   formatDuration,
   formatSessionClockTime,
   groupSessionsByDay,
   type TimerSession,
 } from '@/app/utils/timerHistory';
+import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
 
 type TimerHistoryPanelProps = {
   sessions: TimerSession[];
@@ -33,17 +33,13 @@ const TimerHistoryPanel: React.FC<TimerHistoryPanelProps> = ({
   const dayGroups = useMemo(() => groupSessionsByDay(sessions), [sessions]);
 
   return (
-    <VStack className={glassCardClassName}>
-      <Heading size="xl" className="text-white">
-        History
-      </Heading>
-
+    <TimerSectionCard title="History">
       {isLoading ? (
-        <Text className={`${mutedTextClassName} mt-4`}>Loading...</Text>
+        <Text className={mutedTextClassName}>Loading...</Text>
       ) : null}
 
       {!isLoading && sessions.length === 0 ? (
-        <Text className={`${mutedTextClassName} mt-4`}>
+        <Text className={mutedTextClassName}>
           No submitted timers yet.
         </Text>
       ) : null}
@@ -54,7 +50,7 @@ const TimerHistoryPanel: React.FC<TimerHistoryPanelProps> = ({
           variant="unfilled"
           isCollapsible
           defaultValue={[]}
-          className="mt-4 w-full"
+          className="w-full"
         >
           {dayGroups.map((group, groupIndex) => (
             <AccordionItem
@@ -66,7 +62,7 @@ const TimerHistoryPanel: React.FC<TimerHistoryPanelProps> = ({
             >
               <AccordionHeader>
                 <AccordionTrigger className="px-0 py-3 bg-transparent data-[focus-visible=true]:bg-transparent">
-                  <AccordionTitleText className="text-white text-lg font-semibold">
+                  <AccordionTitleText className="text-white text-base font-semibold">
                     {group.label}
                   </AccordionTitleText>
                   <AccordionIcon
@@ -83,13 +79,13 @@ const TimerHistoryPanel: React.FC<TimerHistoryPanelProps> = ({
                       {sessionIndex > 0 ? (
                         <View className="border-t border-white/20 mb-4" />
                       ) : null}
-                      <Text className="text-white text-2xl font-mono tracking-wider">
+                      <Text className="text-white text-xl font-mono tracking-wider">
                         {formatDuration(session.duration_ms)}
                       </Text>
-                      <Text className={`${mutedTextClassName} mt-2`}>
+                      <Text className={`${mutedTextClassName} mt-2 text-sm`}>
                         Start: {formatSessionClockTime(session.start_time)}
                       </Text>
-                      <Text className={`${mutedTextClassName} mt-1`}>
+                      <Text className={`${mutedTextClassName} mt-1 text-sm`}>
                         End: {formatSessionClockTime(session.end_time)}
                       </Text>
                     </View>
@@ -100,7 +96,7 @@ const TimerHistoryPanel: React.FC<TimerHistoryPanelProps> = ({
           ))}
         </Accordion>
       ) : null}
-    </VStack>
+    </TimerSectionCard>
   );
 };
 

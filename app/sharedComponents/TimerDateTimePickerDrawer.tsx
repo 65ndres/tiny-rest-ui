@@ -3,7 +3,6 @@ import DateTimePicker, {
 } from '@react-native-community/datetimepicker';
 import React from 'react';
 import { Platform, View } from 'react-native';
-import { Button, ButtonText } from '@/components/ui/button';
 import {
   Drawer,
   DrawerBackdrop,
@@ -15,7 +14,7 @@ import {
 } from '@/components/ui/drawer';
 import { CloseIcon, Icon } from '@/components/ui/icon';
 import { Heading } from '@/components/ui/heading';
-import { buttonTextClassName } from '@/app/constants/screenLayout';
+import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 
 type TimerDateTimePickerDrawerProps = {
   isOpen: boolean;
@@ -54,7 +53,7 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
   return (
     <Drawer isOpen={isOpen} onClose={onClose} anchor="bottom" size="md">
       <DrawerBackdrop className="bg-black/60" />
-      <DrawerContent className="border-t border-white/20 bg-black/90 rounded-t-2xl p-6">
+      <DrawerContent className="border-t border-white/20 bg-white/10 rounded-t-2xl p-6">
         <DrawerHeader>
           <Heading size="lg" className="text-white font-bold">
             {title}
@@ -81,16 +80,7 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
 
         {Platform.OS === 'ios' ? (
           <DrawerFooter className="justify-center">
-            <Button
-              variant="solid"
-              className="w-full border-2 border-white bg-white"
-              size="md"
-              onPress={onClose}
-            >
-              <ButtonText className={`${buttonTextClassName} text-black`}>
-                Done
-              </ButtonText>
-            </Button>
+            <TimerOutlineButton label="Done" onPress={onClose} />
           </DrawerFooter>
         ) : null}
       </DrawerContent>

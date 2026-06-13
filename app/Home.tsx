@@ -3,7 +3,7 @@ import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
@@ -106,13 +106,15 @@ const Home: React.FC = () => {
           )}
         </VStack>
 
+        <View style={{ paddingBottom: 40 }}></View>
+
         <HomeTipCard />
 
 
           <HomeRoutineCard
             title="Add sleep"
             subtitle="Log a nap session"
-            iconName="moon-outline"
+            iconName="moon-sharp"
             onPress={() => navigation.navigate('Timer')}
             accessibilityLabel="Add sleep"
           />
@@ -120,7 +122,7 @@ const Home: React.FC = () => {
           <HomeRoutineCard
             title="Add feeding"
             subtitle="Log a bottle or nursing session"
-            iconName="water-outline"
+            iconName="water-sharp"
             onPress={() => navigation.navigate('AddFeeding')}
             accessibilityLabel="Add feeding"
           />
@@ -128,14 +130,14 @@ const Home: React.FC = () => {
           <HomeRoutineCard
             title="View timeline"
             subtitle="See today's schedule"
-            iconName="calendar-outline"
+            iconName="calendar-sharp"
             onPress={() => navigation.navigate('NapTimeline')}
             accessibilityLabel="View timeline"
           />
           <HomeRoutineCard
             title="Soothing sounds"
             subtitle="White noise & lullabies"
-            iconName="musical-notes-outline"
+            iconName="musical-notes-sharp"
             onPress={() => navigation.navigate('Sounds')}
             accessibilityLabel="Soothing sounds"
           />

@@ -9,6 +9,7 @@ import {
 
 type TimerSectionCardProps = {
   title?: string;
+  titleClassName?: string;
   showAccent?: boolean;
   children: React.ReactNode;
 };
@@ -23,6 +24,7 @@ const TimerGradientAccent: React.FC = () => (
 
 const TimerSectionCard: React.FC<TimerSectionCardProps> = ({
   title,
+  titleClassName,
   showAccent = false,
   children,
 }) => (
@@ -30,7 +32,7 @@ const TimerSectionCard: React.FC<TimerSectionCardProps> = ({
     {showAccent ? <TimerGradientAccent /> : null}
     <VStack className="flex-1">
       {title ? (
-        <Text className={timerSectionLabelClassName}>{title}</Text>
+        <Text className={titleClassName ?? timerSectionLabelClassName}>{title}</Text>
       ) : null}
       {children}
     </VStack>

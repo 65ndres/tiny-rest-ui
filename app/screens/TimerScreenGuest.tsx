@@ -8,7 +8,7 @@ import {
   timerContentStackClassName,
   timerHintClassName,
   timerPageTitleClassName,
-  timerResetLinkClassName,
+  timerSessionResetLinkClassName,
   timerScrollContentClassName,
 } from '@/app/constants/screenLayout';
 import {
@@ -237,13 +237,17 @@ const TimerScreenGuest: React.FC = () => {
 
         <TimerElapsedDisplay elapsedMs={elapsedMs} />
 
-        <TimerSectionCard title="Session">
+        <TimerSectionCard
+          title="Session"
+          titleClassName="text-white text-lg font-semibold mb-3"
+        >
           <TimerOutlineButton
             label={isRunning ? 'Stop' : playButtonLabel}
             iconName={isRunning ? 'stop-circle-sharp' : 'play-sharp'}
             onPress={handlePlayStopPress}
             disabled={isSubmitting}
             variant="primary"
+            size="lg"
             accessibilityLabel={isRunning ? 'Stop' : playButtonLabel}
           />
           <TimerOutlineButton
@@ -253,6 +257,7 @@ const TimerScreenGuest: React.FC = () => {
             disabled={!isSubmitEnabled || isSubmitting}
             isLoading={isSubmitting}
             className="mt-3"
+            size="lg"
           />
           <Pressable
             onPress={handleReset}
@@ -261,7 +266,7 @@ const TimerScreenGuest: React.FC = () => {
             accessibilityLabel="Reset timer"
           >
             <Text
-              className={`${timerResetLinkClassName}${isSubmitting || !canReset ? ' opacity-40' : ''}`}
+              className={`${timerSessionResetLinkClassName}${isSubmitting || !canReset ? ' opacity-40' : ''}`}
             >
               Reset
             </Text>

@@ -13,6 +13,7 @@ type TimerOutlineButtonProps = {
   accessibilityLabel?: string;
   className?: string;
   variant?: 'outline' | 'primary';
+  size?: 'md' | 'lg';
 };
 
 const TimerOutlineButton: React.FC<TimerOutlineButtonProps> = ({
@@ -24,9 +25,15 @@ const TimerOutlineButton: React.FC<TimerOutlineButtonProps> = ({
   accessibilityLabel,
   className,
   variant = 'outline',
+  size = 'md',
 }) => {
   const baseClassName =
     variant === 'primary' ? timerPrimaryButtonClassName : timerOutlineButtonClassName;
+  const labelClassName =
+    size === 'lg'
+      ? 'text-white text-lg font-semibold'
+      : 'text-white text-base font-semibold';
+  const iconSize = size === 'lg' ? 22 : 20;
 
   return (
   <Pressable
@@ -43,12 +50,12 @@ const TimerOutlineButton: React.FC<TimerOutlineButtonProps> = ({
         {iconName ? (
           <Ionicons
             name={iconName}
-            size={20}
+            size={iconSize}
             color="white"
             style={{ marginRight: 8 }}
           />
         ) : null}
-        <Text className="text-white text-base font-semibold">{label}</Text>
+        <Text className={labelClassName}>{label}</Text>
       </>
     )}
   </Pressable>

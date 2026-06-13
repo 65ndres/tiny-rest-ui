@@ -17,13 +17,13 @@ const AppScreenFooter: React.FC = () => {
     <View style={styles.container}>
       <VStack className="w-full items-center justify-center flex-1" space="xs">
         <Image
-          source={require('@/assets/images/newer-logo.png')}
+          source={require('@/assets/images/footer-logo.png')}
           style={styles.logo}
           resizeMode="contain"
         />
         <Text
-          className="text-white text-center text-3xl decoration-underline"
-          style={{ fontFamily: 'PlaywriteGBJ', fontWeight: '700' }}
+          className="text-white text-center text-4xl decoration-underline line-height-10"
+          style={{ fontFamily: 'PlaywriteGBJ', lineHeight: 40 }}
         >
           Tiny Rest
         </Text>
@@ -40,8 +40,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   } as ViewStyle,
   logo: {
-    height: 100,
-    width: 100,
+    height: 70,
+    width: 70,
   },
 });
 

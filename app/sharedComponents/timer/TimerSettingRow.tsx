@@ -30,7 +30,7 @@ const TimerSettingRow: React.FC<TimerSettingRowProps> = ({
     accessibilityRole="button"
     accessibilityLabel={accessibilityLabel}
   >
-    <Text className="text-white text-base flex-1 mr-2">{label}</Text>
+    <Text className="text-white text-base font-semibold flex-1 mr-2">{label}</Text>
     <View className="flex-row items-center">
       <Text className="text-white/75 text-base mr-1">
         {value || placeholder}

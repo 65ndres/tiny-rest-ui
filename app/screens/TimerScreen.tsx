@@ -291,7 +291,7 @@ const TimerScreen: React.FC = () => {
         <TimerSectionCard title="Session">
           <TimerOutlineButton
             label={isRunning ? 'Stop' : playButtonLabel}
-            iconName={isRunning ? 'stop-circle-outline' : 'play-outline'}
+            iconName={isRunning ? 'stop-circle-sharp' : 'play-sharp'}
             onPress={handlePlayStopPress}
             disabled={isSubmitting}
             isLoading={isStarting}
@@ -300,7 +300,7 @@ const TimerScreen: React.FC = () => {
           />
           <TimerOutlineButton
             label="Save session"
-            iconName="save-outline"
+            iconName="save-sharp"
             onPress={() => void handleSubmit()}
             disabled={!isSubmitEnabled || isSubmitting || isStarting}
             isLoading={isSubmitting}

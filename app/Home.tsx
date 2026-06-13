@@ -3,14 +3,16 @@ import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 import { Heading } from '@/components/ui/heading';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
-  glassActionTileClassName,
   glassCardCenteredClassName,
-  homeActionTileTextClassName,
+  homeContentStackClassName,
+  homeHintClassName,
+  homePageTitleClassName,
+  homeScrollContentClassName,
   mutedTextClassName,
 } from '@/app/constants/screenLayout';
 import { fetchTimerRuns } from '@/app/utils/timerHistory';
@@ -21,6 +23,9 @@ import {
   predictNextNap,
 } from '@/app/utils/nextNapPrediction';
 import { fetchUserProfile } from '@/app/utils/userProfile';
+import HomeRoutineCard from './sharedComponents/home/HomeRoutineCard';
+import HomeRoutineSection from './sharedComponents/home/HomeRoutineSection';
+import HomeTipCard from './sharedComponents/home/HomeTipCard';
 import ScreenScrollLayout from './sharedComponents/ScreenScrollLayout';
 
 type RootDrawerParamList = {
@@ -32,16 +37,6 @@ type RootDrawerParamList = {
 };
 
 type NavigationProp = DrawerNavigationProp<RootDrawerParamList, 'Home'>;
-
-const HOME_ACTIONS: {
-  label: string;
-  route: keyof RootDrawerParamList;
-}[] = [
-  { label: 'Add sleep', route: 'Timer' },
-  { label: 'Add feeding', route: 'AddFeeding' },
-  { label: 'View timeline', route: 'NapTimeline' },
-  { label: 'Sounds', route: 'Sounds' },
-];
 
 const Home: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -91,40 +86,65 @@ const Home: React.FC = () => {
     return null;
   }
 
-  return (
-    <ScreenScrollLayout>
-      <VStack className={glassCardCenteredClassName} style={{ marginBottom: 20 }}>
-        {isLoading ? (
-          <ActivityIndicator color="white" size="large" />
-        ) : (
-          <>
-            <Heading size="2xl" className="text-white text-center">
-              {babyName}
-            </Heading>
-            <Text className={`${mutedTextClassName} mt-4 text-lg`}>
-              next nap
-            </Text>
-            <Text className="text-white text-5xl font-mono tracking-wider mt-2">
-              {nextNapLabel}
-            </Text>
-          </>
-        )}
-      </VStack>
+  const routineTitle = babyName ? `${babyName}'s Routine` : 'My Routine';
 
-      <VStack className="w-full" space="md">
-        {HOME_ACTIONS.map(({ label, route }) => (
-          <Pressable
-            key={route}
-            className={glassActionTileClassName}
-            onPress={() => navigation.navigate(route)}
-            accessibilityRole="button"
-            accessibilityLabel={label}
-          >
-            <Text className={homeActionTileTextClassName}>{label}</Text>
-          </Pressable>
-        ))}
+  return (
+    <ScreenScrollLayout
+      contentContainerClassName={homeScrollContentClassName}
+    >
+      <VStack space="md" className={homeContentStackClassName}>
+        <Heading size="2xl" className={homePageTitleClassName}>
+          {routineTitle}
+        </Heading>
+
+        <VStack className={glassCardCenteredClassName}>
+          {isLoading ? (
+            <ActivityIndicator color="white" size="large" />
+          ) : (
+            <>
+              <Text className={`${mutedTextClassName} text-lg`}>next nap</Text>
+              <Text className="text-white text-5xl font-mono tracking-wider mt-2">
+                {nextNapLabel}
+              </Text>
+            </>
+          )}
+        </VStack>
+
+        <HomeTipCard />
+
+
+          <HomeRoutineCard
+            title="Add sleep"
+            subtitle="Log a nap session"
+            iconName="moon-outline"
+            onPress={() => navigation.navigate('Timer')}
+            accessibilityLabel="Add sleep"
+          />
+
+          <HomeRoutineCard
+            title="Add feeding"
+            subtitle="Log a bottle or nursing session"
+            iconName="water-outline"
+            onPress={() => navigation.navigate('AddFeeding')}
+            accessibilityLabel="Add feeding"
+          />
+
+          <HomeRoutineCard
+            title="View timeline"
+            subtitle="See today's schedule"
+            iconName="calendar-outline"
+            onPress={() => navigation.navigate('NapTimeline')}
+            accessibilityLabel="View timeline"
+          />
+          <HomeRoutineCard
+            title="Soothing sounds"
+            subtitle="White noise & lullabies"
+            iconName="musical-notes-outline"
+            onPress={() => navigation.navigate('Sounds')}
+            accessibilityLabel="Soothing sounds"
+          />
       </VStack>
-  </ScreenScrollLayout>
+    </ScreenScrollLayout>
   );
 };
 

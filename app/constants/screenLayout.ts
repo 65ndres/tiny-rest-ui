@@ -28,3 +28,15 @@ export const cardCenteredClassName =
   'rounded-xl border border-white/90 p-6 w-full items-center';
 export const buttonTextClassName = 'text-white text-lg';
 export const mutedTextClassName = 'text-white/75 text-base';
+
+/** Home routine timeline (Hatch-inspired). */
+export const homeScrollContentClassName =
+  'flex-grow items-start px-6 pb-4 pt-4 mt-2';
+export const homeContentStackClassName = 'w-full max-w-[360px] items-start';
+export const homePageTitleClassName = 'text-white text-3xl font-bold';
+export const homeHintClassName = 'text-white/75 text-sm';
+export const homeSectionLabelClassName =
+  'text-white/75 text-xs uppercase tracking-widest';
+export const homeRoutineCardClassName =
+  'rounded-[15px] border border-white/20 bg-white/10 p-4 w-full flex-row items-center active:opacity-80';
+export const homeAddStepClassName = 'text-white/75 text-sm mt-2 ml-4';

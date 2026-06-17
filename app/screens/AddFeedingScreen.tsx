@@ -29,6 +29,7 @@ import {
   fetchActiveTimerRun,
   fetchTimerRuns,
   filterFeedingSessions,
+  formatClockTime,
   getLastNursingSide,
   NURSING_RUN_TYPES,
   submitTimerRun,
@@ -45,6 +46,8 @@ type RootDrawerParamList = {
 type NavigationProp = DrawerNavigationProp<RootDrawerParamList, 'AddFeeding'>;
 
 type NursingSide = 'left' | 'right';
+
+type PickerTarget = 'start' | 'end';
 
 const runTypeForSide = (side: NursingSide): TimerRunType =>
   side === 'left' ? 'nursing_left' : 'nursing_right';
@@ -76,7 +79,7 @@ const AddFeedingScreen: React.FC = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [hasStoppedSession, setHasStoppedSession] = useState(false);
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
+  const [activePicker, setActivePicker] = useState<PickerTarget | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [lastSide, setLastSide] = useState<NursingSide | null>(null);
@@ -113,7 +116,7 @@ const AddFeedingScreen: React.FC = () => {
   }, [startTime]);
 
   useEffect(() => {
-    if (!isRunning || !startTime || !endTime) return;
+    if (isRunning || !startTime || !endTime) return;
     setElapsedMs(Math.max(0, endTime.getTime() - startTime.getTime()));
   }, [startTime, endTime, isRunning]);
 
@@ -183,6 +186,24 @@ const AddFeedingScreen: React.FC = () => {
       void loadFeedingHistory();
     }, [loadFeedingHistory])
   );
+
+  const openPicker = (target: PickerTarget) => {
+    if (isRunning) return;
+    setActivePicker(target);
+  };
+
+  const closePicker = () => {
+    setActivePicker(null);
+  };
+
+  const handlePickerDateChange = (selectedDate: Date) => {
+    if (activePicker === 'start') {
+      setStartTime(selectedDate);
+      startTimeRef.current = selectedDate;
+    } else if (activePicker === 'end') {
+      setEndTime(selectedDate);
+    }
+  };
 
   const rollbackPlayState = useCallback(() => {
     clearTimerInterval();
@@ -290,6 +311,7 @@ const AddFeedingScreen: React.FC = () => {
     clearTimerInterval();
     setIsRunning(false);
     setActiveSide(null);
+    setActivePicker(null);
     setStartTime(null);
     startTimeRef.current = null;
     setEndTime(null);
@@ -356,6 +378,13 @@ const AddFeedingScreen: React.FC = () => {
 
   const canResetNursing = isRunning || hasStoppedSession || !!startTime;
 
+  const pickerValue =
+    activePicker === 'start'
+      ? startTime ?? new Date()
+      : activePicker === 'end'
+        ? endTime ?? new Date()
+        : new Date();
+
   return (
     <>
       <ScreenScrollLayout contentContainerClassName={timerScrollContentClassName}>
@@ -388,16 +417,20 @@ const AddFeedingScreen: React.FC = () => {
                 <Text className={timerSectionLabelClassName}>Time</Text>
                 <TimerSettingRow
                   label="Started at:"
-                  value={
-                    formatStartTimeLabel(startTime) === 'Set time'
-                      ? ''
-                      : formatStartTimeLabel(startTime)
-                  }
-                  placeholder="Set time"
-                  onPress={() => setIsPickerOpen(true)}
+                  value={formatClockTime(startTime)}
+                  placeholder="Select time"
+                  onPress={() => openPicker('start')}
                   disabled={isRunning}
                   accessibilityLabel="Select start time"
                   isFirst
+                />
+                <TimerSettingRow
+                  label="Ended at:"
+                  value={formatClockTime(endTime)}
+                  placeholder="Select time"
+                  onPress={() => openPicker('end')}
+                  disabled={isRunning}
+                  accessibilityLabel="Select end time"
                 />
 
                 {isNursingSubmitEnabled ? (
@@ -444,14 +477,11 @@ const AddFeedingScreen: React.FC = () => {
       </ScreenScrollLayout>
 
       <TimerDateTimePickerDrawer
-        isOpen={isPickerOpen}
-        title="Start time"
-        value={startTime ?? new Date()}
-        onChange={(date) => {
-          setStartTime(date);
-          startTimeRef.current = date;
-        }}
-        onClose={() => setIsPickerOpen(false)}
+        isOpen={activePicker !== null}
+        title={activePicker === 'end' ? 'End time' : 'Start time'}
+        value={pickerValue}
+        onChange={handlePickerDateChange}
+        onClose={closePicker}
       />
 
       <TimerDateTimePickerDrawer

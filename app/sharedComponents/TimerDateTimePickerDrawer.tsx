@@ -53,7 +53,7 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
   return (
     <Drawer isOpen={isOpen} onClose={onClose} anchor="bottom" size="md">
       <DrawerBackdrop className="bg-black/60" />
-      <DrawerContent className="border-t border-white/20 bg-white/10 rounded-t-2xl p-6">
+      <DrawerContent className="border-t border-white/20 bg-[#131258] rounded-t-2xl p-6">
         <DrawerHeader>
           <Heading size="lg" className="text-white font-bold">
             {title}
@@ -67,7 +67,10 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
           className="py-2 mb-4"
           contentContainerStyle={{ alignItems: 'center' }}
         >
-          <View className="w-full items-center">
+          <View
+            className="w-full items-center"
+            style={{ backgroundColor: '#131258' }}
+          >
             <DateTimePicker
               value={value}
               mode="datetime"
@@ -79,8 +82,8 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
         </DrawerBody>
 
         {Platform.OS === 'ios' ? (
-          <DrawerFooter className="justify-center">
-            <TimerOutlineButton label="Done" onPress={onClose} />
+          <DrawerFooter className="justify-center pb-8">
+            <TimerOutlineButton label="Done" onPress={onClose} variant="primary" />
           </DrawerFooter>
         ) : null}
       </DrawerContent>

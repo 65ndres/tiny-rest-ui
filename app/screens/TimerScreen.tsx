@@ -1,14 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
-import { Heading } from '@/components/ui/heading';
+import { Alert, Pressable } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
   timerContentStackClassName,
-  timerHintClassName,
-  timerPageTitleClassName,
+  timerSectionLabelClassName,
   timerSessionResetLinkClassName,
   timerScrollContentClassName,
 } from '@/app/constants/screenLayout';
@@ -294,16 +292,28 @@ const TimerScreen: React.FC = () => {
   return (
     <ScreenScrollLayout contentContainerClassName={timerScrollContentClassName}>
       <VStack space="md" className={timerContentStackClassName}>
+        <TimerSectionCard>
+          <TimerElapsedDisplay elapsedMs={elapsedMs} />
 
-        
-        <TimerElapsedDisplay elapsedMs={elapsedMs} />
-        <View className="pb-4">
-        </View>
+          <Text className={`${timerSectionLabelClassName} mt-4`}>Time</Text>
+          <TimerSettingRow
+            label="Started at:"
+            value={formatClockTime(startTime)}
+            placeholder="Select time"
+            onPress={() => openPicker('start')}
+            disabled={isRunning}
+            accessibilityLabel="Select start time"
+            isFirst
+          />
+          <TimerSettingRow
+            label="Ended at:"
+            value={formatClockTime(endTime)}
+            placeholder="Select time"
+            onPress={() => openPicker('end')}
+            disabled={isRunning}
+            accessibilityLabel="Select end time"
+          />
 
-        <TimerSectionCard
-          title="Session"
-          titleClassName="text-white text-lg font-semibold mb-3"
-        >
           <TimerOutlineButton
             label={isRunning ? 'Stop' : playButtonLabel}
             iconName={isRunning ? 'stop-circle-sharp' : 'play-sharp'}
@@ -312,10 +322,11 @@ const TimerScreen: React.FC = () => {
             isLoading={isStarting}
             variant="primary"
             size="lg"
+            className="mt-4"
             accessibilityLabel={isRunning ? 'Stop' : playButtonLabel}
           />
           <TimerOutlineButton
-            label="Save session"
+            label="Save"
             iconName="save-sharp"
             onPress={() => void handleSubmit()}
             disabled={!isSubmitEnabled || isSubmitting || isStarting}
@@ -335,26 +346,6 @@ const TimerScreen: React.FC = () => {
               Reset
             </Text>
           </Pressable>
-        </TimerSectionCard>
-
-        <TimerSectionCard title="Time" >
-          <TimerSettingRow
-            label="Sleep started at:"
-            value={formatClockTime(startTime)}
-            placeholder="Select time"
-            onPress={() => openPicker('start')}
-            disabled={isRunning}
-            accessibilityLabel="Select start time"
-            isFirst
-          />
-          <TimerSettingRow
-            label="Sleep ended at:"
-            value={formatClockTime(endTime)}
-            placeholder="Select time"
-            onPress={() => openPicker('end')}
-            disabled={isRunning}
-            accessibilityLabel="Select end time"
-          />
         </TimerSectionCard>
 
         <TimerHistoryPanel sessions={history} isLoading={historyLoading} />

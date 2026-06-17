@@ -3,7 +3,6 @@ import {
   Alert,
   Pressable,
   StyleSheet,
-  TextInput,
   View,
 } from 'react-native';
 import { Text } from '@/components/ui/text';
@@ -22,6 +21,7 @@ type BottleFeedingFormProps = {
 };
 
 const MAX_AMOUNT = 12;
+const UNIT_OPTIONS = ['oz', 'mL'] as const;
 
 const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
   startTimeLabel,
@@ -49,8 +49,18 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
     );
   };
 
-  const setUnit = (nextUnit: 'oz' | 'mL') => {
-    onMetadataChange({ ...metadata, unit: nextUnit });
+  const pickUnit = () => {
+    Alert.alert(
+      'Unit',
+      undefined,
+      [
+        ...UNIT_OPTIONS.map((option) => ({
+          text: option,
+          onPress: () => onMetadataChange({ ...metadata, unit: option }),
+        })),
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
   };
 
   const adjustAmount = (delta: number) => {
@@ -75,29 +85,13 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
         onPress={pickType}
         accessibilityLabel="Select feeding type"
       />
-
-      <View className="flex-row self-center my-4 rounded-full border border-white/20 overflow-hidden">
-        {(['oz', 'mL'] as const).map((value) => {
-          const selected = unit === value;
-          return (
-            <Pressable
-              key={value}
-              onPress={() => setUnit(value)}
-              className={`px-5 py-2 ${
-                selected ? 'bg-white' : 'bg-white/10'
-              }`}
-            >
-              <Text
-                className={`text-base font-semibold ${
-                  selected ? 'text-[#121b2b]' : 'text-white'
-                }`}
-              >
-                {value}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      <TimerSettingRow
+        label="Unit:"
+        value={unit}
+        placeholder="Select unit"
+        onPress={pickUnit}
+        accessibilityLabel="Select unit"
+      />
 
       <View className="flex-row items-center justify-between py-3 border-t border-white/10">
         <View>
@@ -136,17 +130,6 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
           </Pressable>
         </View>
         <Text className="text-white/75 text-sm w-6 text-center">{MAX_AMOUNT}</Text>
-      </View>
-
-      <View className="border-t border-b border-white/20 py-3 mt-2">
-        <TextInput
-          value={metadata.notes ?? ''}
-          onChangeText={(notes) => onMetadataChange({ ...metadata, notes })}
-          placeholder="+ add note"
-          placeholderTextColor="rgba(255,255,255,0.75)"
-          className="text-white text-base text-right min-h-[40px]"
-          multiline
-        />
       </View>
 
       <TimerOutlineButton

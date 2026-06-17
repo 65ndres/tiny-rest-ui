@@ -29,8 +29,6 @@ import {
 } from '@/app/utils/timerHistory';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
 
-const INITIAL_TIME = { hour: 9, minutes: 0 };
-
 const calendarTheme = {
   backgroundColor: 'transparent',
   calendarBackground: 'transparent',
@@ -189,7 +187,7 @@ const NapTimelineScreen: React.FC = () => {
   );
 
   return (
-    <ScreenComponent>
+    <ScreenComponent contentFlex style={styles.screen}>
       <View style={styles.container}>
       {isLoading ? (
         <View style={styles.loadingOverlay}>
@@ -215,8 +213,6 @@ const NapTimelineScreen: React.FC = () => {
           events={eventsByDate}
           timelineProps={timelineProps}
           showNowIndicator
-          scrollToFirst
-          initialTime={INITIAL_TIME}
         />
       </CalendarProvider>
 
@@ -231,6 +227,11 @@ const NapTimelineScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'stretch',
+  },
   container: {
     flex: 1,
     width: '100%',

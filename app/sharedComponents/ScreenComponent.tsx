@@ -20,9 +20,14 @@ const width = Dimensions.get('window').width;
 interface ScreenComponentProps {
   children?: React.ReactNode;
   style?: ViewStyle;
+  contentFlex?: boolean;
 }
 
-const ScreenComponent: React.FC<ScreenComponentProps> = ({ children, style }) => {
+const ScreenComponent: React.FC<ScreenComponentProps> = ({
+  children,
+  style,
+  contentFlex = false,
+}) => {
   const processChildren = (children: React.ReactNode): React.ReactNode => {
     if (children == null || typeof children === 'boolean') {
       return null;
@@ -71,7 +76,7 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({ children, style }) =>
     <SafeAreaView style={styles.safeArea}>
       <View style={[styles.screenContainer, style]}>
         <View style={{ height: SCREEN_TOP_HEIGHT }} />
-        <View style={{ height: SCREEN_CONTENT_HEIGHT }}>
+        <View style={contentFlex ? styles.flexContent : { height: SCREEN_CONTENT_HEIGHT }}>
           {processChildren(children)}
         </View>
         <View style={{ height: SCREEN_FOOTER_HEIGHT }}>
@@ -83,6 +88,10 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({ children, style }) =>
 };
 
 const styles = StyleSheet.create({
+  flexContent: {
+    flex: 1,
+    minHeight: 0,
+  } as ViewStyle,
   screenContainer: {
     flex: 1,
     width: width * 0.84,

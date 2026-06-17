@@ -236,16 +236,20 @@ const TimerScreen: React.FC = () => {
       return;
     }
 
-    const timerRunId = activeTimerRunIdRef.current;
-    if (!timerRunId) {
-      Alert.alert('Error', 'No active timer run to submit.');
+    if (endTime.getTime() <= startTime.getTime()) {
+      Alert.alert('Error', 'End time must be after start time.');
       return;
     }
+
+    const durationMs = Math.max(
+      0,
+      endTime.getTime() - startTime.getTime()
+    );
 
     const payload = {
       start_time: startTime.toISOString(),
       end_time: endTime.toISOString(),
-      duration_ms: elapsedMs,
+      duration_ms: durationMs,
     };
 
     setIsSubmitting(true);
@@ -254,6 +258,14 @@ const TimerScreen: React.FC = () => {
       if (!token) {
         Alert.alert('Error', 'You must be signed in to submit a timer.');
         return;
+      }
+
+      let timerRunId = activeTimerRunIdRef.current;
+      if (!timerRunId) {
+        const timerRun = await createTimerRun(token, startTime.toISOString(), {
+          run_type: 'sleeping',
+        });
+        timerRunId = timerRun.id;
       }
 
       await submitTimerRun(token, timerRunId, payload);

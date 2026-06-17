@@ -19,6 +19,7 @@ import {
   buildTimelineEventsByDate,
   fetchTimerRunsInRange,
   filterSessionsInRange,
+  filterTimelineSessions,
   formatDateParam,
   formatSessionClockTime,
   getBufferedWeekRange,
@@ -114,15 +115,17 @@ const NapTimelineScreen: React.FC = () => {
 
       const token = await AsyncStorage.getItem('token');
       if (token) {
-        const sessions = await fetchTimerRunsInRange(token, from, to, {
-          run_type: 'sleeping',
-        });
+        const sessions = filterTimelineSessions(
+          await fetchTimerRunsInRange(token, from, to)
+        );
         applySessions(sessions);
         return;
       }
 
       const cached = await loadTimerHistoryFromCache();
-      applySessions(filterSessionsInRange(cached, from, to));
+      applySessions(
+        filterTimelineSessions(filterSessionsInRange(cached, from, to))
+      );
     },
     [applySessions]
   );
@@ -170,8 +173,8 @@ const NapTimelineScreen: React.FC = () => {
 
   const handleEventPress = useCallback((event: TimelineEventProps) => {
     Alert.alert(
-      'Nap',
-      `${formatSessionClockTime(event.start)} – ${formatSessionClockTime(event.end)}\nDuration: ${event.title ?? '—'}`
+      event.summary ?? 'Session',
+      `${formatSessionClockTime(String(event.start))} – ${formatSessionClockTime(String(event.end))}\nDuration: ${event.title ?? '—'}`
     );
   }, []);
 
@@ -218,7 +221,7 @@ const NapTimelineScreen: React.FC = () => {
 
       {!isLoading && Object.keys(eventsByDate).length === 0 ? (
         <View style={styles.emptyState} pointerEvents="none">
-          <Text style={styles.emptyText}>No naps recorded for this period.</Text>
+          <Text style={styles.emptyText}>No sleep or nursing sessions for this period.</Text>
         </View>
       ) : null}
       </View>

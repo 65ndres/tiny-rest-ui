@@ -208,17 +208,42 @@ export const filterSessionsInRange = (
 };
 
 export const NAP_TIMELINE_EVENT_COLOR = '#4ade80';
+export const NURSING_TIMELINE_EVENT_COLOR = '#ff7f50';
+
+export const TIMELINE_RUN_TYPES: TimerRunType[] = [
+  'sleeping',
+  'nursing_left',
+  'nursing_right',
+];
+
+export const filterTimelineSessions = (
+  sessions: TimerSession[]
+): TimerSession[] =>
+  sessions.filter(
+    (session) =>
+      session.run_type != null && TIMELINE_RUN_TYPES.includes(session.run_type)
+  );
 
 export const sessionToTimelineEvent = (
   session: TimerSession
-): TimelineEventProps => ({
-  id: session.id,
-  start: session.start_time,
-  end: session.end_time,
-  title: formatDuration(session.duration_ms),
-  summary: 'Nap',
-  color: NAP_TIMELINE_EVENT_COLOR,
-});
+): TimelineEventProps => {
+  const isNursing =
+    session.run_type === 'nursing_left' ||
+    session.run_type === 'nursing_right';
+
+  return {
+    id: session.id,
+    start: session.start_time,
+    end: session.end_time,
+    title: formatDuration(session.duration_ms),
+    summary: isNursing
+      ? session.run_type === 'nursing_left'
+        ? 'Nursing · Left'
+        : 'Nursing · Right'
+      : 'Nap',
+    color: isNursing ? NURSING_TIMELINE_EVENT_COLOR : NAP_TIMELINE_EVENT_COLOR,
+  };
+};
 
 export const buildTimelineEventsByDate = (
   sessions: TimerSession[]
@@ -358,6 +383,17 @@ export const formatFeedingSessionTitle = (session: TimerSession): string => {
   }
 };
 
+export const formatTimelineEventAlertTitle = (session: TimerSession): string => {
+  if (
+    session.run_type === 'nursing_left' ||
+    session.run_type === 'nursing_right'
+  ) {
+    return formatFeedingSessionTitle(session);
+  }
+
+  return 'Nap';
+};
+
 export const formatFeedingSessionDetails = (session: TimerSession): string => {
   if (session.run_type !== 'bottle') {
     return '';
@@ -411,6 +447,7 @@ export const submitTimerRun = async (
       end_time: payload.end_time,
       duration: payload.duration_ms,
       submitted: true,
+      ...(payload.start_time ? { start_time: payload.start_time } : {}),
     },
     { headers: authHeaders(token) }
   );

@@ -3,16 +3,13 @@ import {
   Alert,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   View,
 } from 'react-native';
-import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
-import { buttonTextClassName } from '@/app/constants/screenLayout';
-import {
-  FEEDING_COLORS,
-  FEEDING_TYPE_OPTIONS,
-} from '@/app/constants/feedingTheme';
+import { Text } from '@/components/ui/text';
+import { FEEDING_TYPE_OPTIONS } from '@/app/constants/feedingTheme';
+import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
+import TimerSettingRow from '@/app/sharedComponents/timer/TimerSettingRow';
 import type { BottleMetadata } from '@/app/utils/timerHistory';
 
 type BottleFeedingFormProps = {
@@ -62,32 +59,38 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
   };
 
   return (
-    <View style={styles.form}>
-      <Row label="Start Time">
-        <Pressable onPress={onPressStartTime}>
-          <Text style={styles.link}>{startTimeLabel}</Text>
-        </Pressable>
-      </Row>
+    <View className="w-full">
+      <TimerSettingRow
+        label="Start time:"
+        value={startTimeLabel === 'Set time' ? '' : startTimeLabel}
+        placeholder="Set time"
+        onPress={onPressStartTime}
+        accessibilityLabel="Select start time"
+        isFirst
+      />
+      <TimerSettingRow
+        label="Type:"
+        value={metadata.feeding_type ?? ''}
+        placeholder="Set type"
+        onPress={pickType}
+        accessibilityLabel="Select feeding type"
+      />
 
-      <Row label="Type:">
-        <Pressable onPress={pickType}>
-          <Text style={styles.link}>
-            {metadata.feeding_type ?? 'Set type'}
-          </Text>
-        </Pressable>
-      </Row>
-
-      <View style={styles.unitToggle}>
+      <View className="flex-row self-center my-4 rounded-full border border-white/20 overflow-hidden">
         {(['oz', 'mL'] as const).map((value) => {
           const selected = unit === value;
           return (
             <Pressable
               key={value}
               onPress={() => setUnit(value)}
-              style={[styles.unitSegment, selected && styles.unitSegmentActive]}
+              className={`px-5 py-2 ${
+                selected ? 'bg-white' : 'bg-white/10'
+              }`}
             >
               <Text
-                style={[styles.unitLabel, selected && styles.unitLabelActive]}
+                className={`text-base font-semibold ${
+                  selected ? 'text-[#121b2b]' : 'text-white'
+                }`}
               >
                 {value}
               </Text>
@@ -96,198 +99,72 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
         })}
       </View>
 
-      <View style={styles.amountBlock}>
+      <View className="flex-row items-center justify-between py-3 border-t border-white/10">
         <View>
-          <Text style={styles.rowLabel}>Amount</Text>
-          <Text style={styles.optional}>optional</Text>
+          <Text className="text-white text-lg font-semibold">Amount</Text>
+          <Text className="text-white/75 text-sm">optional</Text>
         </View>
         <Pressable onPress={() => adjustAmount(1)}>
-          <Text style={styles.link}>
+          <Text className="text-white text-base font-semibold underline">
             {amount > 0 ? `${amount} ${unit}` : 'Set amount'}
           </Text>
         </Pressable>
       </View>
 
-      <View style={styles.sliderRow}>
-        <Text style={styles.scale}>0</Text>
-        <View style={styles.sliderControls}>
+      <View className="flex-row items-center gap-2 mb-2">
+        <Text className="text-white/75 text-sm w-6 text-center">0</Text>
+        <View className="flex-1 flex-row items-center gap-2">
           <Pressable
             onPress={() => adjustAmount(-1)}
-            style={styles.stepButton}
+            className="w-9 h-9 rounded-full bg-white/10 items-center justify-center"
             accessibilityLabel="Decrease amount"
           >
-            <Text style={styles.stepText}>−</Text>
+            <Text className="text-white text-xl leading-6">−</Text>
           </Pressable>
-          <View style={styles.track}>
+          <View className="flex-1 h-1.5 rounded-full bg-white/20 overflow-hidden">
             <View
-              style={[
-                styles.fill,
-                { width: `${(amount / MAX_AMOUNT) * 100}%` },
-              ]}
+              style={[styles.fill, { width: `${(amount / MAX_AMOUNT) * 100}%` }]}
+              className="h-full bg-white rounded-full"
             />
           </View>
           <Pressable
             onPress={() => adjustAmount(1)}
-            style={styles.stepButton}
+            className="w-9 h-9 rounded-full bg-white/10 items-center justify-center"
             accessibilityLabel="Increase amount"
           >
-            <Text style={styles.stepText}>+</Text>
+            <Text className="text-white text-xl leading-6">+</Text>
           </Pressable>
         </View>
-        <Text style={styles.scale}>{MAX_AMOUNT}</Text>
+        <Text className="text-white/75 text-sm w-6 text-center">{MAX_AMOUNT}</Text>
       </View>
 
-      <View style={styles.notesSection}>
+      <View className="border-t border-b border-white/20 py-3 mt-2">
         <TextInput
           value={metadata.notes ?? ''}
           onChangeText={(notes) => onMetadataChange({ ...metadata, notes })}
           placeholder="+ add note"
-          placeholderTextColor={FEEDING_COLORS.textMuted}
-          style={styles.notesInput}
+          placeholderTextColor="rgba(255,255,255,0.75)"
+          className="text-white text-base text-right min-h-[40px]"
           multiline
         />
       </View>
 
-      <Button
-        variant="solid"
-        className="w-full mt-6 border-2 border-white bg-white"
-        size="md"
+      <TimerOutlineButton
+        label="Save"
+        iconName="save-sharp"
         onPress={onSave}
-        isDisabled={isSaving}
-      >
-        {isSaving ? (
-          <ButtonSpinner color="black" />
-        ) : (
-          <ButtonText className={`${buttonTextClassName} text-black`}>
-            Save
-          </ButtonText>
-        )}
-      </Button>
+        disabled={isSaving}
+        isLoading={isSaving}
+        size="lg"
+        className="mt-6"
+      />
     </View>
   );
 };
 
-const Row: React.FC<{ label: string; children: React.ReactNode }> = ({
-  label,
-  children,
-}) => (
-  <View style={styles.row}>
-    <Text style={styles.rowLabel}>{label}</Text>
-    {children}
-  </View>
-);
-
 const styles = StyleSheet.create({
-  form: {
-    width: '100%',
-    paddingTop: 8,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: FEEDING_COLORS.border,
-  },
-  rowLabel: {
-    color: FEEDING_COLORS.text,
-    fontSize: 17,
-  },
-  optional: {
-    color: FEEDING_COLORS.textMuted,
-    fontSize: 13,
-  },
-  link: {
-    color: FEEDING_COLORS.link,
-    fontSize: 17,
-    textDecorationLine: 'underline',
-  },
-  unitToggle: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-    marginVertical: 16,
-    borderRadius: 6,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: FEEDING_COLORS.border,
-  },
-  unitSegment: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-  },
-  unitSegmentActive: {
-    backgroundColor: '#ffffff',
-  },
-  unitLabel: {
-    color: FEEDING_COLORS.text,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  unitLabelActive: {
-    color: '#000000',
-  },
-  amountBlock: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 14,
-  },
-  sliderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  scale: {
-    color: FEEDING_COLORS.textMuted,
-    fontSize: 13,
-    width: 24,
-    textAlign: 'center',
-  },
-  sliderControls: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: FEEDING_COLORS.segmentInactive,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepText: {
-    color: FEEDING_COLORS.text,
-    fontSize: 22,
-    lineHeight: 24,
-  },
-  track: {
-    flex: 1,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    overflow: 'hidden',
-  },
   fill: {
     height: '100%',
-    backgroundColor: FEEDING_COLORS.text,
-    borderRadius: 3,
-  },
-  notesSection: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: FEEDING_COLORS.border,
-    marginTop: 8,
-    paddingVertical: 12,
-  },
-  notesInput: {
-    color: FEEDING_COLORS.text,
-    fontSize: 16,
-    textAlign: 'right',
-    minHeight: 40,
   },
 });
 

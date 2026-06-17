@@ -1,6 +1,6 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { FEEDING_COLORS } from '@/app/constants/feedingTheme';
+import { Pressable, View } from 'react-native';
+import { Text } from '@/components/ui/text';
 
 export type FeedingTab = 'nursing' | 'bottle';
 
@@ -9,56 +9,42 @@ type FeedingSegmentTabsProps = {
   onChange: (tab: FeedingTab) => void;
 };
 
+const TABS: { id: FeedingTab; label: string }[] = [
+  { id: 'nursing', label: 'Nursing' },
+  { id: 'bottle', label: 'Bottle' },
+];
+
 const FeedingSegmentTabs: React.FC<FeedingSegmentTabsProps> = ({
   activeTab,
   onChange,
 }) => (
-  <View style={styles.container}>
-    {(['nursing', 'bottle'] as const).map((tab) => {
-      const isActive = activeTab === tab;
+  <View className="w-full flex-row items-stretch border-b border-white/20 mb-4">
+    {TABS.map((tab, index) => {
+      const isActive = activeTab === tab.id;
       return (
-        <Pressable
-          key={tab}
-          onPress={() => onChange(tab)}
-          style={[styles.segment, isActive && styles.segmentActive]}
-          accessibilityRole="button"
-          accessibilityState={{ selected: isActive }}
-        >
-          <Text style={[styles.label, isActive && styles.labelActive]}>
-            {tab === 'nursing' ? 'Nursing' : 'Bottle'}
-          </Text>
-        </Pressable>
+        <React.Fragment key={tab.id}>
+          {index > 0 ? (
+            <View className="w-px bg-white/20 self-stretch my-1" />
+          ) : null}
+          <Pressable
+            className="flex-1 items-center justify-center py-3 active:opacity-80"
+            onPress={() => onChange(tab.id)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isActive }}
+            accessibilityLabel={tab.label}
+          >
+            <Text
+              className={`text-lg ${
+                isActive ? 'text-white font-semibold' : 'text-white/50'
+              }`}
+            >
+              {tab.label}
+            </Text>
+          </Pressable>
+        </React.Fragment>
       );
     })}
   </View>
 );
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  segment: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: FEEDING_COLORS.border,
-    backgroundColor: FEEDING_COLORS.segmentInactive,
-  },
-  segmentActive: {
-    backgroundColor: '#ffffff',
-    borderColor: '#ffffff',
-  },
-  label: {
-    color: FEEDING_COLORS.text,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  labelActive: {
-    color: '#000000',
-  },
-});
 
 export default FeedingSegmentTabs;

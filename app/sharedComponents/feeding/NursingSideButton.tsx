@@ -34,7 +34,7 @@ const NursingSideButton: React.FC<NursingSideButtonProps> = ({
       accessibilityLabel={side === 'left' ? 'Left nursing timer' : 'Right nursing timer'}
     >
       <Ionicons
-        name={isRunning ? 'stop' : 'play'}
+        name={isRunning ? 'stop-sharp' : 'play-sharp'}
         size={36}
         color={isRunning ? '#000000' : '#ffffff'}
         style={styles.icon}

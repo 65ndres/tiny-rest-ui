@@ -2,16 +2,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, Pressable, View } from 'react-native';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
 import {
-  Alert,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
-import { buttonTextClassName, glassCardClassName } from '@/app/constants/screenLayout';
-import { FEEDING_COLORS } from '@/app/constants/feedingTheme';
+  timerContentStackClassName,
+  timerScrollContentClassName,
+  timerSectionLabelClassName,
+  timerSessionResetLinkClassName,
+} from '@/app/constants/screenLayout';
 import BottleFeedingForm from '@/app/sharedComponents/feeding/BottleFeedingForm';
 import FeedingSegmentTabs, {
   type FeedingTab,
@@ -21,6 +20,9 @@ import NursingSideButton from '@/app/sharedComponents/feeding/NursingSideButton'
 import ScreenScrollLayout from '@/app/sharedComponents/ScreenScrollLayout';
 import TimerDateTimePickerDrawer from '@/app/sharedComponents/TimerDateTimePickerDrawer';
 import TimerElapsedDisplay from '@/app/sharedComponents/TimerElapsedDisplay';
+import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
+import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
+import TimerSettingRow from '@/app/sharedComponents/timer/TimerSettingRow';
 import {
   createBottleFeeding,
   createTimerRun,
@@ -352,82 +354,93 @@ const AddFeedingScreen: React.FC = () => {
   const isNursingSubmitEnabled =
     Boolean(startTime && endTime && hasStoppedSession) && !isRunning;
 
+  const canResetNursing = isRunning || hasStoppedSession || !!startTime;
+
   return (
-    <View style={styles.screen}>
-      <ScreenScrollLayout contentContainerClassName="flex-grow px-4 pb-4 pt-2">
-        <View className={glassCardClassName} style={styles.panel}>
-          <FeedingSegmentTabs activeTab={activeTab} onChange={setActiveTab} />
+    <>
+      <ScreenScrollLayout contentContainerClassName={timerScrollContentClassName}>
+        <VStack space="md" className={timerContentStackClassName}>
+          <TimerSectionCard>
+            <FeedingSegmentTabs activeTab={activeTab} onChange={setActiveTab} />
 
-          {activeTab === 'nursing' ? (
-            <>
-              <View style={styles.startTimeRow}>
-                <Text style={styles.rowLabel}>Start Time</Text>
-                <Pressable
-                  onPress={() => !isRunning && setIsPickerOpen(true)}
+            {activeTab === 'nursing' ? (
+              <>
+                <TimerElapsedDisplay elapsedMs={elapsedMs} />
+
+                <Text className={`${timerSectionLabelClassName} mt-4`}>Sides</Text>
+                <View className="flex-row justify-around gap-3 py-2">
+                  <NursingSideButton
+                    side="left"
+                    isRunning={isRunning && activeSide === 'left'}
+                    showLastSideBadge={lastSide === 'left'}
+                    onPress={() => void handleSidePress('left')}
+                    disabled={isSubmitting || isStarting}
+                  />
+                  <NursingSideButton
+                    side="right"
+                    isRunning={isRunning && activeSide === 'right'}
+                    showLastSideBadge={lastSide === 'right'}
+                    onPress={() => void handleSidePress('right')}
+                    disabled={isSubmitting || isStarting}
+                  />
+                </View>
+
+                <Text className={timerSectionLabelClassName}>Time</Text>
+                <TimerSettingRow
+                  label="Started at:"
+                  value={
+                    formatStartTimeLabel(startTime) === 'Set time'
+                      ? ''
+                      : formatStartTimeLabel(startTime)
+                  }
+                  placeholder="Set time"
+                  onPress={() => setIsPickerOpen(true)}
                   disabled={isRunning}
-                >
-                  <Text style={styles.link}>
-                    {formatStartTimeLabel(startTime)}
-                  </Text>
-                </Pressable>
-              </View>
-
-              <TimerElapsedDisplay elapsedMs={elapsedMs} />
-
-              <View style={styles.sidesRow}>
-                <NursingSideButton
-                  side="left"
-                  isRunning={isRunning && activeSide === 'left'}
-                  showLastSideBadge={lastSide === 'left'}
-                  onPress={() => void handleSidePress('left')}
-                  disabled={isSubmitting || isStarting}
+                  accessibilityLabel="Select start time"
+                  isFirst
                 />
-                <NursingSideButton
-                  side="right"
-                  isRunning={isRunning && activeSide === 'right'}
-                  showLastSideBadge={lastSide === 'right'}
-                  onPress={() => void handleSidePress('right')}
-                  disabled={isSubmitting || isStarting}
-                />
-              </View>
 
-              {isNursingSubmitEnabled && (
-                <Button
-                  variant="solid"
-                  className="w-full mt-6 border-2 border-white bg-white"
-                  size="md"
-                  onPress={() => void handleNursingSubmit()}
-                  isDisabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <ButtonSpinner color="black" />
-                  ) : (
-                    <ButtonText className={`${buttonTextClassName} text-black`}>
-                      Save
-                    </ButtonText>
-                  )}
-                </Button>
-              )}
+                {isNursingSubmitEnabled ? (
+                  <TimerOutlineButton
+                    label="Save"
+                    iconName="save-sharp"
+                    onPress={() => void handleNursingSubmit()}
+                    disabled={isSubmitting}
+                    isLoading={isSubmitting}
+                    size="lg"
+                    className="mt-4"
+                  />
+                ) : null}
 
-              {(isRunning || hasStoppedSession || startTime) && (
-                <Pressable onPress={resetNursing} style={styles.resetLink}>
-                  <Text style={styles.resetText}>Reset</Text>
-                </Pressable>
-              )}
-            </>
-          ) : (
-            <BottleFeedingForm
-              startTimeLabel={formatStartTimeLabel(bottleStartTime)}
-              onPressStartTime={() => setBottlePickerOpen(true)}
-              metadata={bottleMetadata}
-              onMetadataChange={setBottleMetadata}
-              onSave={() => void handleBottleSave()}
-              isSaving={isSavingBottle}
-            />
-          )}
-        </View>
+                {canResetNursing ? (
+                  <Pressable
+                    onPress={resetNursing}
+                    disabled={isSubmitting || isStarting}
+                    accessibilityRole="button"
+                    accessibilityLabel="Reset nursing timer"
+                  >
+                    <Text
+                      className={`${timerSessionResetLinkClassName}${isSubmitting || isStarting ? ' opacity-40' : ''}`}
+                    >
+                      Reset
+                    </Text>
+                  </Pressable>
+                ) : null}
+              </>
+            ) : (
+              <BottleFeedingForm
+                startTimeLabel={formatStartTimeLabel(bottleStartTime)}
+                onPressStartTime={() => setBottlePickerOpen(true)}
+                metadata={bottleMetadata}
+                onMetadataChange={setBottleMetadata}
+                onSave={() => void handleBottleSave()}
+                isSaving={isSavingBottle}
+              />
+            )}
+          </TimerSectionCard>
 
-        <FeedingHistoryPanel sessions={history} isLoading={historyLoading} />
+          <FeedingHistoryPanel sessions={history} isLoading={historyLoading} />
+        </VStack>
       </ScreenScrollLayout>
 
       <TimerDateTimePickerDrawer
@@ -448,50 +461,8 @@ const AddFeedingScreen: React.FC = () => {
         onChange={setBottleStartTime}
         onClose={() => setBottlePickerOpen(false)}
       />
-    </View>
+    </>
   );
 };
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  panel: {
-    width: '100%',
-    maxWidth: 400,
-    alignSelf: 'center',
-  },
-  startTimeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 8,
-  },
-  rowLabel: {
-    color: FEEDING_COLORS.text,
-    fontSize: 17,
-  },
-  link: {
-    color: FEEDING_COLORS.link,
-    fontSize: 17,
-    textDecorationLine: 'underline',
-  },
-  sidesRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 24,
-    marginBottom: 16,
-    gap: 12,
-  },
-  resetLink: {
-    alignSelf: 'center',
-    marginTop: 16,
-  },
-  resetText: {
-    color: FEEDING_COLORS.text,
-    fontSize: 17,
-  },
-});
 
 export default AddFeedingScreen;

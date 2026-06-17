@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Alert, Pressable } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
@@ -16,7 +16,6 @@ import FeedingSegmentTabs, {
   type FeedingTab,
 } from '@/app/sharedComponents/feeding/FeedingSegmentTabs';
 import FeedingHistoryPanel from '@/app/sharedComponents/feeding/FeedingHistoryPanel';
-import NursingSideButton from '@/app/sharedComponents/feeding/NursingSideButton';
 import ScreenScrollLayout from '@/app/sharedComponents/ScreenScrollLayout';
 import TimerDateTimePickerDrawer from '@/app/sharedComponents/TimerDateTimePickerDrawer';
 import TimerElapsedDisplay from '@/app/sharedComponents/TimerElapsedDisplay';
@@ -75,6 +74,7 @@ const AddFeedingScreen: React.FC = () => {
 
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
+  const [selectedSide, setSelectedSide] = useState<NursingSide>('left');
   const [activeSide, setActiveSide] = useState<NursingSide | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -134,7 +134,11 @@ const AddFeedingScreen: React.FC = () => {
 
   const applyNursingContextFromRuns = useCallback(
     (allRuns: TimerSession[], activeRun: Awaited<ReturnType<typeof fetchActiveTimerRun>>) => {
-      setLastSide(getLastNursingSide(allRuns));
+      const last = getLastNursingSide(allRuns);
+      setLastSide(last);
+      if (last) {
+        setSelectedSide(last);
+      }
 
       if (
         activeRun &&
@@ -214,97 +218,87 @@ const AddFeedingScreen: React.FC = () => {
     setElapsedMs(0);
   }, [clearTimerInterval]);
 
-  const startSide = useCallback(
-    async (side: NursingSide, options?: { forceNew?: boolean }) => {
-      const now = new Date();
-      let nextStart = startTime;
+  const handlePlay = useCallback(async () => {
+    const now = new Date();
+    let nextStart = startTime;
+    const side = activeSide ?? selectedSide;
 
-      if (options?.forceNew) {
-        activeTimerRunIdRef.current = null;
-        nextStart = now;
-        setStartTime(now);
-        startTimeRef.current = now;
-        setEndTime(null);
-        setHasStoppedSession(false);
-      } else if (!nextStart) {
-        nextStart = now;
-        setStartTime(now);
-        startTimeRef.current = now;
-      }
+    if (!nextStart) {
+      nextStart = now;
+      setStartTime(now);
+      startTimeRef.current = now;
+    }
 
-      setActiveSide(side);
-      if (!options?.forceNew) {
-        setEndTime(null);
-        setHasStoppedSession(false);
-      }
-      setIsRunning(true);
-      setElapsedMs(Date.now() - nextStart.getTime());
+    setActiveSide(side);
+    setEndTime(null);
+    setHasStoppedSession(false);
+    setElapsedMs(0);
+    setIsRunning(true);
+    setElapsedMs(Date.now() - nextStart.getTime());
 
-      if (activeTimerRunIdRef.current) {
+    if (activeTimerRunIdRef.current) {
+      return;
+    }
+
+    setIsStarting(true);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        rollbackPlayState();
+        Alert.alert('Error', 'You must be signed in to start a timer.');
         return;
       }
 
-      setIsStarting(true);
-      try {
-        const token = await AsyncStorage.getItem('token');
-        if (!token) {
-          rollbackPlayState();
-          Alert.alert('Error', 'You must be signed in to start a timer.');
-          return;
-        }
-
-        const timerRun = await createTimerRun(
-          token,
-          nextStart.toISOString(),
-          { run_type: runTypeForSide(side) }
-        );
-        activeTimerRunIdRef.current = timerRun.id;
-      } catch {
-        rollbackPlayState();
-        Alert.alert('Error', 'Could not start nursing timer.');
-      } finally {
-        setIsStarting(false);
-      }
-    },
-    [rollbackPlayState, startTime]
-  );
-
-  const handleSidePress = async (side: NursingSide) => {
-    if (isSubmitting || isStarting) return;
-
-    if (isRunning && activeSide === side) {
-      const now = new Date();
-      clearTimerInterval();
-      setIsRunning(false);
-      setEndTime(now);
-      if (startTimeRef.current) {
-        setElapsedMs(now.getTime() - startTimeRef.current.getTime());
-      }
-      setHasStoppedSession(true);
-      return;
-    }
-
-    if (isRunning && activeSide !== side) {
-      Alert.alert(
-        'Switch side?',
-        'Starting the other side will stop the current timer.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Switch',
-            onPress: () => void startSide(side, { forceNew: true }),
-          },
-        ]
+      const timerRun = await createTimerRun(
+        token,
+        nextStart.toISOString(),
+        { run_type: runTypeForSide(side) }
       );
-      return;
+      activeTimerRunIdRef.current = timerRun.id;
+    } catch {
+      rollbackPlayState();
+      Alert.alert('Error', 'Could not start nursing timer.');
+    } finally {
+      setIsStarting(false);
+    }
+  }, [activeSide, rollbackPlayState, selectedSide, startTime]);
+
+  const handleStop = () => {
+    const now = new Date();
+    clearTimerInterval();
+    setIsRunning(false);
+    setEndTime(now);
+
+    const start = startTimeRef.current;
+    if (start) {
+      setElapsedMs(now.getTime() - start.getTime());
     }
 
-    if (hasStoppedSession) {
-      Alert.alert('Save or reset', 'Submit or reset before starting again.');
-      return;
-    }
+    setHasStoppedSession(true);
+  };
 
-    await startSide(side);
+  const handlePlayStopPress = () => {
+    if (isRunning) {
+      handleStop();
+    } else {
+      void handlePlay();
+    }
+  };
+
+  const pickSide = () => {
+    if (isRunning || hasStoppedSession || isSubmitting || isStarting) return;
+
+    Alert.alert('Side', undefined, [
+      {
+        text: 'Left',
+        onPress: () => setSelectedSide('left'),
+      },
+      {
+        text: 'Right',
+        onPress: () => setSelectedSide('right'),
+      },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
   };
 
   const resetNursing = () => {
@@ -373,10 +367,18 @@ const AddFeedingScreen: React.FC = () => {
     }
   };
 
-  const isNursingSubmitEnabled =
-    Boolean(startTime && endTime && hasStoppedSession) && !isRunning;
+  const isNursingSubmitEnabled = Boolean(startTime && endTime) && !isRunning;
 
-  const canResetNursing = isRunning || hasStoppedSession || !!startTime;
+  const canResetNursing =
+    isRunning || !!startTime || !!endTime || elapsedMs > 0;
+
+  const displayedSide = activeSide ?? selectedSide;
+  const sideLabel = displayedSide === 'left' ? 'Left' : 'Right';
+  const canPickSide =
+    !isRunning && !hasStoppedSession && !isSubmitting && !isStarting;
+
+  const playButtonLabel =
+    !isRunning && startTime && hasStoppedSession ? 'Resume' : 'Start';
 
   const pickerValue =
     activePicker === 'start'
@@ -396,25 +398,7 @@ const AddFeedingScreen: React.FC = () => {
               <>
                 <TimerElapsedDisplay elapsedMs={elapsedMs} />
 
-                <Text className={`${timerSectionLabelClassName} mt-4`}>Sides</Text>
-                <View className="flex-row justify-around gap-3 py-2">
-                  <NursingSideButton
-                    side="left"
-                    isRunning={isRunning && activeSide === 'left'}
-                    showLastSideBadge={lastSide === 'left'}
-                    onPress={() => void handleSidePress('left')}
-                    disabled={isSubmitting || isStarting}
-                  />
-                  <NursingSideButton
-                    side="right"
-                    isRunning={isRunning && activeSide === 'right'}
-                    showLastSideBadge={lastSide === 'right'}
-                    onPress={() => void handleSidePress('right')}
-                    disabled={isSubmitting || isStarting}
-                  />
-                </View>
-
-                <Text className={timerSectionLabelClassName}>Time</Text>
+                <Text className={`${timerSectionLabelClassName} mt-4`}>Time</Text>
                 <TimerSettingRow
                   label="Started at:"
                   value={formatClockTime(startTime)}
@@ -433,32 +417,53 @@ const AddFeedingScreen: React.FC = () => {
                   accessibilityLabel="Select end time"
                 />
 
-                {isNursingSubmitEnabled ? (
-                  <TimerOutlineButton
-                    label="Save"
-                    iconName="save-sharp"
-                    onPress={() => void handleNursingSubmit()}
-                    disabled={isSubmitting}
-                    isLoading={isSubmitting}
-                    size="lg"
-                    className="mt-4"
-                  />
-                ) : null}
+                <TimerSettingRow
+                  label="Side:"
+                  value={
+                    lastSide === displayedSide && canPickSide
+                      ? `${sideLabel} (last)`
+                      : sideLabel
+                  }
+                  placeholder="Select side"
+                  onPress={pickSide}
+                  disabled={!canPickSide}
+                  accessibilityLabel="Select nursing side"
+                />
 
-                {canResetNursing ? (
-                  <Pressable
-                    onPress={resetNursing}
-                    disabled={isSubmitting || isStarting}
-                    accessibilityRole="button"
-                    accessibilityLabel="Reset nursing timer"
+                <TimerOutlineButton
+                  label={isRunning ? 'Stop' : playButtonLabel}
+                  iconName={isRunning ? 'stop-circle-sharp' : 'play-sharp'}
+                  onPress={handlePlayStopPress}
+                  disabled={isSubmitting}
+                  isLoading={isStarting}
+                  variant="primary"
+                  size="lg"
+                  className="mt-4"
+                  accessibilityLabel={isRunning ? 'Stop' : playButtonLabel}
+                />
+
+                <TimerOutlineButton
+                  label="Save"
+                  iconName="save-sharp"
+                  onPress={() => void handleNursingSubmit()}
+                  disabled={!isNursingSubmitEnabled || isSubmitting}
+                  isLoading={isSubmitting}
+                  size="lg"
+                  className="mt-3"
+                />
+
+                <Pressable
+                  onPress={resetNursing}
+                  disabled={isSubmitting || isStarting || !canResetNursing}
+                  accessibilityRole="button"
+                  accessibilityLabel="Reset nursing timer"
+                >
+                  <Text
+                    className={`${timerSessionResetLinkClassName}${isSubmitting || isStarting || !canResetNursing ? ' opacity-40' : ''}`}
                   >
-                    <Text
-                      className={`${timerSessionResetLinkClassName}${isSubmitting || isStarting ? ' opacity-40' : ''}`}
-                    >
-                      Reset
-                    </Text>
-                  </Pressable>
-                ) : null}
+                    Reset
+                  </Text>
+                </Pressable>
               </>
             ) : (
               <BottleFeedingForm

@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Pressable } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
@@ -293,7 +293,9 @@ const TimerScreen: React.FC = () => {
     <ScreenScrollLayout contentContainerClassName={timerScrollContentClassName}>
       <VStack space="md" className={timerContentStackClassName}>
         <TimerSectionCard>
+          <View style={{ paddingBottom: 30, paddingTop: 60 }}>
           <TimerElapsedDisplay elapsedMs={elapsedMs} />
+          </View>
 
           <Text className={`${timerSectionLabelClassName} mt-4`}>Time</Text>
           <TimerSettingRow

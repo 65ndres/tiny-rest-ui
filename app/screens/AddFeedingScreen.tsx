@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Pressable } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
@@ -396,7 +396,9 @@ const AddFeedingScreen: React.FC = () => {
 
             {activeTab === 'nursing' ? (
               <>
+              <View style={{ paddingBottom: 20, paddingTop: 40 }}>
                 <TimerElapsedDisplay elapsedMs={elapsedMs} />
+                </View>
 
                 <Text className={`${timerSectionLabelClassName} mt-4`}>Time</Text>
                 <TimerSettingRow

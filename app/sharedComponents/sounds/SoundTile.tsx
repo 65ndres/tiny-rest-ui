@@ -7,11 +7,6 @@ import {
   View,
 } from 'react-native';
 import type { SoundTrack } from '@/app/constants/soundCatalog';
-import {
-  GLASS_BACKGROUND_COLOR,
-  GLASS_BORDER_COLOR,
-  GLASS_BORDER_COLOR_ACTIVE,
-} from '@/app/constants/screenLayout';
 
 type SoundTileProps = {
   track: SoundTrack;
@@ -26,26 +21,32 @@ const SoundTile: React.FC<SoundTileProps> = ({
   tileSize,
   onPress,
 }) => {
+  const playable = track.source != null;
+  const innerSize = tileSize - 4;
+
   return (
     <Pressable
       onPress={onPress}
+      disabled={!playable}
       style={({ pressed }) => [
         styles.wrapper,
         {
           width: tileSize,
           height: tileSize,
         },
-        isActive && styles.wrapperActive,
-        pressed && styles.wrapperPressed,
+        isActive ? styles.wrapperActive : styles.wrapperInactive,
+        !playable && styles.wrapperDisabled,
+        playable && pressed && styles.wrapperPressed,
       ]}
     >
       <ImageBackground
         source={track.coverImage}
-        style={styles.image}
+        style={[styles.image, { width: innerSize, height: innerSize }]}
         imageStyle={styles.imageRadius}
+        resizeMode="cover"
       >
         <View style={styles.labelContainer}>
-          <Text style={styles.label} numberOfLines={1}>
+          <Text style={styles.label} numberOfLines={2}>
             {track.title}
           </Text>
         </View>
@@ -58,34 +59,42 @@ export default SoundTile;
 
 const styles = StyleSheet.create({
   wrapper: {
-    marginBottom: 12,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: GLASS_BORDER_COLOR,
-    backgroundColor: GLASS_BACKGROUND_COLOR,
+    borderRadius: 12,
+    borderWidth: 2,
     overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  wrapperInactive: {
+    borderColor: 'transparent',
   },
   wrapperActive: {
-    borderColor: GLASS_BORDER_COLOR_ACTIVE,
+    borderColor: '#FFFFFF',
+  },
+  wrapperDisabled: {
+    opacity: 0.7,
   },
   wrapperPressed: {
     opacity: 0.8,
   },
   image: {
-    flex: 1,
     justifyContent: 'flex-end',
   },
   imageRadius: {
-    borderRadius: 14,
+    borderRadius: 10,
   },
   labelContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    paddingHorizontal: 8,
+    paddingBottom: 8,
+    paddingTop: 20,
   },
   label: {
     color: 'white',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
+    lineHeight: 15,
+    textShadowColor: 'rgba(0, 0, 0, 0.6)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
 });

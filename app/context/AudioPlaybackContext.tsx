@@ -70,7 +70,7 @@ export const AudioPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   const startPlayback = useCallback((trackId: string) => {
     const player = playerRef.current;
     const track = getSoundTrackById(trackId);
-    if (!player || !track) return;
+    if (!player || !track?.source) return;
 
     player.loop = true;
     player.replace(track.source);
@@ -88,6 +88,9 @@ export const AudioPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const toggleTrack = useCallback(
     (trackId: string) => {
+      const track = getSoundTrackById(trackId);
+      if (!track?.source) return;
+
       if (activeTrackId === trackId && isPlaying) {
         stopPlayback();
         return;

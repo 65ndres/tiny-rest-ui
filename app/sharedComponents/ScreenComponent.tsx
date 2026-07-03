@@ -10,6 +10,7 @@ import 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   SCREEN_CONTENT_HEIGHT,
+  SCREEN_CONTENT_WIDTH_RATIO,
   SCREEN_FOOTER_HEIGHT,
   SCREEN_TOP_HEIGHT,
 } from '@/app/constants/screenLayout';
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
   } as ViewStyle,
   screenContainer: {
     flex: 1,
-    width: width * 0.84,
+    width: width * SCREEN_CONTENT_WIDTH_RATIO,
   } as ViewStyle,
   safeArea: {
     flex: 1,

@@ -1,16 +1,26 @@
 export type SoundTrack = {
   id: string;
   title: string;
-  source: number;
+  source?: number;
   coverImage: number;
 };
 
 export const SOUND_CATALOG: SoundTrack[] = [
   {
-    id: 'white-noise-1',
-    title: 'White Noise',
+    id: 'green-noise',
+    title: 'Green Noise',
     source: require('../../assets/audio/white_noise_1.mp3'),
-    coverImage: require('../../assets/images/bg-clouds.jpg'),
+    coverImage: require('../../assets/images/sounds/green-noise.png'),
+  },
+  {
+    id: 'night-rain',
+    title: 'Night Rain',
+    coverImage: require('../../assets/images/sounds/night-rain.png'),
+  },
+  {
+    id: 'tranquil-ocean',
+    title: 'Tranquil Ocean',
+    coverImage: require('../../assets/images/sounds/tranquil-ocean.png'),
   },
 ];
 

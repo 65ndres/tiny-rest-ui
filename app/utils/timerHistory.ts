@@ -578,6 +578,82 @@ export const formatDuration = (ms: number): string => {
   return `${hours}:${minutes}:${seconds}`;
 };
 
+const readableClockTimeFormat: Intl.DateTimeFormatOptions = {
+  hour: 'numeric',
+  minute: '2-digit',
+};
+
+export const formatReadableClockTime = (iso: string): string => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return 'Invalid time';
+  }
+  return date.toLocaleTimeString(undefined, readableClockTimeFormat);
+};
+
+export const formatSessionTimeRange = (
+  start: string,
+  end?: string | null
+): string => {
+  const startLabel = formatReadableClockTime(start);
+  if (!end) {
+    return startLabel;
+  }
+
+  const endDate = new Date(end);
+  if (Number.isNaN(endDate.getTime())) {
+    return startLabel;
+  }
+
+  return `${startLabel} – ${formatReadableClockTime(end)}`;
+};
+
+export const formatHumanDuration = (ms: number): string => {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (hours > 0) {
+    return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+  }
+  if (minutes > 0) {
+    return `${minutes} min`;
+  }
+  return `${seconds} sec`;
+};
+
+const joinHistoryParts = (parts: string[]): string =>
+  parts.filter((part) => part.length > 0).join(' · ');
+
+export const formatSessionTimeAndDuration = (session: TimerSession): string => {
+  const parts: string[] = [
+    formatSessionTimeRange(session.start_time, session.end_time ?? undefined),
+  ];
+  if (session.duration_ms > 0) {
+    parts.push(formatHumanDuration(session.duration_ms));
+  }
+  return joinHistoryParts(parts);
+};
+
+export const formatFeedingHistoryPrimary = (session: TimerSession): string => {
+  const parts: string[] = [formatFeedingSessionTitle(session)];
+  const details = formatFeedingSessionDetails(session);
+  if (details) {
+    parts.push(details);
+  }
+  return joinHistoryParts(parts);
+};
+
+export const formatTimerHistoryLine = (session: TimerSession): string =>
+  formatSessionTimeAndDuration(session);
+
+export const formatFeedingHistoryLine = (session: TimerSession): string => {
+  const primary = formatFeedingHistoryPrimary(session);
+  const timeAndDuration = formatSessionTimeAndDuration(session);
+  return joinHistoryParts([primary, timeAndDuration]);
+};
+
 export const formatSessionTime = (iso: string): string => {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) {

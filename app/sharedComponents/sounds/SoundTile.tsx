@@ -3,10 +3,12 @@ import {
   ImageBackground,
   Pressable,
   StyleSheet,
-  Text,
-  View,
 } from 'react-native';
 import type { SoundTrack } from '@/app/constants/soundCatalog';
+import {
+  GLASS_BORDER_COLOR_ACTIVE,
+  soundTileClassName,
+} from '@/app/constants/screenLayout';
 
 type SoundTileProps = {
   track: SoundTrack;
@@ -22,35 +24,21 @@ const SoundTile: React.FC<SoundTileProps> = ({
   onPress,
 }) => {
   const playable = track.source != null;
-  const innerSize = tileSize - 4;
 
   return (
     <Pressable
+      accessibilityLabel={track.title}
+      className={soundTileClassName}
       onPress={onPress}
       disabled={!playable}
-      style={({ pressed }) => [
-        styles.wrapper,
-        {
-          width: tileSize,
-          height: tileSize,
-        },
-        isActive ? styles.wrapperActive : styles.wrapperInactive,
-        !playable && styles.wrapperDisabled,
-        playable && pressed && styles.wrapperPressed,
-      ]}
+      style={ styles.tile}
     >
       <ImageBackground
         source={track.coverImage}
-        style={[styles.image, { width: innerSize, height: innerSize }]}
-        imageStyle={styles.imageRadius}
+        style={styles.cover}
+        imageStyle={styles.coverImage}
         resizeMode="cover"
-      >
-        <View style={styles.labelContainer}>
-          <Text style={styles.label} numberOfLines={2}>
-            {track.title}
-          </Text>
-        </View>
-      </ImageBackground>
+      />
     </Pressable>
   );
 };
@@ -58,18 +46,13 @@ const SoundTile: React.FC<SoundTileProps> = ({
 export default SoundTile;
 
 const styles = StyleSheet.create({
-  wrapper: {
-    borderRadius: 12,
+  tile: {
+    borderColor: GLASS_BORDER_COLOR_ACTIVE,
     borderWidth: 2,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  wrapperInactive: {
-    borderColor: 'transparent',
-  },
-  wrapperActive: {
-    borderColor: '#FFFFFF',
+    width: 110,
+    height: 110,
+    borderRadius: 13,
+    overflow: 'hidden'
   },
   wrapperDisabled: {
     opacity: 0.7,
@@ -77,24 +60,11 @@ const styles = StyleSheet.create({
   wrapperPressed: {
     opacity: 0.8,
   },
-  image: {
-    justifyContent: 'flex-end',
+  cover: {
+    width: '100%',
+    height: '100%',
   },
-  imageRadius: {
-    borderRadius: 10,
-  },
-  labelContainer: {
-    paddingHorizontal: 8,
-    paddingBottom: 8,
-    paddingTop: 20,
-  },
-  label: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '500',
-    lineHeight: 15,
-    textShadowColor: 'rgba(0, 0, 0, 0.6)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 3,
+  coverImage: {
+    borderRadius: 13,
   },
 });

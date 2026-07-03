@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import {
-  FlatList,
+  ScrollView,
   StyleSheet,
   useWindowDimensions,
   View,
@@ -13,6 +13,7 @@ import SoundTile from '@/app/sharedComponents/sounds/SoundTile';
 import VolumeOverlay from '@/app/sharedComponents/sounds/VolumeOverlay';
 
 const TILE_GAP = 10;
+const NUM_COLUMNS = 3;
 const VOLUME_OVERLAY_HEIGHT = 68;
 
 const SoundsScreen: React.FC = () => {
@@ -22,29 +23,30 @@ const SoundsScreen: React.FC = () => {
 
   const tileSize = useMemo(() => {
     const contentWidth = screenWidth * SCREEN_CONTENT_WIDTH_RATIO;
-    return Math.floor((contentWidth - TILE_GAP * 2) / 3);
+    return Math.floor(
+      (contentWidth - TILE_GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS,
+    );
   }, [screenWidth]);
 
   return (
     <ScreenComponent contentFlex>
       <View style={styles.content}>
-        <FlatList
-          data={SOUND_CATALOG}
-          keyExtractor={(item) => item.id}
-          horizontal
-          scrollEnabled={false}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tileRow}
-          ItemSeparatorComponent={() => <View style={{ width: TILE_GAP }} />}
-          renderItem={({ item }) => (
-            <SoundTile
-              track={item}
-              tileSize={tileSize}
-              isActive={activeTrackId === item.id && isPlaying}
-              onPress={() => toggleTrack(item.id)}
-            />
-          )}
-        />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.tileGrid}
+        >
+          <View style={styles.grid}>
+            {SOUND_CATALOG.map((item) => (
+              <SoundTile
+                key={item.id}
+                track={item}
+                tileSize={80}
+                isActive={activeTrackId === item.id && isPlaying}
+                onPress={() => toggleTrack(item.id)}
+              />
+            ))}
+          </View>
+        </ScrollView>
         <VolumeOverlay volume={volume} onVolumeChange={setVolume} />
       </View>
     </ScreenComponent>
@@ -59,7 +61,12 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'relative',
   },
-  tileRow: {
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: TILE_GAP,
+  },
+  tileGrid: {
     paddingTop: 16,
     paddingBottom: VOLUME_OVERLAY_HEIGHT + 16,
   },

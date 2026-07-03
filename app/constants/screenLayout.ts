@@ -13,6 +13,8 @@ export const cardClassName = 'rounded-xl border border-white/90 p-6 w-full';
 export const GLASS_BACKGROUND_COLOR = 'rgba(255, 255, 255, 0.1)';
 export const GLASS_BORDER_COLOR = 'rgba(255, 255, 255, 0.2)';
 export const GLASS_BORDER_COLOR_ACTIVE = 'rgba(255, 255, 255, 0.6)';
+/** Matches cardClassName border (more visible than glass cards). */
+export const CARD_BORDER_COLOR = 'rgba(255, 255, 255, 0.9)';
 
 /** Matches SubscriptionScreen planCard (glass panel). */
 export const glassCardClassName =
@@ -41,6 +43,8 @@ export const homeSectionLabelClassName =
   'text-white/75 text-xs uppercase tracking-widest';
 export const homeRoutineCardClassName =
   'rounded-[15px] border border-white/20 bg-white/10 p-4 w-full flex-row items-center active:opacity-80';
+export const soundTileClassName =
+  'rounded-[15px] border border-white/90 bg-white/10 p-2.5 overflow-hidden items-center justify-between';
 export const homeAddStepClassName = 'text-white/75 text-sm mt-2 ml-4';
 
 /** Timer section cards (Hatch-inspired). */

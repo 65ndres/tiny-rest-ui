@@ -1,8 +1,7 @@
 // app/context/RevenueCatContext.tsx
-import { API_URL } from '@/constants/Config';
+import { API_URL, isDevelopment } from '@/constants/Config';
 import { PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from '@/constants/legalUrls';
 import axios from 'axios';
-import Constants from 'expo-constants';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Alert, Platform } from 'react-native';
 import Purchases, {
@@ -18,18 +17,18 @@ import RevenueCatUI, {
 } from 'react-native-purchases-ui';
 import { useAuth } from './AuthContext';
 
-// RevenueCat Test key (required when running in Expo Go; native store is not available there)
-const REVENUECAT_TEST_KEY = 'test_coZdnrQZwFSrdHtAmaBgRVpmICu';
+// RevenueCat Test key (used in development)
+const REVENUECAT_TEST_KEY = 'test_QUpAwigTTupwnYwSsqqTWletcbb';
 
-// Use Test key in Expo Go; otherwise use production key from env (must be EXPO_PUBLIC_* for Expo to inject it)
-const isExpoGo = Constants.appOwnership === 'expo';
+// Use Test key in development; otherwise use production key from env (must be EXPO_PUBLIC_* for Expo to inject it)
 const REVENUECAT_API_KEY =
-  isExpoGo
+  isDevelopment
     ? REVENUECAT_TEST_KEY
     : (process.env.EXPO_PUBLIC_REVENUECAT_API_KEY ?? REVENUECAT_TEST_KEY);
 
+// console.log("PACAAAAAA", REVENUECAT_API_KEY)
 // Entitlement identifier
-export const ENTITLEMENT_IDENTIFIER = 'Promsas Pro';
+export const ENTITLEMENT_IDENTIFIER = 'Tiny Rest Pro';
 
 interface RevenueCatContextType {
   // State

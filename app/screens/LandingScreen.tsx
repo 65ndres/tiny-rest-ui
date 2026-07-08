@@ -14,9 +14,9 @@ import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 
 type AuthStackParamList = {
-  Login: undefined;
-  SignUp: undefined;
-  FeaturedScreenGuest: undefined;
+  LoginGluestack: undefined;
+  SignUpGluestack: undefined;
+  Timer: undefined;
 };
 
 type NavigationProp = DrawerNavigationProp<AuthStackParamList>;
@@ -31,15 +31,15 @@ const LandingScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
 
   const handleLogin = () => {
-    navigation.navigate('Login');
+    navigation.navigate('LoginGluestack');
   };
 
   const handleSignUp = () => {
-    navigation.navigate('SignUp');
+    navigation.navigate('SignUpGluestack');
   };
 
   const handleContinueGuest = () => {
-    navigation.navigate('FeaturedScreenGuest');
+    navigation.navigate('Timer');
   };
 
   return (

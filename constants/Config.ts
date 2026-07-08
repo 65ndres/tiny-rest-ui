@@ -6,7 +6,7 @@ import Constants from 'expo-constants';
  */
 
 // Determine if we're in development mode
-const isDevelopment = __DEV__ || Constants.appOwnership === 'expo';
+const isDevelopment = __DEV__ || Constants.executionEnvironment === 'standalone';
 
 // API Configuration
 const DEVELOPMENT_API_URL = 'http://127.0.0.1:3000/api/v1'; //'https://97f8-173-239-254-51.ngrok-free.app/api/v1';

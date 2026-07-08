@@ -11,11 +11,13 @@ import ScreenComponent from './ScreenComponent';
 type ScreenScrollLayoutProps = {
   children: React.ReactNode;
   contentContainerClassName?: string;
+  keyboardShouldPersistTaps?: 'always' | 'never' | 'handled';
 };
 
 const ScreenScrollLayout: React.FC<ScreenScrollLayoutProps> = ({
   children,
   contentContainerClassName,
+  keyboardShouldPersistTaps,
 }) => (
   <ScreenComponent>
     <ScrollView
@@ -24,6 +26,7 @@ const ScreenScrollLayout: React.FC<ScreenScrollLayoutProps> = ({
         contentContainerClassName ?? scrollContentClassName
       }
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps={keyboardShouldPersistTaps}
     >
       <VStack space="md" className={contentStackClassName}>
         {children}

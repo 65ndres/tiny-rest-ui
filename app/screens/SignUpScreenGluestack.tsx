@@ -1,8 +1,7 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Alert, ScrollView } from 'react-native';
-import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
+import { Alert } from 'react-native';
 import {
   FormControl,
   FormControlError,
@@ -17,8 +16,16 @@ import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { Link, LinkText } from '@/components/ui/link';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
+import {
+  glassInputClassName,
+  homeContentStackClassName,
+  mutedTextClassName,
+  scrollContentClassName,
+} from '@/app/constants/screenLayout';
 import { useAuth } from '../context/AuthContext';
-import ScreenComponent from '../sharedComponents/ScreenComponent';
+import ScreenScrollLayout from '../sharedComponents/ScreenScrollLayout';
+import TimerOutlineButton from '../sharedComponents/timer/TimerOutlineButton';
+import TimerSectionCard from '../sharedComponents/timer/TimerSectionCard';
 
 type AuthStackParamList = {
   LoginGluestack: undefined;
@@ -28,13 +35,10 @@ type NavigationProp = DrawerNavigationProp<AuthStackParamList>;
 
 const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
 
-const inputClassName =
-  'border-white data-[hover=true]:border-white data-[focus=true]:border-white';
 const inputFieldClassName = 'text-white text-lg';
-const labelClassName = 'text-white text-lg';
-const bodyTextClassName = 'text-white text-lg';
-const linkTextClassName = 'text-white text-lg';
-const buttonTextClassName = 'text-white text-lg';
+const labelClassName = 'text-white text-base';
+
+const authScrollContentClassName = `${scrollContentClassName} justify-center`;
 
 const SignUpScreenGluestack: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -107,25 +111,20 @@ const SignUpScreenGluestack: React.FC = () => {
   };
 
   return (
-    <ScreenComponent>
-      <ScrollView
-        className="flex-1"
-        contentContainerClassName="flex-grow px-6 pb-4 items-center justify-center"
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-      <VStack space="md" className="w-full max-w-[336px] items-center">
-        <VStack className="rounded-xl border border-white/90 p-6 w-full">
+    <ScreenScrollLayout
+      contentContainerClassName={authScrollContentClassName}
+      keyboardShouldPersistTaps="handled"
+    >
+      <VStack space="md" className={homeContentStackClassName}>
+        <TimerSectionCard>
           <Heading size="2xl" className="text-white">
             Sign up
           </Heading>
-          <Text size="lg" className={`mt-2 ${bodyTextClassName}`}>
-            Create your account
-          </Text>
+          <Text className={`mt-2 ${mutedTextClassName}`}>Create your account</Text>
 
           <FormControl isInvalid={!!emailError} size="lg" className="w-full mt-4">
             <FormControlLabel>
-              <FormControlLabelText size="lg" className={labelClassName}>
+              <FormControlLabelText size="md" className={labelClassName}>
                 Email
               </FormControlLabelText>
             </FormControlLabel>
@@ -133,7 +132,7 @@ const SignUpScreenGluestack: React.FC = () => {
               size="lg"
               isDisabled={isLoading}
               isInvalid={!!emailError}
-              className={inputClassName}
+              className={glassInputClassName}
             >
               <InputField
                 placeholder="Enter your email"
@@ -164,7 +163,7 @@ const SignUpScreenGluestack: React.FC = () => {
 
           <FormControl isInvalid={!!passwordError} size="lg" className="w-full mt-6">
             <FormControlLabel>
-              <FormControlLabelText size="lg" className={labelClassName}>
+              <FormControlLabelText size="md" className={labelClassName}>
                 Password
               </FormControlLabelText>
             </FormControlLabel>
@@ -172,7 +171,7 @@ const SignUpScreenGluestack: React.FC = () => {
               size="lg"
               isDisabled={isLoading}
               isInvalid={!!passwordError}
-              className={inputClassName}
+              className={glassInputClassName}
             >
               <InputField
                 placeholder="Enter your password"
@@ -211,7 +210,7 @@ const SignUpScreenGluestack: React.FC = () => {
 
           <FormControl isInvalid={!!passwordConfirmationError} size="lg" className="w-full mt-6">
             <FormControlLabel>
-              <FormControlLabelText size="lg" className={labelClassName}>
+              <FormControlLabelText size="md" className={labelClassName}>
                 Confirm password
               </FormControlLabelText>
             </FormControlLabel>
@@ -219,7 +218,7 @@ const SignUpScreenGluestack: React.FC = () => {
               size="lg"
               isDisabled={isLoading}
               isInvalid={!!passwordConfirmationError}
-              className={inputClassName}
+              className={glassInputClassName}
             >
               <InputField
                 placeholder="Confirm your password"
@@ -256,29 +255,26 @@ const SignUpScreenGluestack: React.FC = () => {
             ) : null}
           </FormControl>
 
-          <Button
-            variant="outline"
-            className="w-full mt-6 border-2 border-white bg-transparent"
-            size="md"
-            onPress={handleSignup}
-            isDisabled={isLoading}
-          >
-            {isLoading ? (
-              <ButtonSpinner color="white" />
-            ) : (
-              <ButtonText className={buttonTextClassName}>Create account</ButtonText>
-            )}
-          </Button>
-        </VStack>
+          <TimerOutlineButton
+            label="Create account"
+            iconName="person-add-sharp"
+            onPress={() => void handleSignup()}
+            disabled={isLoading}
+            isLoading={isLoading}
+            variant="primary"
+            size="lg"
+            className="mt-6"
+            accessibilityLabel="Create account"
+          />
+        </TimerSectionCard>
 
         <Link onPress={() => navigation.navigate('LoginGluestack')} disabled={isLoading}>
-          <LinkText size="lg" className={`${linkTextClassName} mt-2`}>
+          <LinkText size="md" className={`${mutedTextClassName} text-center`}>
             Already have an account? Log in
           </LinkText>
         </Link>
       </VStack>
-      </ScrollView>
-    </ScreenComponent>
+    </ScreenScrollLayout>
   );
 };
 

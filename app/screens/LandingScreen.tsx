@@ -1,17 +1,25 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
-import { Button, Text } from '@rneui/themed';
 import React from 'react';
+import { Pressable } from 'react-native';
+import { Heading } from '@/components/ui/heading';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
 import {
-  Dimensions,
-  Pressable,
-  StyleSheet,
-  View,
-  type TextStyle,
-  type ViewStyle,
-} from 'react-native';
-import { APP_DISPLAY_NAME } from '@/constants/appBranding';
-import ScreenComponent from '../sharedComponents/ScreenComponent';
+  glassCardCenteredClassName,
+  glassCardClassName,
+  homeContentStackClassName,
+  homeScrollContentClassName,
+  mutedTextClassName,
+  timerSessionResetLinkClassName,
+} from '@/app/constants/screenLayout';
+import {
+  APP_DISPLAY_NAME,
+  BASIC_PLAN_DISPLAY_NAME,
+  PRO_PLAN_DISPLAY_NAME,
+} from '@/constants/appBranding';
+import ScreenScrollLayout from '../sharedComponents/ScreenScrollLayout';
+import TimerOutlineButton from '../sharedComponents/timer/TimerOutlineButton';
 
 type AuthStackParamList = {
   LoginGluestack: undefined;
@@ -20,12 +28,6 @@ type AuthStackParamList = {
 };
 
 type NavigationProp = DrawerNavigationProp<AuthStackParamList>;
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-const REFERENCE_HEIGHT = 812;
-const REFERENCE_WIDTH = 375;
-const scale = Math.min(screenHeight / REFERENCE_HEIGHT, screenWidth / REFERENCE_WIDTH);
-const s = (value: number) => value * scale;
 
 const LandingScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -43,125 +45,54 @@ const LandingScreen: React.FC = () => {
   };
 
   return (
-    <ScreenComponent style={styles.screen}>
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <Text style={styles.headline}>Welcome to {APP_DISPLAY_NAME}</Text>
-          <Text style={styles.supporting}>Explore the word of the Lord in the simplest way possible.</Text>
-          <Text style={styles.trial}>
-            Create a <Text style={styles.trialEmphasis}>Basic</Text> account for free or try our{' '}
-            <Text style={styles.trialEmphasis}>Pro</Text> account the get the most out of {APP_DISPLAY_NAME}. Includes a{' '}
-            <Text style={styles.trialEmphasis}>14-day free trial.</Text>
+    <ScreenScrollLayout contentContainerClassName={homeScrollContentClassName}>
+      <VStack space="md" className={homeContentStackClassName}>
+        <VStack className={glassCardCenteredClassName} space="sm">
+          <Heading size="2xl" className="text-white text-center">
+            Welcome to {APP_DISPLAY_NAME}
+          </Heading>
+          <Text className={`${mutedTextClassName} text-center`}>
+            Track naps, feedings, and soothing sounds for your little one.
           </Text>
-          <View style={styles.buttonsContainer}>
-            <Button
-              title="LOG IN"
-              buttonStyle={styles.primaryButton}
-              containerStyle={styles.primaryButtonContainer}
-              titleStyle={styles.primaryButtonTitle}
-              onPress={handleLogin}
-            />
-            <Button
-              title="SIGN UP"
-              buttonStyle={styles.primaryButton}
-              containerStyle={styles.primaryButtonContainer}
-              titleStyle={styles.primaryButtonTitle}
-              type="outline"
-              onPress={handleSignUp}
-            />
-            <Pressable
-              accessibilityRole="link"
-              hitSlop={12}
-              onPress={handleContinueGuest}
-              style={styles.continueLinkWrap}
-            >
-              <Text style={styles.continueLink}>Continue as a guest</Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-    </ScreenComponent>
+        </VStack>
+
+        <VStack className={glassCardClassName}>
+          <Text className={`${mutedTextClassName} text-center`}>
+            Create a {BASIC_PLAN_DISPLAY_NAME} account for free or try{' '}
+            {PRO_PLAN_DISPLAY_NAME} with a 14-day free trial.
+          </Text>
+        </VStack>
+
+        <TimerOutlineButton
+          label="Log in"
+          iconName="log-in-sharp"
+          onPress={handleLogin}
+          variant="primary"
+          size="lg"
+          accessibilityLabel="Log in"
+        />
+
+        <TimerOutlineButton
+          label="Sign up"
+          iconName="person-add-sharp"
+          onPress={handleSignUp}
+          variant="outline"
+          size="lg"
+          accessibilityLabel="Sign up"
+        />
+
+        <Pressable
+          accessibilityRole="link"
+          hitSlop={12}
+          onPress={handleContinueGuest}
+        >
+          <Text className={timerSessionResetLinkClassName}>
+            Continue as a guest
+          </Text>
+        </Pressable>
+      </VStack>
+    </ScreenScrollLayout>
   );
 };
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  } as ViewStyle,
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingTop: s(28),
-    paddingBottom: s(18),
-  } as ViewStyle,
-  content: {
-    paddingHorizontal: s(24),
-    paddingTop: s(18),
-    alignItems: 'center',
-  } as ViewStyle,
-  headline: {
-    color: 'white',
-    textAlign: 'center',
-    fontSize: s(26),
-    lineHeight: s(33),
-    fontWeight: '700',
-    marginBottom: s(14),
-  } as TextStyle,
-  supporting: {
-    color: 'white',
-    textAlign: 'center',
-    fontSize: s(18),
-    lineHeight: s(26),
-    fontWeight: '400',
-    opacity: 0.95,
-    marginBottom: s(14),
-    paddingHorizontal: s(8),
-  } as TextStyle,
-  trial: {
-    color: 'white',
-    textAlign: 'center',
-    fontSize: s(17),
-    lineHeight: s(24),
-    fontWeight: '400',
-    marginBottom: s(18),
-    paddingHorizontal: s(8),
-  } as TextStyle,
-  trialEmphasis: {
-    fontWeight: '700',
-    color: 'white',
-  } as TextStyle,
-  buttonsContainer: {
-    width: '100%',
-    maxWidth: Math.min(s(320), screenWidth),
-  } as ViewStyle,
-  primaryButton: {
-    backgroundColor: 'white',
-    borderWidth: s(2),
-    borderColor: 'white',
-    borderRadius: s(30),
-  } as ViewStyle,
-  primaryButtonContainer: {
-    marginHorizontal: s(14),
-    marginVertical: s(8),
-  } as ViewStyle,
-  primaryButtonTitle: {
-    fontWeight: 'bold',
-    color: '#ac8861ff',
-    fontSize: s(16),
-  } as TextStyle,
-  continueLinkWrap: {
-    alignSelf: 'center',
-    marginTop: s(10),
-    paddingVertical: s(6),
-    paddingHorizontal: s(12),
-  } as ViewStyle,
-  continueLink: {
-    color: 'rgba(255, 255, 255, 0.92)',
-    fontSize: s(18),
-    fontWeight: '500',
-    textAlign: 'center',
-    textDecorationLine: 'underline',
-  } as TextStyle,
-});
 
 export default LandingScreen;

@@ -1,11 +1,7 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import {
-  Alert,
-  ScrollView,
-} from 'react-native';
-import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
+import { Alert, Pressable } from 'react-native';
 import {
   Checkbox,
   CheckboxIcon,
@@ -32,8 +28,17 @@ import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
 import { Link, LinkText } from '@/components/ui/link';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
+import {
+  glassInputClassName,
+  homeContentStackClassName,
+  mutedTextClassName,
+  scrollContentClassName,
+  timerSessionResetLinkClassName,
+} from '@/app/constants/screenLayout';
 import { useAuth } from '../context/AuthContext';
-import ScreenComponent from '../sharedComponents/ScreenComponent';
+import ScreenScrollLayout from '../sharedComponents/ScreenScrollLayout';
+import TimerOutlineButton from '../sharedComponents/timer/TimerOutlineButton';
+import TimerSectionCard from '../sharedComponents/timer/TimerSectionCard';
 
 type AuthStackParamList = {
   SignUpGluestack: undefined;
@@ -44,13 +49,10 @@ type NavigationProp = DrawerNavigationProp<AuthStackParamList>;
 
 const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
 
-const inputClassName =
-  'border-white data-[hover=true]:border-white data-[focus=true]:border-white';
 const inputFieldClassName = 'text-white text-lg';
-const labelClassName = 'text-white text-lg';
-const bodyTextClassName = 'text-white text-lg';
-const linkTextClassName = 'text-white text-lg';
-const buttonTextClassName = 'text-white text-lg';
+const labelClassName = 'text-white text-base';
+
+const authScrollContentClassName = `${scrollContentClassName} justify-center`;
 
 const LoginScreenGluestack: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -87,25 +89,20 @@ const LoginScreenGluestack: React.FC = () => {
   };
 
   return (
-    <ScreenComponent>
-      <ScrollView
-        className="flex-1"
-        contentContainerClassName="flex-grow px-6 pb-4 items-center justify-center"
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-      <VStack space="md" className="w-full max-w-[336px] items-center">
-        <VStack className="rounded-xl border border-white/90 p-6 w-full">
+    <ScreenScrollLayout
+      contentContainerClassName={authScrollContentClassName}
+      keyboardShouldPersistTaps="handled"
+    >
+      <VStack space="md" className={homeContentStackClassName}>
+        <TimerSectionCard>
           <Heading size="2xl" className="text-white">
             Log in
           </Heading>
-          <Text size="lg" className={`mt-2 ${bodyTextClassName}`}>
-            Login to start using gluestack
-          </Text>
+          <Text className={`mt-2 ${mutedTextClassName}`}>Welcome back</Text>
 
           <FormControl isInvalid={!!emailError} size="lg" className="w-full mt-4">
             <FormControlLabel>
-              <FormControlLabelText size="lg" className={labelClassName}>
+              <FormControlLabelText size="md" className={labelClassName}>
                 Email
               </FormControlLabelText>
             </FormControlLabel>
@@ -113,7 +110,7 @@ const LoginScreenGluestack: React.FC = () => {
               size="lg"
               isDisabled={isLoading}
               isInvalid={!!emailError}
-              className={inputClassName}
+              className={glassInputClassName}
             >
               <InputField
                 placeholder="Enter your email"
@@ -143,7 +140,7 @@ const LoginScreenGluestack: React.FC = () => {
 
           <FormControl isInvalid={!!passwordError} size="lg" className="w-full mt-6">
             <FormControlLabel>
-              <FormControlLabelText size="lg" className={labelClassName}>
+              <FormControlLabelText size="md" className={labelClassName}>
                 Password
               </FormControlLabelText>
             </FormControlLabel>
@@ -151,7 +148,7 @@ const LoginScreenGluestack: React.FC = () => {
               size="lg"
               isDisabled={isLoading}
               isInvalid={!!passwordError}
-              className={inputClassName}
+              className={glassInputClassName}
             >
               <InputField
                 placeholder="Enter your password"
@@ -198,44 +195,39 @@ const LoginScreenGluestack: React.FC = () => {
               <CheckboxIndicator>
                 <CheckboxIcon as={CheckIcon} />
               </CheckboxIndicator>
-              <CheckboxLabel className={bodyTextClassName}>Remember me</CheckboxLabel>
+              <CheckboxLabel className={mutedTextClassName}>Remember me</CheckboxLabel>
             </Checkbox>
 
-            <Button
-              variant="link"
-              size="md"
+            <Pressable
               onPress={() => navigation.navigate('PasswordReset')}
-              isDisabled={isLoading}
+              disabled={isLoading}
+              accessibilityRole="link"
             >
-              <ButtonText className={`${buttonTextClassName} underline underline-offset-1`}>
-                Forgot Password?
-              </ButtonText>
-            </Button>
+              <Text className={`${timerSessionResetLinkClassName} underline`}>
+                Forgot password?
+              </Text>
+            </Pressable>
           </HStack>
 
-          <Button
-            variant="solid"
-            className="w-full border-2 border-white bg-white"
-            size="md"
-            onPress={handleLogin}
-            isDisabled={isLoading}
-          >
-            {isLoading ? (
-              <ButtonSpinner color="white" />
-            ) : (
-              <ButtonText className={`${buttonTextClassName} text-black`}>Log in</ButtonText>
-            )}
-          </Button>
-        </VStack>
+          <TimerOutlineButton
+            label="Log in"
+            iconName="log-in-sharp"
+            onPress={() => void handleLogin()}
+            disabled={isLoading}
+            isLoading={isLoading}
+            variant="primary"
+            size="lg"
+            accessibilityLabel="Log in"
+          />
+        </TimerSectionCard>
 
         <Link onPress={() => navigation.navigate('SignUpGluestack')} disabled={isLoading}>
-          <LinkText size="lg" className={`${linkTextClassName} mt-2`}>
+          <LinkText size="md" className={`${mutedTextClassName} text-center`}>
             Don&apos;t have an account? Sign up
           </LinkText>
         </Link>
       </VStack>
-      </ScrollView>
-    </ScreenComponent>
+    </ScreenScrollLayout>
   );
 };
 

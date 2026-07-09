@@ -21,10 +21,10 @@ import { useAuth } from './AuthContext';
 const REVENUECAT_TEST_KEY = 'test_QUpAwigTTupwnYwSsqqTWletcbb';
 
 // Use Test key in development; otherwise use production key from env (must be EXPO_PUBLIC_* for Expo to inject it)
-const REVENUECAT_API_KEY =
-  isDevelopment
-    ? REVENUECAT_TEST_KEY
-    : (process.env.EXPO_PUBLIC_REVENUECAT_API_KEY ?? REVENUECAT_TEST_KEY);
+const REVENUECAT_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY
+  // isDevelopment
+  //   ? REVENUECAT_TEST_KEY
+  //   : (process.env.EXPO_PUBLIC_REVENUECAT_API_KEY ?? REVENUECAT_TEST_KEY);
 
 // console.log("PACAAAAAA", REVENUECAT_API_KEY)
 // Entitlement identifier

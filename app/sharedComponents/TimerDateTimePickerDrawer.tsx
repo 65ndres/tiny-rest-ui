@@ -22,6 +22,7 @@ type TimerDateTimePickerDrawerProps = {
   value: Date;
   onChange: (date: Date) => void;
   onClose: () => void;
+  mode?: 'date' | 'datetime' | 'time';
 };
 
 const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
@@ -30,6 +31,7 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
   value,
   onChange,
   onClose,
+  mode = 'datetime',
 }) => {
   const handlePickerChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     if (Platform.OS === 'android') {
@@ -73,10 +75,11 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
           >
             <DateTimePicker
               value={value}
-              mode="datetime"
+              mode={mode}
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               onChange={handlePickerChange}
               themeVariant="dark"
+              maximumDate={mode === 'date' ? new Date() : undefined}
             />
           </View>
         </DrawerBody>

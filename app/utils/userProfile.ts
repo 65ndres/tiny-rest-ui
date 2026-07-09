@@ -8,6 +8,7 @@ export type UserProfile = {
   username: string | null;
   subscription_type?: string;
   baby_name: string | null;
+  baby_birthdate: string | null;
   daily_nap_count: number;
 };
 
@@ -17,6 +18,7 @@ export type UserProfileUpdate = Partial<{
   email: string;
   username: string;
   baby_name: string | null;
+  baby_birthdate: string | null;
   daily_nap_count: number;
 }>;
 
@@ -30,6 +32,7 @@ export const fetchUserProfile = async (token: string): Promise<UserProfile> => {
   });
   return {
     ...response.data,
+    baby_birthdate: response.data.baby_birthdate ?? null,
     daily_nap_count: response.data.daily_nap_count ?? 3,
   };
 };

@@ -94,3 +94,5 @@ android/.gradle/
 # Large unused assets (keep only what's needed)
 
 # @end expo-cli
+
+.env

@@ -470,6 +470,53 @@ const startOfLocalDay = (date: Date): Date => {
   return normalized;
 };
 
+export const isEpochAnchoredDate = (date: Date): boolean =>
+  date.getFullYear() < 2000;
+
+export const applyPickerTimeToBaseDate = (
+  picked: Date,
+  baseDate: Date
+): Date => {
+  const merged = new Date(baseDate);
+  merged.setHours(
+    picked.getHours(),
+    picked.getMinutes(),
+    picked.getSeconds(),
+    0
+  );
+  return merged;
+};
+
+export const normalizePickedTimerDate = (
+  picked: Date,
+  baseDate: Date
+): Date => {
+  if (isEpochAnchoredDate(picked)) {
+    return applyPickerTimeToBaseDate(picked, baseDate);
+  }
+  return picked;
+};
+
+export const normalizeTimerSessionTimes = (
+  start: Date,
+  end: Date
+): { start: Date; end: Date } => {
+  const today = startOfLocalDay(new Date());
+  const normalizedStart = isEpochAnchoredDate(start)
+    ? applyPickerTimeToBaseDate(start, today)
+    : new Date(start);
+  let normalizedEnd = isEpochAnchoredDate(end)
+    ? applyPickerTimeToBaseDate(end, normalizedStart)
+    : new Date(end);
+
+  if (normalizedEnd.getTime() <= normalizedStart.getTime()) {
+    normalizedEnd = new Date(normalizedEnd);
+    normalizedEnd.setDate(normalizedEnd.getDate() + 1);
+  }
+
+  return { start: normalizedStart, end: normalizedEnd };
+};
+
 export const getLocalDayKey = (iso: string): string => {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) {

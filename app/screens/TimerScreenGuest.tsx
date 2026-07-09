@@ -15,6 +15,8 @@ import {
   createLocalTimerSession,
   formatClockTime,
   loadTimerHistoryFromCache,
+  normalizePickedTimerDate,
+  normalizeTimerSessionTimes,
   prependTimerSession,
   saveTimerHistoryToCache,
   type TimerSession,
@@ -109,11 +111,17 @@ const TimerScreenGuest: React.FC = () => {
   };
 
   const handlePickerDateChange = (selectedDate: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     if (activePicker === 'start') {
-      setStartTime(selectedDate);
-      startTimeRef.current = selectedDate;
+      const normalized = normalizePickedTimerDate(selectedDate, today);
+      setStartTime(normalized);
+      startTimeRef.current = normalized;
     } else if (activePicker === 'end') {
-      setEndTime(selectedDate);
+      const base = startTime ?? today;
+      const normalized = normalizePickedTimerDate(selectedDate, base);
+      setEndTime(normalized);
     }
   };
 
@@ -192,10 +200,17 @@ const TimerScreenGuest: React.FC = () => {
       return;
     }
 
+    const { start: normalizedStart, end: normalizedEnd } =
+      normalizeTimerSessionTimes(startTime, endTime);
+    const durationMs = Math.max(
+      0,
+      normalizedEnd.getTime() - normalizedStart.getTime()
+    );
+
     const payload = {
-      start_time: startTime.toISOString(),
-      end_time: endTime.toISOString(),
-      duration_ms: elapsedMs,
+      start_time: normalizedStart.toISOString(),
+      end_time: normalizedEnd.toISOString(),
+      duration_ms: durationMs,
     };
 
     setIsSubmitting(true);

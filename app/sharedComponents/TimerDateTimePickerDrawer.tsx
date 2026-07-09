@@ -33,6 +33,9 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
   onClose,
   mode = 'datetime',
 }) => {
+  const resolvedMode =
+    mode === 'datetime' && Platform.OS !== 'ios' ? 'time' : mode;
+
   const handlePickerChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     if (Platform.OS === 'android') {
       if (event.type === 'dismissed') {
@@ -75,7 +78,7 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
           >
             <DateTimePicker
               value={value}
-              mode={mode}
+              mode={resolvedMode}
               display={Platform.OS === 'ios' ? 'spinner' : 'default'}
               onChange={handlePickerChange}
               themeVariant="dark"

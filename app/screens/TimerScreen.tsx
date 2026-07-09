@@ -14,6 +14,8 @@ import {
   createTimerRun,
   fetchTimerRuns,
   formatClockTime,
+  normalizePickedTimerDate,
+  normalizeTimerSessionTimes,
   submitTimerRun,
   type TimerSession,
 } from '@/app/utils/timerHistory';
@@ -118,11 +120,17 @@ const TimerScreen: React.FC = () => {
   };
 
   const handlePickerDateChange = (selectedDate: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     if (activePicker === 'start') {
-      setStartTime(selectedDate);
-      startTimeRef.current = selectedDate;
+      const normalized = normalizePickedTimerDate(selectedDate, today);
+      setStartTime(normalized);
+      startTimeRef.current = normalized;
     } else if (activePicker === 'end') {
-      setEndTime(selectedDate);
+      const base = startTime ?? today;
+      const normalized = normalizePickedTimerDate(selectedDate, base);
+      setEndTime(normalized);
     }
   };
 
@@ -239,14 +247,17 @@ const TimerScreen: React.FC = () => {
       return;
     }
 
+    const { start: normalizedStart, end: normalizedEnd } =
+      normalizeTimerSessionTimes(startTime, endTime);
+
     const durationMs = Math.max(
       0,
-      endTime.getTime() - startTime.getTime()
+      normalizedEnd.getTime() - normalizedStart.getTime()
     );
 
     const payload = {
-      start_time: startTime.toISOString(),
-      end_time: endTime.toISOString(),
+      start_time: normalizedStart.toISOString(),
+      end_time: normalizedEnd.toISOString(),
       duration_ms: durationMs,
     };
 
@@ -260,9 +271,13 @@ const TimerScreen: React.FC = () => {
 
       let timerRunId = activeTimerRunIdRef.current;
       if (!timerRunId) {
-        const timerRun = await createTimerRun(token, startTime.toISOString(), {
-          run_type: 'sleeping',
-        });
+        const timerRun = await createTimerRun(
+          token,
+          normalizedStart.toISOString(),
+          {
+            run_type: 'sleeping',
+          }
+        );
         timerRunId = timerRun.id;
       }
 

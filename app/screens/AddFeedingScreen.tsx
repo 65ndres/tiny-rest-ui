@@ -30,6 +30,8 @@ import {
   filterFeedingSessions,
   formatClockTime,
   getLastNursingSide,
+  normalizePickedTimerDate,
+  normalizeTimerSessionTimes,
   NURSING_RUN_TYPES,
   submitTimerRun,
   type BottleMetadata,
@@ -201,11 +203,17 @@ const AddFeedingScreen: React.FC = () => {
   };
 
   const handlePickerDateChange = (selectedDate: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     if (activePicker === 'start') {
-      setStartTime(selectedDate);
-      startTimeRef.current = selectedDate;
+      const normalized = normalizePickedTimerDate(selectedDate, today);
+      setStartTime(normalized);
+      startTimeRef.current = normalized;
     } else if (activePicker === 'end') {
-      setEndTime(selectedDate);
+      const base = startTime ?? today;
+      const normalized = normalizePickedTimerDate(selectedDate, base);
+      setEndTime(normalized);
     }
   };
 
@@ -320,6 +328,13 @@ const AddFeedingScreen: React.FC = () => {
       return;
     }
 
+    const { start: normalizedStart, end: normalizedEnd } =
+      normalizeTimerSessionTimes(startTime, endTime);
+    const durationMs = Math.max(
+      0,
+      normalizedEnd.getTime() - normalizedStart.getTime()
+    );
+
     setIsSubmitting(true);
     try {
       const token = await AsyncStorage.getItem('token');
@@ -329,9 +344,9 @@ const AddFeedingScreen: React.FC = () => {
       }
 
       await submitTimerRun(token, activeTimerRunIdRef.current, {
-        start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
-        duration_ms: elapsedMs,
+        start_time: normalizedStart.toISOString(),
+        end_time: normalizedEnd.toISOString(),
+        duration_ms: durationMs,
       });
 
       Alert.alert('Success', 'Nursing session saved.');

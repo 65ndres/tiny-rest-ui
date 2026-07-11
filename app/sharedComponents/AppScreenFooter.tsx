@@ -21,12 +21,6 @@ const AppScreenFooter: React.FC = () => {
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text
-          className="text-white text-center text-4xl decoration-underline line-height-10"
-          style={{ fontFamily: 'PlaywriteGBJ', lineHeight: 40 }}
-        >
-          Tiny Rest
-        </Text>
       </VStack>
     </View>
   );
@@ -40,8 +34,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   } as ViewStyle,
   logo: {
-    height: 70,
-    width: 70,
+    height: 100,
+    // width: 70,
   },
 });
 

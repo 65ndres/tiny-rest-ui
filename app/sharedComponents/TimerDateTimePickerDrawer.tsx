@@ -6,10 +6,8 @@ import { ImageBackground, Platform, StyleSheet, View } from 'react-native';
 import {
   Drawer,
   DrawerBackdrop,
-  DrawerBody,
   DrawerCloseButton,
   DrawerContent,
-  DrawerFooter,
   DrawerHeader,
 } from '@/components/ui/drawer';
 import { CloseIcon, Icon } from '@/components/ui/icon';
@@ -58,44 +56,49 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
   };
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} anchor="bottom" size="md">
+    <Drawer isOpen={isOpen} onClose={onClose} anchor="bottom" size="lg">
       <DrawerBackdrop className="bg-black/60" />
-      <DrawerContent className="border-t border-white/20 bg-transparent rounded-t-2xl p-0 overflow-hidden">
+      <DrawerContent className="border-white/0 bg-transparent p-0 overflow-hidden">
         <ImageBackground
           source={DATE_PICKER_BG}
           resizeMode="cover"
           style={styles.background}
         >
-          <DrawerHeader>
+
+
+          <View style={styles.centeredContent}>
+          <DrawerHeader className="px-6 pt-6" style={{paddingTop: "0%"}}>
             <Heading size="lg" className="text-white font-bold">
               {title}
             </Heading>
             <DrawerCloseButton className="p-1">
-              <Icon as={CloseIcon} className="text-white" size="md" />
+              <Icon as={CloseIcon} className="text-white" size="xl" />
             </DrawerCloseButton>
           </DrawerHeader>
-
-          <DrawerBody
-            className="py-2 mb-4"
-            contentContainerStyle={{ alignItems: 'center' }}
-          >
-            <View className="w-full items-center bg-transparent">
+            <View style={styles.pickerScale}>
               <DateTimePicker
                 value={value}
                 mode={resolvedMode}
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 onChange={handlePickerChange}
                 themeVariant="dark"
+                textColor="#ffffff"
+                style={styles.picker}
                 maximumDate={mode === 'date' ? new Date() : undefined}
               />
             </View>
-          </DrawerBody>
 
-          {Platform.OS === 'ios' ? (
-            <DrawerFooter className="justify-center pb-8">
-              <TimerOutlineButton label="Done" onPress={onClose} variant="primary" />
-            </DrawerFooter>
-          ) : null}
+            {Platform.OS === 'ios' ? (
+              <View style={styles.doneButton}>
+                <TimerOutlineButton
+                  label="Done"
+                  onPress={onClose}
+                  variant="solid"
+                  size="xl"
+                />
+              </View>
+            ) : null}
+          </View>
         </ImageBackground>
       </DrawerContent>
     </Drawer>
@@ -105,10 +108,30 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
 const styles = StyleSheet.create({
   background: {
     width: '100%',
-    padding: 24,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    overflow: 'hidden',
+    height: '100%',
+  },
+  centeredContent: {
+    flex: 1,
+    width: '100%',
+    // alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingBottom: 32,
+  },
+  pickerScale: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transform: [{ scale: 1.15 }],
+  },
+  picker: {
+    width: '100%',
+    height: 216,
+  },
+  doneButton: {
+    width: '100%',
+    marginTop: 36,
+    alignItems: 'center',
   },
 });
 

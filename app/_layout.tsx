@@ -232,11 +232,11 @@ const AuthenticatedNavigator: React.FC = () => {
         name="Timer"
         component={TimerScreen}
         options={{
-          drawerLabel: 'TIMER',
+          drawerLabel: 'ADD SLEEP',
           headerLeft: () => <BackButton text="" />,
           headerTitle: () => (
             <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
-              TIMER
+              ADD SLEEP
             </Text>
           ),
         }}
@@ -375,11 +375,11 @@ const UnauthenticatedNavigator: React.FC = () => {
           name="Timer"
           component={TimerScreenGuest}
           options={{
-            drawerLabel: 'TIMER',
+            drawerLabel: 'ADD SLEEP',
             headerLeft: () => <BackButton text=" " />,
             headerTitle: () => (
               <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
-                TIMER
+                ADD SLEEP
               </Text>
             ),
           }}

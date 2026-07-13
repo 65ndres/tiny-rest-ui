@@ -36,7 +36,6 @@ const UserProfileScreen: React.FC = () => {
   const [lastName, setLastName] = useState<string>('');
   const [username, setUsername] = useState<string>('');
   const [email, setEmail] = useState<string>('');
-  const [babyName, setBabyName] = useState<string>('');
   const [oldPassword, setOldPassword] = useState<string>('');
   const [newPassword, setNewPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -69,7 +68,6 @@ const UserProfileScreen: React.FC = () => {
       setLastName(profile.last_name || '');
       setUsername(profile.username || '');
       setEmail(profile.email || '');
-      setBabyName(profile.baby_name || '');
     } catch (error) {
       console.error('Failed to fetch profile:', error);
       Alert.alert('Error', 'Failed to load profile data');
@@ -79,7 +77,7 @@ const UserProfileScreen: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!isLoadingProfile && (firstName || lastName || email || username || babyName)) {
+    if (!isLoadingProfile && (firstName || lastName || email || username)) {
       contentFadeAnim.setValue(0);
       Animated.timing(contentFadeAnim, {
         toValue: 1,
@@ -87,7 +85,7 @@ const UserProfileScreen: React.FC = () => {
         useNativeDriver: true,
       }).start();
     }
-  }, [isLoadingProfile, firstName, lastName, email, username, babyName, contentFadeAnim]);
+  }, [isLoadingProfile, firstName, lastName, email, username, contentFadeAnim]);
 
   const updateProfile = async () => {
     setFirstNameError('');
@@ -128,7 +126,6 @@ const UserProfileScreen: React.FC = () => {
         first_name: firstName,
         last_name: lastName,
         email: email.toLowerCase(),
-        baby_name: babyName.trim() || null,
       });
 
       if (oldPassword.trim() && newPassword.trim()) {
@@ -231,19 +228,6 @@ const UserProfileScreen: React.FC = () => {
                 }}
                 errorMessage={lastNameError}
                 errorStyle={styles.errorStyle}
-                disabled={isLoadingProfile || isLoading}
-              />
-              <Input
-                cursorColor="#ffffff"
-                placeholder="Baby's name"
-                selectionColor="white"
-                placeholderTextColor="#d8d8d8ff"
-                leftIcon={{ type: 'font-awesome', name: 'heart', color: '#ffffffff', size: s(22) }}
-                inputStyle={styles.inputStyle}
-                labelStyle={styles.labelStyle}
-                inputContainerStyle={styles.inputContainerStyle}
-                value={babyName}
-                onChangeText={setBabyName}
                 disabled={isLoadingProfile || isLoading}
               />
               <Input

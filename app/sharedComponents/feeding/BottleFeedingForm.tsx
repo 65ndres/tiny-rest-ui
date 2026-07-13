@@ -141,7 +141,7 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
         onPress={onSave}
         disabled={isSaving}
         isLoading={isSaving}
-        size="lg"
+        size="xl"
         variant="solid"
         className="mt-6"
       />

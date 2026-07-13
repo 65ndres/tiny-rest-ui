@@ -34,7 +34,7 @@ const FeedingSegmentTabs: React.FC<FeedingSegmentTabsProps> = ({
             accessibilityLabel={tab.label}
           >
             <Text
-              className={`text-lg ${
+              className={`text-xl ${
                 isActive ? 'text-white font-semibold' : 'text-white/50'
               }`}
             >

@@ -1,6 +1,6 @@
 export const SCREEN_TOP_HEIGHT = '10%';
-export const SCREEN_CONTENT_HEIGHT = '82%';
-export const SCREEN_FOOTER_HEIGHT = '8%';
+export const SCREEN_CONTENT_HEIGHT = '80%';
+export const SCREEN_FOOTER_HEIGHT = '10%';
 /** Matches ScreenComponent screenContainer width ratio. */
 export const SCREEN_CONTENT_WIDTH_RATIO = 0.84;
 

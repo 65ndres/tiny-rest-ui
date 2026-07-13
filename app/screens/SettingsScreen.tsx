@@ -185,17 +185,18 @@ const SettingsScreen: React.FC = () => {
                 accessibilityLabel="Select daily nap count"
                 size="lg"
               />
-            </TimerSectionCard>
 
-            <TimerOutlineButton
-              label="Save"
-              iconName="save-sharp"
-              onPress={() => void saveSettings()}
-              disabled={isSaving}
-              isLoading={isSaving}
-              size="lg"
-              variant="solid"
-            />
+              <TimerOutlineButton
+                label="Save"
+                iconName="save-sharp"
+                onPress={() => void saveSettings()}
+                disabled={isSaving}
+                isLoading={isSaving}
+                size="xl"
+                variant="solid"
+                className="mt-6"
+              />
+            </TimerSectionCard>
           </>
         )}
       </VStack>

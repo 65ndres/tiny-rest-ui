@@ -340,7 +340,7 @@ const TimerScreen: React.FC = () => {
             disabled={isSubmitting}
             isLoading={isStarting}
             variant="solid"
-            size="lg"
+            size="xl"
             className="mt-4"
             accessibilityLabel={isRunning ? 'Stop' : playButtonLabel}
           />
@@ -351,7 +351,7 @@ const TimerScreen: React.FC = () => {
             disabled={!isSubmitEnabled || isSubmitting || isStarting}
             isLoading={isSubmitting}
             className="mt-3"
-            size="lg"
+            size="xl"
             variant="solid"
           />
           <Pressable

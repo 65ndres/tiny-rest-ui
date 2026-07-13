@@ -284,12 +284,11 @@ const AuthenticatedNavigator: React.FC = () => {
         name="AddFeeding"
         component={AddFeedingScreen}
         options={{
-          drawerLabel: () => null,
-          drawerItemStyle: { display: 'none' },
+          drawerLabel: 'ADD FEEDING',
           headerLeft: () => <BackButton text="" />,
           headerTitle: () => (
             <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
-              Add feeding
+              ADD FEEDING
             </Text>
           ),
         }}

@@ -457,7 +457,7 @@ const AddFeedingScreen: React.FC = () => {
                   disabled={isSubmitting}
                   isLoading={isStarting}
                   variant="solid"
-                  size="lg"
+                  size="xl"
                   className="mt-4"
                   accessibilityLabel={isRunning ? 'Stop' : playButtonLabel}
                 />
@@ -468,7 +468,7 @@ const AddFeedingScreen: React.FC = () => {
                   onPress={() => void handleNursingSubmit()}
                   disabled={!isNursingSubmitEnabled || isSubmitting}
                   isLoading={isSubmitting}
-                  size="lg"
+                  size="xl"
                   variant="solid"
                   className="mt-3"
                 />

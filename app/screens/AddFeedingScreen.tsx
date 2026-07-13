@@ -424,6 +424,7 @@ const AddFeedingScreen: React.FC = () => {
                   disabled={isRunning}
                   accessibilityLabel="Select start time"
                   isFirst
+                  size="lg"
                 />
                 <TimerSettingRow
                   label="Ended at:"
@@ -432,6 +433,7 @@ const AddFeedingScreen: React.FC = () => {
                   onPress={() => openPicker('end')}
                   disabled={isRunning}
                   accessibilityLabel="Select end time"
+                  size="lg"
                 />
 
                 <TimerSettingRow
@@ -445,6 +447,7 @@ const AddFeedingScreen: React.FC = () => {
                   onPress={pickSide}
                   disabled={!canPickSide}
                   accessibilityLabel="Select nursing side"
+                  size="lg"
                 />
 
                 <TimerOutlineButton
@@ -453,7 +456,7 @@ const AddFeedingScreen: React.FC = () => {
                   onPress={handlePlayStopPress}
                   disabled={isSubmitting}
                   isLoading={isStarting}
-                  variant="primary"
+                  variant="solid"
                   size="lg"
                   className="mt-4"
                   accessibilityLabel={isRunning ? 'Stop' : playButtonLabel}
@@ -466,6 +469,7 @@ const AddFeedingScreen: React.FC = () => {
                   disabled={!isNursingSubmitEnabled || isSubmitting}
                   isLoading={isSubmitting}
                   size="lg"
+                  variant="solid"
                   className="mt-3"
                 />
 

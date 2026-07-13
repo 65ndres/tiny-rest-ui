@@ -77,6 +77,7 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
         onPress={onPressStartTime}
         accessibilityLabel="Select start time"
         isFirst
+        size="lg"
       />
       <TimerSettingRow
         label="Type:"
@@ -84,6 +85,7 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
         placeholder="Set type"
         onPress={pickType}
         accessibilityLabel="Select feeding type"
+        size="lg"
       />
       <TimerSettingRow
         label="Unit:"
@@ -91,15 +93,16 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
         placeholder="Select unit"
         onPress={pickUnit}
         accessibilityLabel="Select unit"
+        size="lg"
       />
 
       <View className="flex-row items-center justify-between py-3 border-t border-white/10">
         <View>
-          <Text className="text-white text-lg font-semibold">Amount</Text>
+          <Text className="text-white text-xl font-semibold">Amount</Text>
           <Text className="text-white/75 text-sm">optional</Text>
         </View>
         <Pressable onPress={() => adjustAmount(1)}>
-          <Text className="text-white text-base font-semibold underline">
+          <Text className="text-white text-lg font-semibold underline">
             {amount > 0 ? `${amount} ${unit}` : 'Set amount'}
           </Text>
         </Pressable>
@@ -139,6 +142,7 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
         disabled={isSaving}
         isLoading={isSaving}
         size="lg"
+        variant="solid"
         className="mt-6"
       />
     </View>

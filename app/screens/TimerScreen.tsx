@@ -321,6 +321,7 @@ const TimerScreen: React.FC = () => {
             disabled={isRunning}
             accessibilityLabel="Select start time"
             isFirst
+            size="lg"
           />
           <TimerSettingRow
             label="Ended at:"
@@ -329,6 +330,7 @@ const TimerScreen: React.FC = () => {
             onPress={() => openPicker('end')}
             disabled={isRunning}
             accessibilityLabel="Select end time"
+            size="lg"
           />
 
           <TimerOutlineButton

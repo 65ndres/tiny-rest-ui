@@ -29,12 +29,12 @@ const HomeRoutineCard: React.FC<HomeRoutineCardProps> = ({
     accessibilityRole="button"
     accessibilityLabel={accessibilityLabel}
   >
-    <View className="h-10 w-10 rounded-full border border-white/20 bg-white/10 items-center justify-center mr-3">
-      <Ionicons name={iconName} size={20} color="white" />
+    <View className="h-10 w-10 rounded-full border border-white bg-white items-center justify-center mr-3">
+      <Ionicons name={iconName} size={20} color="#63488b" />
     </View>
     <VStack className="flex-1" space="xs">
-      <Text className="text-white text-base font-semibold">{title}</Text>
-      <Text className="text-white/75 text-sm">{subtitle}</Text>
+      <Text className="text-white text-xl font-semibold">{title}</Text>
+      <Text className="text-white/75 text-lg">{subtitle}</Text>
     </VStack>
     <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.5)" />
   </Pressable>

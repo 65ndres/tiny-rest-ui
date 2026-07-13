@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useState } from 'react';
-import { Alert, Pressable, TextInput, View } from 'react-native';
+import { Alert, TextInput, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
@@ -34,6 +34,9 @@ const formatBirthdate = (value: string | null): string => {
   });
 };
 
+const formatNapCount = (count: number): string =>
+  count === 1 ? '1 nap' : `${count} naps`;
+
 const toDateInput = (value: string | null): Date => {
   if (!value) return new Date();
   const date = new Date(`${value}T12:00:00`);
@@ -49,6 +52,7 @@ const toIsoDate = (date: Date): string => {
 
 const SettingsScreen: React.FC = () => {
   const [babyName, setBabyName] = useState('');
+  const [nameError, setNameError] = useState('');
   const [dailyNapCount, setDailyNapCount] = useState(3);
   const [babyBirthdate, setBabyBirthdate] = useState<string | null>(null);
   const [birthdatePickerValue, setBirthdatePickerValue] = useState(new Date());
@@ -64,6 +68,7 @@ const SettingsScreen: React.FC = () => {
 
       const profile = await fetchUserProfile(token);
       setBabyName(profile.baby_name || '');
+      setNameError('');
       setDailyNapCount(normalizeDailyNapCount(profile.daily_nap_count));
       setBabyBirthdate(profile.baby_birthdate);
       setBirthdatePickerValue(toDateInput(profile.baby_birthdate));
@@ -80,7 +85,25 @@ const SettingsScreen: React.FC = () => {
     }, [loadSettings])
   );
 
+  const pickDailyNapCount = () => {
+    Alert.alert('Daily naps', undefined, [
+      ...NAP_OPTIONS.map((count) => ({
+        text: formatNapCount(count),
+        onPress: () => setDailyNapCount(count),
+      })),
+      { text: 'Cancel', style: 'cancel' as const },
+    ]);
+  };
+
   const saveSettings = async () => {
+    const trimmedName = babyName.trim();
+    if (!trimmedName) {
+      setNameError('Baby name is required.');
+      Alert.alert('Error', 'Baby name is required.');
+      return;
+    }
+
+    setNameError('');
     setIsSaving(true);
     try {
       const token = await AsyncStorage.getItem('token');
@@ -90,7 +113,7 @@ const SettingsScreen: React.FC = () => {
       }
 
       await updateUserProfile(token, {
-        baby_name: babyName.trim() || null,
+        baby_name: trimmedName,
         baby_birthdate: babyBirthdate,
         daily_nap_count: dailyNapCount,
       });
@@ -109,31 +132,39 @@ const SettingsScreen: React.FC = () => {
       keyboardShouldPersistTaps="handled"
     >
       <VStack space="md" className={timerContentStackClassName}>
-        <TimerSectionCard>
-          <Text className={timerSectionLabelClassName}>Baby</Text>
+        {isLoading ? (
+          <TimerSectionCard>
+            <Text className="text-white/75 text-base">Loading...</Text>
+          </TimerSectionCard>
+        ) : (
+          <>
+            <TimerSectionCard>
+              <Text className={timerSectionLabelClassName}>Baby</Text>
 
-          {isLoading ? (
-            <Text className="text-white/75 text-base mt-2">Loading...</Text>
-          ) : (
-            <>
               <View className={`${timerSettingRowClassName} border-t-0`}>
-                <Text className="text-white text-lg font-semibold flex-1 mr-2">
+                <Text className="text-white text-xl font-semibold flex-1 mr-2">
                   Name:
                 </Text>
                 <TextInput
                   value={babyName}
-                  onChangeText={setBabyName}
+                  onChangeText={(text) => {
+                    setBabyName(text);
+                    if (nameError) setNameError('');
+                  }}
                   placeholder="Enter name"
                   placeholderTextColor="rgba(255,255,255,0.5)"
                   editable={!isSaving}
                   accessibilityLabel="Baby name"
-                  className="text-white text-base font-semibold underline text-right min-w-[120px] py-0"
+                  className="text-white text-lg font-semibold underline text-right min-w-[120px] py-0"
                   cursorColor="#ffffff"
                   selectionColor="white"
                   autoCapitalize="words"
                   autoCorrect={false}
                 />
               </View>
+              {nameError ? (
+                <Text className="text-error-400 text-sm mt-1">{nameError}</Text>
+              ) : null}
 
               <TimerSettingRow
                 label="Birthdate:"
@@ -142,54 +173,34 @@ const SettingsScreen: React.FC = () => {
                 onPress={() => setIsBirthdatePickerOpen(true)}
                 disabled={isSaving}
                 accessibilityLabel="Set baby birthdate"
-              />
-
-              <Text className={`${timerSectionLabelClassName} mt-6`}>
-                Daily naps
-              </Text>
-              <Text className="text-white/75 text-sm mb-3">
-                How many naps does your baby usually take per day?
-              </Text>
-              <View className="flex-row flex-wrap justify-between gap-3">
-                {NAP_OPTIONS.map((count) => {
-                  const isSelected = dailyNapCount === count;
-                  return (
-                    <Pressable
-                      key={count}
-                      onPress={() => setDailyNapCount(count)}
-                      disabled={isSaving}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: isSelected }}
-                      className={`w-[18%] min-w-[52px] aspect-square rounded-[15px] border items-center justify-center ${
-                        isSelected
-                          ? 'border-white/50 bg-white/30'
-                          : 'border-white/30 bg-transparent'
-                      }`}
-                    >
-                      <Text
-                        className={`text-2xl font-semibold ${
-                          isSelected ? 'text-white' : 'text-white/75'
-                        }`}
-                      >
-                        {count}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-
-              <TimerOutlineButton
-                label="Save"
-                iconName="save-sharp"
-                onPress={() => void saveSettings()}
-                disabled={isSaving}
-                isLoading={isSaving}
                 size="lg"
-                className="mt-6"
               />
-            </>
-          )}
-        </TimerSectionCard>
+            </TimerSectionCard>
+
+            <TimerSectionCard>
+              <Text className={timerSectionLabelClassName}>Daily naps</Text>
+              <TimerSettingRow
+                label="Daily naps:"
+                value={formatNapCount(dailyNapCount)}
+                placeholder="Select naps"
+                onPress={pickDailyNapCount}
+                disabled={isSaving}
+                accessibilityLabel="Select daily nap count"
+                isFirst
+                size="lg"
+              />
+            </TimerSectionCard>
+
+            <TimerOutlineButton
+              label="Save"
+              iconName="save-sharp"
+              onPress={() => void saveSettings()}
+              disabled={isSaving}
+              isLoading={isSaving}
+              size="lg"
+            />
+          </>
+        )}
       </VStack>
 
       <TimerDateTimePickerDrawer

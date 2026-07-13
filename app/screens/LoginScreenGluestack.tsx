@@ -1,39 +1,23 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Alert, Pressable } from 'react-native';
+import { Alert, Pressable, TextInput, View } from 'react-native';
 import {
   Checkbox,
   CheckboxIcon,
   CheckboxIndicator,
   CheckboxLabel,
 } from '@/components/ui/checkbox';
-import {
-  FormControl,
-  FormControlError,
-  FormControlErrorIcon,
-  FormControlErrorText,
-  FormControlLabel,
-  FormControlLabelText,
-} from '@/components/ui/form-control';
-import { Heading } from '@/components/ui/heading';
-import { HStack } from '@/components/ui/hstack';
-import {
-  AlertCircleIcon,
-  CheckIcon,
-  EyeIcon,
-  EyeOffIcon,
-} from '@/components/ui/icon';
-import { Input, InputField, InputIcon, InputSlot } from '@/components/ui/input';
+import { CheckIcon, EyeIcon, EyeOffIcon, Icon } from '@/components/ui/icon';
 import { Link, LinkText } from '@/components/ui/link';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
-  glassInputClassName,
-  homeContentStackClassName,
   mutedTextClassName,
-  scrollContentClassName,
-  timerSessionResetLinkClassName,
+  timerContentStackClassName,
+  timerScrollContentClassName,
+  timerSectionLabelClassName,
+  timerSettingRowClassName,
 } from '@/app/constants/screenLayout';
 import { useAuth } from '../context/AuthContext';
 import ScreenScrollLayout from '../sharedComponents/ScreenScrollLayout';
@@ -47,12 +31,22 @@ type AuthStackParamList = {
 
 type NavigationProp = DrawerNavigationProp<AuthStackParamList>;
 
-const PLACEHOLDER_COLOR = 'rgba(255, 255, 255, 0.75)';
+const inputClassName =
+  'text-white text-lg font-semibold underline text-right min-w-[120px] flex-1 py-0';
+const labelClassName = 'text-white text-xl font-semibold mr-2';
 
-const inputFieldClassName = 'text-white text-lg';
-const labelClassName = 'text-white text-base';
+type FieldRowProps = {
+  label: string;
+  isFirst?: boolean;
+  children: React.ReactNode;
+};
 
-const authScrollContentClassName = `${scrollContentClassName} justify-center`;
+const FieldRow: React.FC<FieldRowProps> = ({ label, isFirst = false, children }) => (
+  <View className={`${timerSettingRowClassName}${isFirst ? ' border-t-0' : ''}`}>
+    <Text className={labelClassName}>{label}</Text>
+    {children}
+  </View>
+);
 
 const LoginScreenGluestack: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -90,124 +84,74 @@ const LoginScreenGluestack: React.FC = () => {
 
   return (
     <ScreenScrollLayout
-      contentContainerClassName={authScrollContentClassName}
+      contentContainerClassName={`${timerScrollContentClassName} justify-center`}
       keyboardShouldPersistTaps="handled"
     >
-      <VStack space="md" className={homeContentStackClassName}>
+      <VStack space="md" className={timerContentStackClassName}>
         <TimerSectionCard>
-          <Heading size="2xl" className="text-white">
-            Log in
-          </Heading>
-          <Text className={`mt-2 ${mutedTextClassName}`}>Welcome back</Text>
+          <Text style={{fontSize: 34, fontWeight: 'bold', color: '#ffffff', lineHeight: 40}}>Log in</Text>
+          <Text className={`${mutedTextClassName} text-lg mb-6`}>Welcome back</Text>
 
-          <FormControl isInvalid={!!emailError} size="lg" className="w-full mt-4">
-            <FormControlLabel>
-              <FormControlLabelText size="md" className={labelClassName}>
-                Email
-              </FormControlLabelText>
-            </FormControlLabel>
-            <Input
-              size="lg"
-              isDisabled={isLoading}
-              isInvalid={!!emailError}
-              className={glassInputClassName}
-            >
-              <InputField
-                placeholder="Enter your email"
-                placeholderTextColor={PLACEHOLDER_COLOR}
-                value={email}
-                onChangeText={(text) => {
-                  setEmail(text.toLowerCase());
-                  if (emailError) setEmailError('');
-                }}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                accessibilityLabel="Email"
-                className={inputFieldClassName}
-                cursorColor="#ffffff"
-                selectionColor="white"
-              />
-            </Input>
-            {emailError ? (
-              <FormControlError>
-                <FormControlErrorIcon as={AlertCircleIcon} />
-                <FormControlErrorText size="md" className="text-error-400">
-                  {emailError}
-                </FormControlErrorText>
-              </FormControlError>
-            ) : null}
-          </FormControl>
+          <FieldRow label="Email:" isFirst>
+            <TextInput
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text.toLowerCase());
+                if (emailError) setEmailError('');
+              }}
+              placeholder="Enter email"
+              placeholderTextColor="rgba(255,255,255,0.5)"
+              editable={!isLoading}
+              accessibilityLabel="Email"
+              className={inputClassName}
+              cursorColor="#ffffff"
+              selectionColor="white"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              autoCorrect={false}
+            />
+          </FieldRow>
+          {emailError ? (
+            <Text className="text-error-400 text-sm mt-1">{emailError}</Text>
+          ) : null}
 
-          <FormControl isInvalid={!!passwordError} size="lg" className="w-full mt-6">
-            <FormControlLabel>
-              <FormControlLabelText size="md" className={labelClassName}>
-                Password
-              </FormControlLabelText>
-            </FormControlLabel>
-            <Input
-              size="lg"
-              isDisabled={isLoading}
-              isInvalid={!!passwordError}
-              className={glassInputClassName}
-            >
-              <InputField
-                placeholder="Enter your password"
-                placeholderTextColor={PLACEHOLDER_COLOR}
-                value={password}
-                onChangeText={(text) => {
-                  setPassword(text);
-                  if (passwordError) setPasswordError('');
-                }}
-                secureTextEntry={!showPassword}
-                accessibilityLabel="Password"
-                className={inputFieldClassName}
-                cursorColor="#ffffff"
-                selectionColor="white"
-              />
-              <InputSlot
-                onPress={() => setShowPassword((prev) => !prev)}
-                className="mr-3"
-              >
-                <InputIcon
-                  as={showPassword ? EyeIcon : EyeOffIcon}
-                  className="text-white"
-                />
-              </InputSlot>
-            </Input>
-            {passwordError ? (
-              <FormControlError>
-                <FormControlErrorIcon as={AlertCircleIcon} />
-                <FormControlErrorText size="md" className="text-error-400">
-                  {passwordError}
-                </FormControlErrorText>
-              </FormControlError>
-            ) : null}
-          </FormControl>
-
-          <HStack className="justify-between my-5 items-center">
-            <Checkbox
-              value="remember"
-              size="md"
-              isChecked={rememberMe}
-              onChange={setRememberMe}
-              isDisabled={isLoading}
-            >
-              <CheckboxIndicator>
-                <CheckboxIcon as={CheckIcon} />
-              </CheckboxIndicator>
-              <CheckboxLabel className={mutedTextClassName}>Remember me</CheckboxLabel>
-            </Checkbox>
-
+          <FieldRow label="Password:">
+            <TextInput
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+                if (passwordError) setPasswordError('');
+              }}
+              placeholder="Enter password"
+              placeholderTextColor="rgba(255,255,255,0.5)"
+              editable={!isLoading}
+              accessibilityLabel="Password"
+              className={inputClassName}
+              cursorColor="#ffffff"
+              selectionColor="white"
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
             <Pressable
-              onPress={() => navigation.navigate('PasswordReset')}
+              onPress={() => setShowPassword((prev) => !prev)}
               disabled={isLoading}
-              accessibilityRole="link"
+              accessibilityRole="button"
+              accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+              className="ml-2 p-1"
             >
-              <Text className={`${timerSessionResetLinkClassName} underline`}>
-                Forgot password?
-              </Text>
+              <Icon
+                as={showPassword ? EyeIcon : EyeOffIcon}
+                className="text-white"
+                size="md"
+              />
             </Pressable>
-          </HStack>
+          </FieldRow>
+          {passwordError ? (
+            <Text className="text-error-400 text-sm mt-1">{passwordError}</Text>
+          ) : null}
+
+
 
           <TimerOutlineButton
             label="Log in"
@@ -215,17 +159,38 @@ const LoginScreenGluestack: React.FC = () => {
             onPress={() => void handleLogin()}
             disabled={isLoading}
             isLoading={isLoading}
-            variant="primary"
-            size="lg"
+            variant="solid"
+            size="xl"
+            className="mt-4"
             accessibilityLabel="Log in"
           />
         </TimerSectionCard>
 
-        <Link onPress={() => navigation.navigate('SignUpGluestack')} disabled={isLoading}>
-          <LinkText size="md" className={`${mutedTextClassName} text-center`}>
-            Don&apos;t have an account? Sign up
-          </LinkText>
-        </Link>
+
+        <View className="w-full items-center mt-6 mb-2 gap-6">
+          <Pressable
+            onPress={() => navigation.navigate('PasswordReset')}
+            disabled={isLoading}
+            accessibilityRole="link"
+            className="items-center"
+          >
+            <Text style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff', lineHeight: 20}}>
+              Forgot password?
+            </Text>
+          </Pressable>
+
+          <Link
+            onPress={() => navigation.navigate('SignUpGluestack')}
+            disabled={isLoading}
+            className="items-center"
+          >
+            <LinkText style={{fontSize: 18, fontWeight: 'bold', color: '#ffffff', lineHeight: 20}}>
+              Don&apos;t have an account? Sign up
+            </LinkText>
+          </Link>
+        </View>
+
+
       </VStack>
     </ScreenScrollLayout>
   );

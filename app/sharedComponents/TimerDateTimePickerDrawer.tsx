@@ -2,7 +2,7 @@ import DateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
 import React from 'react';
-import { ImageBackground, Platform, StyleSheet, View } from 'react-native';
+import { Image, ImageBackground, Platform, StyleSheet, View } from 'react-native';
 import {
   Drawer,
   DrawerBackdrop,
@@ -10,11 +10,11 @@ import {
   DrawerContent,
   DrawerHeader,
 } from '@/components/ui/drawer';
-import { CloseIcon, Icon } from '@/components/ui/icon';
 import { Heading } from '@/components/ui/heading';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 
 const DATE_PICKER_BG = require('../../assets/images/bg-date-picker.png');
+const SPARKLE_ICON = require('../../assets/images/sparkle.png');
 
 type TimerDateTimePickerDrawerProps = {
   isOpen: boolean;
@@ -72,7 +72,11 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
               {title}
             </Heading>
             <DrawerCloseButton className="p-1">
-              <Icon as={CloseIcon} className="text-white" size="xl" />
+              <Image
+                source={SPARKLE_ICON}
+                style={styles.closeIcon}
+                accessibilityLabel="Close"
+              />
             </DrawerCloseButton>
           </DrawerHeader>
             <View style={styles.pickerScale}>
@@ -132,6 +136,11 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 36,
     alignItems: 'center',
+  },
+  closeIcon: {
+    width: 40,
+    height: 40,
+    resizeMode: 'contain',
   },
 });
 

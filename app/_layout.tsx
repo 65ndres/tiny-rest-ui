@@ -4,7 +4,7 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemL
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Dimensions, Image, ImageBackground, ImageStyle, StatusBar, StyleSheet, Text, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { ActivityIndicator, Animated, Dimensions, Image, ImageBackground, ImageStyle, StatusBar, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { AudioPlaybackProvider } from "./context/AudioPlaybackContext";
@@ -111,7 +111,7 @@ const CustomDrawerContent: React.FC<any> = (props) => {
   const { presentPaywall } = useRevenueCat();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const isProUser = user?.subscription_type === 'pro';
-  const alwaysAllowedRoutes = new Set(['Home', 'FeaturedScreen', 'Profile', 'Timer', 'Settings', 'NapTimeline', 'AddFeeding', 'Sounds']);
+  const alwaysAllowedRoutes = new Set(['Home', 'Profile', 'Timer', 'Settings']);
   const hiddenRoutes = new Set(['NewConversation', 'Conversation', 'Subscription']);
 
   const handleLogout = async () => {
@@ -152,16 +152,9 @@ const CustomDrawerContent: React.FC<any> = (props) => {
               <DrawerItem
                 key={route.key}
                 label={() => (
-                  <View style={styles.drawerItemRow}>
-                    <Text style={[styles.drawerLabel, !isAllowed && styles.disabledDrawerLabel]}>
-                      {labelText}
-                    </Text>
-                    {!isAllowed && (
-                      <View style={styles.proLabel}>
-                        <Text style={styles.proLabelText}>Pro</Text>
-                      </View>
-                    )}
-                  </View>
+                  <Text style={[styles.drawerLabel, !isAllowed && styles.disabledDrawerLabel]}>
+                    {labelText}
+                  </Text>
                 )}
                 onPress={() => {
                   if (isAllowed) {
@@ -568,26 +561,6 @@ const styles = StyleSheet.create({
   disabledDrawerLabel: {
     opacity: 0.45,
   },
-  drawerItemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  } as ViewStyle,
-  proLabel: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 6,
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
-  } as ViewStyle,
-  proLabelText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  } as TextStyle,
   logoutLabel: {
     textAlign: 'center',
     color: 'white',

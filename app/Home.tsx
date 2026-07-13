@@ -17,6 +17,8 @@ import {
   fetchSleepPrediction,
   formatPredictionDisplay,
 } from '@/app/utils/sleepPrediction';
+import { useAuth } from './context/AuthContext';
+import { useRevenueCat } from './context/RevenueCatContext';
 import HomeRoutineCard from './sharedComponents/home/HomeRoutineCard';
 import HomeTipCard from './sharedComponents/home/HomeTipCard';
 import ScreenScrollLayout from './sharedComponents/ScreenScrollLayout';
@@ -33,6 +35,9 @@ type NavigationProp = DrawerNavigationProp<RootDrawerParamList, 'Home'>;
 
 const Home: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const { user } = useAuth();
+  const { presentPaywall } = useRevenueCat();
+  const isProUser = user?.subscription_type === 'pro';
   const [heroLabel, setHeroLabel] = useState('next nap');
   const [heroValue, setHeroValue] = useState('--:--');
   const [heroSubtitle, setHeroSubtitle] = useState<string | undefined>();
@@ -40,6 +45,17 @@ const Home: React.FC = () => {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+
+  const navigateOrPaywall = useCallback(
+    (route: keyof Omit<RootDrawerParamList, 'Home' | 'Timer'>) => {
+      if (!isProUser) {
+        void presentPaywall();
+        return;
+      }
+      navigation.navigate(route);
+    },
+    [isProUser, navigation, presentPaywall]
+  );
 
   const loadHomeData = useCallback(async () => {
     setIsLoading(true);
@@ -114,23 +130,26 @@ const Home: React.FC = () => {
             title="Add feeding"
             subtitle="Log a bottle or nursing session"
             iconName="water-sharp"
-            onPress={() => navigation.navigate('AddFeeding')}
+            onPress={() => navigateOrPaywall('AddFeeding')}
             accessibilityLabel="Add feeding"
+            dimmed={!isProUser}
           />
 
           <HomeRoutineCard
             title="View timeline"
             subtitle="See today's schedule"
             iconName="calendar-sharp"
-            onPress={() => navigation.navigate('NapTimeline')}
+            onPress={() => navigateOrPaywall('NapTimeline')}
             accessibilityLabel="View timeline"
+            dimmed={!isProUser}
           />
           <HomeRoutineCard
             title="Soothing sounds"
             subtitle="White noise & lullabies"
             iconName="musical-notes-sharp"
-            onPress={() => navigation.navigate('Sounds')}
+            onPress={() => navigateOrPaywall('Sounds')}
             accessibilityLabel="Soothing sounds"
+            dimmed={!isProUser}
           />
       </VStack>
     </ScreenScrollLayout>

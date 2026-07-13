@@ -11,6 +11,7 @@ type HomeRoutineCardProps = {
   iconName: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
   accessibilityLabel: string;
+  dimmed?: boolean;
 };
 
 const HomeRoutineCard: React.FC<HomeRoutineCardProps> = ({
@@ -19,9 +20,11 @@ const HomeRoutineCard: React.FC<HomeRoutineCardProps> = ({
   iconName,
   onPress,
   accessibilityLabel,
+  dimmed = false,
 }) => (
   <Pressable
     className={homeRoutineCardClassName}
+    style={dimmed ? { opacity: 0.45 } : undefined}
     onPress={onPress}
     accessibilityRole="button"
     accessibilityLabel={accessibilityLabel}

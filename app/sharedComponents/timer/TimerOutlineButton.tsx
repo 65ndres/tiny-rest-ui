@@ -18,13 +18,19 @@ type TimerOutlineButtonProps = {
   accessibilityLabel?: string;
   className?: string;
   variant?: 'outline' | 'primary' | 'solid';
-  size?: 'md' | 'lg';
+  size?: 'md' | 'lg' | 'xl';
 };
 
 const variantClassName = {
   outline: timerOutlineButtonClassName,
   primary: timerPrimaryButtonClassName,
   solid: timerSolidButtonClassName,
+} as const;
+
+const sizeStyles = {
+  md: { labelClassName: 'text-base font-semibold', iconSize: 20 },
+  lg: { labelClassName: 'text-lg font-semibold', iconSize: 22 },
+  xl: { labelClassName: 'text-xl font-semibold', iconSize: 24 },
 } as const;
 
 const TimerOutlineButton: React.FC<TimerOutlineButtonProps> = ({
@@ -41,11 +47,7 @@ const TimerOutlineButton: React.FC<TimerOutlineButtonProps> = ({
   const baseClassName = variantClassName[variant];
   const contentColor =
     variant === 'solid' ? TIMER_SOLID_BUTTON_CONTENT_COLOR : 'white';
-  const labelClassName =
-    size === 'lg'
-      ? 'text-lg font-semibold'
-      : 'text-base font-semibold';
-  const iconSize = size === 'lg' ? 22 : 20;
+  const { labelClassName, iconSize } = sizeStyles[size];
 
   return (
   <Pressable

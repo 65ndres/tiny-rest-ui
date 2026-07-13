@@ -15,7 +15,7 @@ const AppScreenFooter: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <VStack className="w-full items-center justify-center flex-1" space="xs">
+      <VStack className="w-full items-center justify-center flex-1 p-3" space="xs">
         <Image
           source={require('@/assets/images/footer-logo.png')}
           style={styles.logo}
@@ -30,12 +30,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
   } as ViewStyle,
   logo: {
+    marginTop: 15,
     height: 100,
-    // width: 70,
   },
 });
 

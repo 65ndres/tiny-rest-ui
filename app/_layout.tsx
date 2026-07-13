@@ -233,7 +233,6 @@ const AuthenticatedNavigator: React.FC = () => {
         name="Home"
         component={Home}
         options={{ 
-          headerLeft: () => <Image source={require('../assets/images/splash-icon.png')} style={styles.logoImage} />,
           drawerLabel: 'HOME', headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>HOME</Text> }}
       />
       <Drawer.Screen

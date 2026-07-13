@@ -2,7 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { ActivityIndicator, Pressable } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { timerOutlineButtonClassName, timerPrimaryButtonClassName } from '@/app/constants/screenLayout';
+import {
+  TIMER_SOLID_BUTTON_CONTENT_COLOR,
+  timerOutlineButtonClassName,
+  timerPrimaryButtonClassName,
+  timerSolidButtonClassName,
+} from '@/app/constants/screenLayout';
 
 type TimerOutlineButtonProps = {
   label: string;
@@ -12,9 +17,15 @@ type TimerOutlineButtonProps = {
   isLoading?: boolean;
   accessibilityLabel?: string;
   className?: string;
-  variant?: 'outline' | 'primary';
+  variant?: 'outline' | 'primary' | 'solid';
   size?: 'md' | 'lg';
 };
+
+const variantClassName = {
+  outline: timerOutlineButtonClassName,
+  primary: timerPrimaryButtonClassName,
+  solid: timerSolidButtonClassName,
+} as const;
 
 const TimerOutlineButton: React.FC<TimerOutlineButtonProps> = ({
   label,
@@ -27,12 +38,13 @@ const TimerOutlineButton: React.FC<TimerOutlineButtonProps> = ({
   variant = 'outline',
   size = 'md',
 }) => {
-  const baseClassName =
-    variant === 'primary' ? timerPrimaryButtonClassName : timerOutlineButtonClassName;
+  const baseClassName = variantClassName[variant];
+  const contentColor =
+    variant === 'solid' ? TIMER_SOLID_BUTTON_CONTENT_COLOR : 'white';
   const labelClassName =
     size === 'lg'
-      ? 'text-white text-lg font-semibold'
-      : 'text-white text-base font-semibold';
+      ? 'text-lg font-semibold'
+      : 'text-base font-semibold';
   const iconSize = size === 'lg' ? 22 : 20;
 
   return (
@@ -44,18 +56,20 @@ const TimerOutlineButton: React.FC<TimerOutlineButtonProps> = ({
     accessibilityLabel={accessibilityLabel ?? label}
   >
     {isLoading ? (
-      <ActivityIndicator color="white" size="small" />
+      <ActivityIndicator color={contentColor} size="small" />
     ) : (
       <>
         {iconName ? (
           <Ionicons
             name={iconName}
             size={iconSize}
-            color="white"
+            color={contentColor}
             style={{ marginRight: 8 }}
           />
         ) : null}
-        <Text className={labelClassName}>{label}</Text>
+        <Text className={labelClassName} style={{ color: contentColor }}>
+          {label}
+        </Text>
       </>
     )}
   </Pressable>

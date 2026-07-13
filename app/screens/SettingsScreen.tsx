@@ -175,10 +175,7 @@ const SettingsScreen: React.FC = () => {
                 accessibilityLabel="Set baby birthdate"
                 size="lg"
               />
-            </TimerSectionCard>
 
-            <TimerSectionCard>
-              <Text className={timerSectionLabelClassName}>Daily naps</Text>
               <TimerSettingRow
                 label="Daily naps:"
                 value={formatNapCount(dailyNapCount)}
@@ -186,7 +183,6 @@ const SettingsScreen: React.FC = () => {
                 onPress={pickDailyNapCount}
                 disabled={isSaving}
                 accessibilityLabel="Select daily nap count"
-                isFirst
                 size="lg"
               />
             </TimerSectionCard>
@@ -198,6 +194,7 @@ const SettingsScreen: React.FC = () => {
               disabled={isSaving}
               isLoading={isSaving}
               size="lg"
+              variant="solid"
             />
           </>
         )}

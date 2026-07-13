@@ -337,7 +337,7 @@ const TimerScreen: React.FC = () => {
             onPress={handlePlayStopPress}
             disabled={isSubmitting}
             isLoading={isStarting}
-            variant="primary"
+            variant="solid"
             size="lg"
             className="mt-4"
             accessibilityLabel={isRunning ? 'Stop' : playButtonLabel}
@@ -350,6 +350,7 @@ const TimerScreen: React.FC = () => {
             isLoading={isSubmitting}
             className="mt-3"
             size="lg"
+            variant="solid"
           />
           <Pressable
             onPress={handleReset}

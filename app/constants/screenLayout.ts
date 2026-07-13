@@ -59,6 +59,9 @@ export const timerOutlineButtonClassName =
   'w-full rounded-[15px] border border-white/30 py-4 items-center justify-center flex-row active:opacity-80';
 export const timerPrimaryButtonClassName =
   'w-full rounded-[15px] border border-white/50 bg-white/30 py-4 items-center justify-center flex-row active:opacity-80';
+export const timerSolidButtonClassName =
+  'w-full rounded-[15px] border border-white bg-white py-4 items-center justify-center flex-row active:opacity-80';
+export const TIMER_SOLID_BUTTON_CONTENT_COLOR = '#63488b';
 export const timerResetLinkClassName = 'text-white/75 text-sm text-center mt-3';
 export const timerSessionResetLinkClassName =
   'text-white/75 text-base text-center mt-3';

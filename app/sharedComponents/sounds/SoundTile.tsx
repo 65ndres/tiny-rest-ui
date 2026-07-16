@@ -6,8 +6,8 @@ import {
 } from 'react-native';
 import type { SoundTrack } from '@/app/constants/soundCatalog';
 import {
-  GLASS_BORDER_COLOR_ACTIVE,
-  soundTileClassName,
+  CARD_BORDER_COLOR,
+  GLASS_BORDER_COLOR,
 } from '@/app/constants/screenLayout';
 
 type SoundTileProps = {
@@ -28,10 +28,15 @@ const SoundTile: React.FC<SoundTileProps> = ({
   return (
     <Pressable
       accessibilityLabel={track.title}
-      className={soundTileClassName}
+      accessibilityState={{ selected: isActive, disabled: !playable }}
       onPress={onPress}
       disabled={!playable}
-      style={ styles.tile}
+      style={[
+        styles.tile,
+        { width: tileSize, height: tileSize },
+        isActive ? styles.tileActive : styles.tileInactive,
+        !playable ? styles.tileDisabled : null,
+      ]}
     >
       <ImageBackground
         source={track.coverImage}
@@ -47,24 +52,25 @@ export default SoundTile;
 
 const styles = StyleSheet.create({
   tile: {
-    borderColor: GLASS_BORDER_COLOR_ACTIVE,
-    borderWidth: 2,
-    width: 110,
-    height: 110,
     borderRadius: 13,
-    overflow: 'hidden'
+    overflow: 'hidden',
   },
-  wrapperDisabled: {
-    opacity: 0.7,
+  tileInactive: {
+    borderWidth: 2,
+    borderColor: GLASS_BORDER_COLOR,
   },
-  wrapperPressed: {
-    opacity: 0.8,
+  tileActive: {
+    borderWidth: 3,
+    borderColor: CARD_BORDER_COLOR,
+  },
+  tileDisabled: {
+    opacity: 0.55,
   },
   cover: {
     width: '100%',
     height: '100%',
   },
   coverImage: {
-    borderRadius: 13,
+    borderRadius: 11,
   },
 });

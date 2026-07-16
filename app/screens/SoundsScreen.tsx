@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -11,11 +11,10 @@ import SoundTile from '@/app/sharedComponents/sounds/SoundTile';
 import VolumeOverlay from '@/app/sharedComponents/sounds/VolumeOverlay';
 
 const TILE_GAP = 10;
-const NUM_COLUMNS = 3;
 const VOLUME_OVERLAY_HEIGHT = 68;
 
 const SoundsScreen: React.FC = () => {
-  const { activeTrackId, isPlaying, volume, toggleTrack, setVolume } =
+  const { activeTrackId, volume, toggleTrack, setVolume } =
     useAudioPlayback();
 
   return (
@@ -30,8 +29,8 @@ const SoundsScreen: React.FC = () => {
               <SoundTile
                 key={item.id}
                 track={item}
-                tileSize={80}
-                isActive={activeTrackId === item.id && isPlaying}
+                tileSize={110}
+                isActive={activeTrackId === item.id}
                 onPress={() => toggleTrack(item.id)}
               />
             ))}

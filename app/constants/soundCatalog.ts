@@ -5,24 +5,26 @@ export type SoundTrack = {
   coverImage: number;
 };
 
-const DOT_GRID_COVER = require('../../assets/images/round.png');
+const WHITE_NOISE = require('../../assets/audio/white_noise_1_loop.wav');
 
 export const SOUND_CATALOG: SoundTrack[] = [
   {
     id: 'green-noise',
     title: 'Green Noise',
-    source: require('../../assets/audio/white_noise_1.mp3'),
-    coverImage: DOT_GRID_COVER,
+    source: WHITE_NOISE,
+    coverImage: require('../../assets/images/sound1.png'),
   },
   {
     id: 'night-rain',
     title: 'Night Rain',
-    coverImage: DOT_GRID_COVER,
+    source: WHITE_NOISE,
+    coverImage: require('../../assets/images/sound2.png'),
   },
   {
     id: 'tranquil-ocean',
     title: 'Tranquil Ocean',
-    coverImage: DOT_GRID_COVER,
+    source: WHITE_NOISE,
+    coverImage: require('../../assets/images/sound3.png'),
   },
 ];
 

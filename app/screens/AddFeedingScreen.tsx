@@ -323,8 +323,13 @@ const AddFeedingScreen: React.FC = () => {
   };
 
   const handleNursingSubmit = async () => {
-    if (!startTime || !endTime || !activeTimerRunIdRef.current) {
-      Alert.alert('Error', 'Stop the timer before saving.');
+    if (!startTime || !endTime) {
+      Alert.alert('Error', 'Start and end times are required.');
+      return;
+    }
+
+    if (endTime.getTime() <= startTime.getTime()) {
+      Alert.alert('Error', 'End time must be after start time.');
       return;
     }
 
@@ -335,6 +340,14 @@ const AddFeedingScreen: React.FC = () => {
       normalizedEnd.getTime() - normalizedStart.getTime()
     );
 
+    const payload = {
+      start_time: normalizedStart.toISOString(),
+      end_time: normalizedEnd.toISOString(),
+      duration_ms: durationMs,
+    };
+
+    const side = activeSide ?? selectedSide;
+
     setIsSubmitting(true);
     try {
       const token = await AsyncStorage.getItem('token');
@@ -343,11 +356,17 @@ const AddFeedingScreen: React.FC = () => {
         return;
       }
 
-      await submitTimerRun(token, activeTimerRunIdRef.current, {
-        start_time: normalizedStart.toISOString(),
-        end_time: normalizedEnd.toISOString(),
-        duration_ms: durationMs,
-      });
+      let timerRunId = activeTimerRunIdRef.current;
+      if (!timerRunId) {
+        const timerRun = await createTimerRun(
+          token,
+          normalizedStart.toISOString(),
+          { run_type: runTypeForSide(side) }
+        );
+        timerRunId = timerRun.id;
+      }
+
+      await submitTimerRun(token, timerRunId, payload);
 
       Alert.alert('Success', 'Nursing session saved.');
       resetNursing();

@@ -455,6 +455,15 @@ export const submitTimerRun = async (
   return response.data.timer_run;
 };
 
+export const deleteTimerRun = async (
+  token: string,
+  id: number
+): Promise<void> => {
+  await axios.delete(`${API_URL}/timer_runs/${id}`, {
+    headers: authHeaders(token),
+  });
+};
+
 const dateTimeFormat: Intl.DateTimeFormatOptions = {
   dateStyle: 'medium',
   timeStyle: 'short',
@@ -791,6 +800,14 @@ export const saveTimerHistoryToCache = async (
     TIMER_HISTORY_CACHE_KEY,
     JSON.stringify(sortNewestFirst(sessions))
   );
+};
+
+export const removeTimerSessionFromCache = async (
+  id: string
+): Promise<void> => {
+  const sessions = await loadTimerHistoryFromCache();
+  const next = sessions.filter((session) => session.id !== id);
+  await saveTimerHistoryToCache(next);
 };
 
 export const prependTimerSession = (

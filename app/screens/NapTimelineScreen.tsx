@@ -1,9 +1,11 @@
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Pressable,
   StyleSheet,
   Text,
   View,
@@ -12,11 +14,13 @@ import {
   CalendarProvider,
   TimelineEventProps,
   TimelineList,
+  TimelinePackedEventProps,
   WeekCalendar,
 } from 'react-native-calendars';
 import {
   buildMarkedDatesFromEvents,
   buildTimelineEventsByDate,
+  deleteTimerRun,
   fetchTimerRunsInRange,
   filterSessionsInRange,
   filterTimelineSessions,
@@ -26,6 +30,7 @@ import {
   getWeekRangeForDate,
   loadTimerHistoryFromCache,
   mergeTimelineEventsByDate,
+  removeTimerSessionFromCache,
   type TimerSession,
 } from '@/app/utils/timerHistory';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
@@ -63,6 +68,8 @@ const timelineTheme = {
     borderRadius: 6,
     paddingLeft: 6,
     paddingRight: 6,
+    paddingTop: 4,
+    paddingBottom: 4,
   },
   timeLabel: {
     color: 'rgba(255,255,255,0.75)',
@@ -82,6 +89,9 @@ const timelineTheme = {
   },
 };
 
+const isNumericId = (id: string | undefined): id is string =>
+  !!id && /^\d+$/.test(id);
+
 const NapTimelineScreen: React.FC = () => {
   const today = useMemo(() => formatDateParam(new Date()), []);
   const [currentDate, setCurrentDate] = useState(today);
@@ -89,7 +99,9 @@ const NapTimelineScreen: React.FC = () => {
     Record<string, TimelineEventProps[]>
   >({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
   const fetchedRangesRef = useRef<Set<string>>(new Set());
+  const suppressEventPressRef = useRef(false);
 
   const markedDates = useMemo(
     () => buildMarkedDatesFromEvents(eventsByDate),
@@ -102,6 +114,19 @@ const NapTimelineScreen: React.FC = () => {
     setEventsByDate((current) =>
       mergeTimelineEventsByDate(current, buildTimelineEventsByDate(sessions))
     );
+  }, []);
+
+  const removeEventFromState = useCallback((eventId: string) => {
+    setEventsByDate((current) => {
+      const next: Record<string, TimelineEventProps[]> = {};
+      for (const [date, events] of Object.entries(current)) {
+        const filtered = events.filter((event) => event.id !== eventId);
+        if (filtered.length > 0) {
+          next[date] = filtered;
+        }
+      }
+      return next;
+    });
   }, []);
 
   const loadRange = useCallback(
@@ -172,11 +197,87 @@ const NapTimelineScreen: React.FC = () => {
   );
 
   const handleEventPress = useCallback((event: TimelineEventProps) => {
+    if (suppressEventPressRef.current) {
+      suppressEventPressRef.current = false;
+      return;
+    }
+
     Alert.alert(
       event.summary ?? 'Session',
       `${formatSessionClockTime(String(event.start))} – ${formatSessionClockTime(String(event.end))}\nDuration: ${event.title ?? '—'}`
     );
   }, []);
+
+  const performDelete = useCallback(
+    async (event: TimelinePackedEventProps) => {
+      const eventId = event.id;
+      if (!eventId || isDeleting) return;
+
+      setIsDeleting(true);
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (token && isNumericId(eventId)) {
+          await deleteTimerRun(token, Number(eventId));
+        }
+
+        await removeTimerSessionFromCache(eventId);
+        removeEventFromState(eventId);
+      } catch {
+        Alert.alert('Error', 'Could not delete this entry. Please try again.');
+      } finally {
+        setIsDeleting(false);
+      }
+    },
+    [isDeleting, removeEventFromState]
+  );
+
+  const confirmDelete = useCallback(
+    (event: TimelinePackedEventProps) => {
+      Alert.alert(
+        'Delete entry',
+        'Are you sure you want to delete this session? This cannot be undone.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: () => void performDelete(event),
+          },
+        ]
+      );
+    },
+    [performDelete]
+  );
+
+  const renderEvent = useCallback(
+    (event: TimelinePackedEventProps) => (
+      <View style={styles.eventContent}>
+        <View style={styles.eventTextBlock}>
+          <Text numberOfLines={1} style={styles.eventTitle}>
+            {event.title || 'Event'}
+          </Text>
+          {event.summary ? (
+            <Text numberOfLines={2} style={styles.eventSummary}>
+              {event.summary}
+            </Text>
+          ) : null}
+        </View>
+        <Pressable
+          accessibilityLabel="Delete entry"
+          accessibilityRole="button"
+          hitSlop={8}
+          onPress={() => {
+            suppressEventPressRef.current = true;
+            confirmDelete(event);
+          }}
+          style={styles.deleteButton}
+        >
+          <Ionicons name="trash-outline" size={16} color="#ffffff" />
+        </Pressable>
+      </View>
+    ),
+    [confirmDelete]
+  );
 
   const timelineProps = useMemo(
     () => ({
@@ -185,45 +286,48 @@ const NapTimelineScreen: React.FC = () => {
       rightEdgeSpacing: 24,
       theme: timelineTheme,
       onEventPress: handleEventPress,
+      renderEvent,
     }),
-    [handleEventPress]
+    [handleEventPress, renderEvent]
   );
 
   return (
     <ScreenComponent contentFlex style={styles.screen}>
       <View style={styles.container}>
-      {isLoading ? (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator color="white" size="large" />
-        </View>
-      ) : null}
+        {isLoading || isDeleting ? (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator color="white" size="large" />
+          </View>
+        ) : null}
 
-      <CalendarProvider
-        date={currentDate}
-        onDateChanged={handleDateChanged}
-        onMonthChange={handleMonthChange}
-        showTodayButton
-        disabledOpacity={0.6}
-        theme={calendarTheme}
-        style={styles.provider}
-      >
-        <WeekCalendar
-          markedDates={markedDates}
+        <CalendarProvider
+          date={currentDate}
+          onDateChanged={handleDateChanged}
+          onMonthChange={handleMonthChange}
+          showTodayButton
+          disabledOpacity={0.6}
           theme={calendarTheme}
-          allowShadow={false}
-        />
-        <TimelineList
-          events={eventsByDate}
-          timelineProps={timelineProps}
-          showNowIndicator
-        />
-      </CalendarProvider>
+          style={styles.provider}
+        >
+          <WeekCalendar
+            markedDates={markedDates}
+            theme={calendarTheme}
+            allowShadow={false}
+          />
+          <TimelineList
+            events={eventsByDate}
+            timelineProps={timelineProps}
+            showNowIndicator
+          />
+        </CalendarProvider>
 
-      {!isLoading && Object.keys(eventsByDate).length === 0 ? (
-        <View style={styles.emptyState} pointerEvents="none">
-          <Text style={styles.emptyText}>No sleep or nursing sessions for this period.</Text>
-        </View>
-      ) : null}
+        {!isLoading && Object.keys(eventsByDate).length === 0 ? (
+          <View style={styles.emptyState} pointerEvents="none">
+            <Text style={styles.emptyText}>
+              No sleep or nursing sessions for this period.
+            </Text>
+          </View>
+        ) : null}
       </View>
     </ScreenComponent>
   );
@@ -261,6 +365,28 @@ const styles = StyleSheet.create({
   emptyText: {
     color: 'rgba(255,255,255,0.75)',
     fontSize: 16,
+  },
+  eventContent: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  eventTextBlock: {
+    flexShrink: 1,
+  },
+  eventTitle: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 12,
+  },
+  eventSummary: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 11,
+    marginTop: 2,
+  },
+  deleteButton: {
+    alignSelf: 'flex-start',
+    marginTop: 4,
+    paddingVertical: 2,
   },
 });
 

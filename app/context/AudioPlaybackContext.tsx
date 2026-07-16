@@ -15,8 +15,8 @@ import React, {
 import { getSoundTrackById } from '@/app/constants/soundCatalog';
 
 /** Seconds before track end to start overlapping the next loop. */
-const CROSSFADE_SECONDS = 3;
-const CROSSFADE_STEPS = 60;
+const CROSSFADE_SECONDS = 5;
+const CROSSFADE_STEPS = 80;
 const MONITOR_INTERVAL_MS = 100;
 
 type AudioPlaybackContextValue = {

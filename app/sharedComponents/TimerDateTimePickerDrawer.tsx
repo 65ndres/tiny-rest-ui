@@ -11,6 +11,7 @@ import {
   DrawerHeader,
 } from '@/components/ui/drawer';
 import { Heading } from '@/components/ui/heading';
+import { TIMER_SOLID_BUTTON_CONTENT_COLOR } from '@/app/constants/screenLayout';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 
 const DATE_PICKER_BG = require('../../assets/images/bg-date-picker.png');
@@ -85,8 +86,8 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
                 mode={resolvedMode}
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 onChange={handlePickerChange}
-                themeVariant="dark"
-                textColor="#ffffff"
+                themeVariant="light"
+                textColor={TIMER_SOLID_BUTTON_CONTENT_COLOR}
                 style={styles.picker}
                 maximumDate={mode === 'date' ? new Date() : undefined}
               />

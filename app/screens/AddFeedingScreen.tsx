@@ -517,7 +517,13 @@ const AddFeedingScreen: React.FC = () => {
             )}
           </TimerSectionCard>
 
-          <FeedingHistoryPanel sessions={history} isLoading={historyLoading} />
+          <FeedingHistoryPanel
+            sessions={history}
+            isLoading={historyLoading}
+            onSessionDeleted={(id) =>
+              setHistory((prev) => prev.filter((session) => session.id !== id))
+            }
+          />
         </VStack>
       </ScreenScrollLayout>
 

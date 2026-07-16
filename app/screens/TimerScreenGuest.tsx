@@ -300,7 +300,13 @@ const TimerScreenGuest: React.FC = () => {
           </Pressable>
         </TimerSectionCard>
 
-        <TimerHistoryPanel sessions={history} isLoading={historyLoading} />
+        <TimerHistoryPanel
+          sessions={history}
+          isLoading={historyLoading}
+          onSessionDeleted={(id) =>
+            setHistory((prev) => prev.filter((session) => session.id !== id))
+          }
+        />
       </VStack>
 
       <TimerDateTimePickerDrawer

@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useMemo } from 'react';
-import { View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Alert, Pressable, View } from 'react-native';
 import {
   Accordion,
   AccordionContent,
@@ -15,11 +16,13 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { homeRoutineCardClassName } from '@/app/constants/screenLayout';
 import {
+  deleteTimerRun,
   formatDuration,
   formatFeedingSessionDetails,
   formatFeedingSessionTitle,
   formatSessionClockTime,
   groupSessionsByDay,
+  removeTimerSessionFromCache,
   type TimerSession,
 } from '@/app/utils/timerHistory';
 import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
@@ -31,6 +34,7 @@ type SessionHistoryPanelProps = {
   isLoading: boolean;
   emptyMessage: string;
   variant?: SessionHistoryVariant;
+  onSessionDeleted?: (sessionId: string) => void;
 };
 
 type MetaRowData = {
@@ -38,6 +42,8 @@ type MetaRowData = {
   label: string;
   value: string;
 };
+
+const isNumericId = (id: string): boolean => /^\d+$/.test(id);
 
 const MetaRow = ({ iconName, label, value }: MetaRowData) => (
   <View className="flex-row items-center mt-1">
@@ -119,8 +125,50 @@ const SessionHistoryPanel: React.FC<SessionHistoryPanelProps> = ({
   isLoading,
   emptyMessage,
   variant = 'sleep',
+  onSessionDeleted,
 }) => {
+  const [isDeleting, setIsDeleting] = useState(false);
   const dayGroups = useMemo(() => groupSessionsByDay(sessions), [sessions]);
+
+  const performDelete = useCallback(
+    async (sessionId: string) => {
+      if (isDeleting) return;
+
+      setIsDeleting(true);
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (token && isNumericId(sessionId)) {
+          await deleteTimerRun(token, Number(sessionId));
+        }
+
+        await removeTimerSessionFromCache(sessionId);
+        onSessionDeleted?.(sessionId);
+      } catch {
+        Alert.alert('Error', 'Could not delete this entry. Please try again.');
+      } finally {
+        setIsDeleting(false);
+      }
+    },
+    [isDeleting, onSessionDeleted]
+  );
+
+  const confirmDelete = useCallback(
+    (sessionId: string) => {
+      Alert.alert(
+        'Delete entry',
+        'Are you sure you want to delete this session? This cannot be undone.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: () => void performDelete(sessionId),
+          },
+        ]
+      );
+    },
+    [performDelete]
+  );
 
   return (
     <TimerSectionCard title="History">
@@ -175,6 +223,15 @@ const SessionHistoryPanel: React.FC<SessionHistoryPanelProps> = ({
                           />
                         ))}
                       </VStack>
+                      <Pressable
+                        accessibilityLabel="Delete entry"
+                        accessibilityRole="button"
+                        hitSlop={8}
+                        onPress={() => confirmDelete(session.id)}
+                        className="ml-2 self-start"
+                      >
+                        <Ionicons name="trash-outline" size={22} color="#ffffff" />
+                      </Pressable>
                     </View>
                   ))}
                 </VStack>

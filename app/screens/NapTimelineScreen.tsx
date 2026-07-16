@@ -33,6 +33,7 @@ import {
   removeTimerSessionFromCache,
   type TimerSession,
 } from '@/app/utils/timerHistory';
+import { TIMER_SOLID_BUTTON_CONTENT_COLOR } from '@/app/constants/screenLayout';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
 
 const calendarTheme = {
@@ -272,7 +273,11 @@ const NapTimelineScreen: React.FC = () => {
           }}
           style={styles.deleteButton}
         >
-          <Ionicons name="trash-outline" size={16} color="#ffffff" />
+          <Ionicons
+            name="trash-outline"
+            size={22}
+            color={TIMER_SOLID_BUTTON_CONTENT_COLOR}
+          />
         </Pressable>
       </View>
     ),
@@ -374,13 +379,14 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   eventTitle: {
-    color: '#ffffff',
-    fontWeight: '600',
-    fontSize: 12,
+    color: TIMER_SOLID_BUTTON_CONTENT_COLOR,
+    fontWeight: '700',
+    fontSize: 15,
   },
   eventSummary: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 11,
+    color: TIMER_SOLID_BUTTON_CONTENT_COLOR,
+    fontWeight: '600',
+    fontSize: 13,
     marginTop: 2,
   },
   deleteButton: {

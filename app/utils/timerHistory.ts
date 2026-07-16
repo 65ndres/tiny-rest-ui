@@ -207,8 +207,8 @@ export const filterSessionsInRange = (
   });
 };
 
-export const NAP_TIMELINE_EVENT_COLOR = '#4ade80';
-export const NURSING_TIMELINE_EVENT_COLOR = '#ff7f50';
+export const NAP_TIMELINE_EVENT_COLOR = '#ffffff';
+export const NURSING_TIMELINE_EVENT_COLOR = '#ffffff';
 
 export const TIMELINE_RUN_TYPES: TimerRunType[] = [
   'sleeping',

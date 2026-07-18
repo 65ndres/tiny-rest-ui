@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  ImageBackground,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -9,6 +9,7 @@ import {
 import type { SoundTrack } from '@/app/constants/soundCatalog';
 import {
   CARD_BORDER_COLOR,
+  GLASS_BACKGROUND_COLOR,
   GLASS_BORDER_COLOR,
 } from '@/app/constants/screenLayout';
 
@@ -19,6 +20,11 @@ type SoundTileProps = {
   onPress: () => void;
 };
 
+const PLAY_BUTTON = require('../../../assets/images/play-button.png');
+
+/** Image inset so artwork sits smaller and centered in the glass tile. */
+const IMAGE_SCALE = 0.42;
+
 const SoundTile: React.FC<SoundTileProps> = ({
   track,
   isActive,
@@ -26,6 +32,7 @@ const SoundTile: React.FC<SoundTileProps> = ({
   onPress,
 }) => {
   const playable = track.source != null;
+  const imageSize = Math.round(tileSize * IMAGE_SCALE);
 
   return (
     <Pressable
@@ -33,7 +40,11 @@ const SoundTile: React.FC<SoundTileProps> = ({
       accessibilityState={{ selected: isActive, disabled: !playable }}
       onPress={onPress}
       disabled={!playable}
-      style={[styles.wrapper, { width: tileSize }, !playable ? styles.tileDisabled : null]}
+      style={[
+        styles.wrapper,
+        { width: tileSize },
+        !playable ? styles.tileDisabled : null,
+      ]}
     >
       <View
         style={[
@@ -42,11 +53,10 @@ const SoundTile: React.FC<SoundTileProps> = ({
           isActive ? styles.tileActive : styles.tileInactive,
         ]}
       >
-        <ImageBackground
-          source={track.coverImage}
-          style={styles.cover}
-          imageStyle={styles.coverImage}
-          resizeMode="cover"
+        <Image
+          source={PLAY_BUTTON}
+          style={{ width: imageSize, height: imageSize }}
+          resizeMode="contain"
         />
       </View>
       <Text style={styles.title} numberOfLines={2}>
@@ -63,7 +73,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tile: {
-    borderRadius: 13,
+    borderRadius: 15,
+    backgroundColor: GLASS_BACKGROUND_COLOR,
+    alignItems: 'center',
+    justifyContent: 'center',
     overflow: 'hidden',
   },
   tileInactive: {
@@ -76,13 +89,6 @@ const styles = StyleSheet.create({
   },
   tileDisabled: {
     opacity: 0.55,
-  },
-  cover: {
-    width: '100%',
-    height: '100%',
-  },
-  coverImage: {
-    borderRadius: 11,
   },
   title: {
     marginTop: 8,

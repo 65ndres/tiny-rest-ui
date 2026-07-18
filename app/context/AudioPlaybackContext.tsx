@@ -183,20 +183,30 @@ export const AudioPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
       const [playerA, playerB] = players;
       const targetVolume = volumeRef.current;
 
-      playerA.loop = false;
-      playerB.loop = false;
-      playerA.replace(track.source);
-      playerB.replace(track.source);
-      playerA.volume = targetVolume;
-      playerB.volume = 0;
       activeIndexRef.current = 0;
-      void playerA.seekTo(0);
-      playerA.play();
-
       activeTrackIdRef.current = trackId;
       setActiveTrackId(trackId);
       setIsPlaying(true);
-      startMonitor();
+
+      if (track.seamlessLoop) {
+        playerA.loop = false;
+        playerB.loop = false;
+        playerA.replace(track.source);
+        playerB.replace(track.source);
+        playerA.volume = targetVolume;
+        playerB.volume = 0;
+        void playerA.seekTo(0);
+        playerA.play();
+        startMonitor();
+      } else {
+        playerA.loop = true;
+        playerB.loop = false;
+        playerA.replace(track.source);
+        playerA.volume = targetVolume;
+        playerB.volume = 0;
+        void playerA.seekTo(0);
+        playerA.play();
+      }
 
       setTimeout(() => {
         playerA.setActiveForLockScreen(true, {

@@ -3,6 +3,8 @@ export type SoundTrack = {
   title: string;
   source?: number;
   coverImage: number;
+  /** Dual-player crossfade loop (Night Rain / White Noise). */
+  seamlessLoop?: boolean;
 };
 
 const NIGHT_RAIN = require('../../assets/audio/white_noise_1_loop.wav');
@@ -22,12 +24,14 @@ export const SOUND_CATALOG: SoundTrack[] = [
     title: 'Night Rain',
     source: NIGHT_RAIN,
     coverImage: require('../../assets/images/sound2.png'),
+    seamlessLoop: true,
   },
   {
     id: 'tranquil-ocean',
     title: 'White Noise',
     source: WHITE_NOISE,
     coverImage: require('../../assets/images/sound3.png'),
+    seamlessLoop: true,
   },
   {
     id: 'cozy-fireplace',

@@ -3,6 +3,8 @@ import {
   ImageBackground,
   Pressable,
   StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import type { SoundTrack } from '@/app/constants/soundCatalog';
 import {
@@ -31,19 +33,25 @@ const SoundTile: React.FC<SoundTileProps> = ({
       accessibilityState={{ selected: isActive, disabled: !playable }}
       onPress={onPress}
       disabled={!playable}
-      style={[
-        styles.tile,
-        { width: tileSize, height: tileSize },
-        isActive ? styles.tileActive : styles.tileInactive,
-        !playable ? styles.tileDisabled : null,
-      ]}
+      style={[styles.wrapper, { width: tileSize }, !playable ? styles.tileDisabled : null]}
     >
-      <ImageBackground
-        source={track.coverImage}
-        style={styles.cover}
-        imageStyle={styles.coverImage}
-        resizeMode="cover"
-      />
+      <View
+        style={[
+          styles.tile,
+          { width: tileSize, height: tileSize },
+          isActive ? styles.tileActive : styles.tileInactive,
+        ]}
+      >
+        <ImageBackground
+          source={track.coverImage}
+          style={styles.cover}
+          imageStyle={styles.coverImage}
+          resizeMode="cover"
+        />
+      </View>
+      <Text style={styles.title} numberOfLines={2}>
+        {track.title}
+      </Text>
     </Pressable>
   );
 };
@@ -51,6 +59,9 @@ const SoundTile: React.FC<SoundTileProps> = ({
 export default SoundTile;
 
 const styles = StyleSheet.create({
+  wrapper: {
+    alignItems: 'center',
+  },
   tile: {
     borderRadius: 13,
     overflow: 'hidden',
@@ -72,5 +83,12 @@ const styles = StyleSheet.create({
   },
   coverImage: {
     borderRadius: 11,
+  },
+  title: {
+    marginTop: 8,
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

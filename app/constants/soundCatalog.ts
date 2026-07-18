@@ -26,6 +26,12 @@ export const SOUND_CATALOG: SoundTrack[] = [
     source: WHITE_NOISE,
     coverImage: require('../../assets/images/sound3.png'),
   },
+  {
+    id: 'cozy-fireplace',
+    title: 'Cozy Fireplace',
+    source: require('../../assets/audio/sound4.mp3'),
+    coverImage: require('../../assets/images/sound4.png'),
+  },
 ];
 
 export const getSoundTrackById = (id: string): SoundTrack | undefined =>

@@ -1,21 +1,32 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ScrollView,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { SOUND_CATALOG } from '@/app/constants/soundCatalog';
+import { SCREEN_CONTENT_WIDTH_RATIO } from '@/app/constants/screenLayout';
 import { useAudioPlayback } from '@/app/context/AudioPlaybackContext';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
 import SoundTile from '@/app/sharedComponents/sounds/SoundTile';
 import VolumeOverlay from '@/app/sharedComponents/sounds/VolumeOverlay';
 
-const TILE_GAP = 10;
+const TILE_GAP = 12;
+const NUM_COLUMNS = 2;
 const VOLUME_OVERLAY_HEIGHT = 68;
 
 const SoundsScreen: React.FC = () => {
+  const { width: windowWidth } = useWindowDimensions();
   const { activeTrackId, volume, toggleTrack, setVolume } =
     useAudioPlayback();
+
+  const tileSize = useMemo(() => {
+    const contentWidth = windowWidth * SCREEN_CONTENT_WIDTH_RATIO;
+    return Math.floor(
+      (contentWidth - TILE_GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS
+    );
+  }, [windowWidth]);
 
   return (
     <ScreenComponent contentFlex>
@@ -24,12 +35,12 @@ const SoundsScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.tileGrid}
         >
-          <View style={styles.grid}>
+          <View style={[styles.grid, { gap: TILE_GAP, maxWidth: tileSize * NUM_COLUMNS + TILE_GAP }]}>
             {SOUND_CATALOG.map((item) => (
               <SoundTile
                 key={item.id}
                 track={item}
-                tileSize={110}
+                tileSize={tileSize}
                 isActive={activeTrackId === item.id}
                 onPress={() => toggleTrack(item.id)}
               />
@@ -53,8 +64,8 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     justifyContent: 'center',
+    alignSelf: 'center',
     flexWrap: 'wrap',
-    gap: TILE_GAP,
   },
   tileGrid: {
     paddingTop: 16,

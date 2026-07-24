@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import axios from 'axios';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import { Text } from '@/components/ui/text';
@@ -23,6 +24,7 @@ import {
   type TimerSession,
 } from '@/app/utils/timerHistory';
 import {
+  clearWidgetTimerAndRefresh,
   getStoredPausedElapsedForRun,
   refreshWidgetState,
   syncLocalTimerToWidget,
@@ -54,6 +56,7 @@ const TimerScreen: React.FC = () => {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const activeTimerRunIdRef = useRef<number | null>(null);
   const isRunningRef = useRef(false);
+  const loadSeqRef = useRef(0);
 
   const clearTimerInterval = useCallback(() => {
     if (intervalRef.current) {
@@ -102,11 +105,12 @@ const TimerScreen: React.FC = () => {
   }, [clearTimerInterval]);
 
   const loadHistory = useCallback(async () => {
+    const seq = ++loadSeqRef.current;
     setHistoryLoading(true);
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) {
-        setHistory([]);
+        if (seq === loadSeqRef.current) setHistory([]);
         return;
       }
 
@@ -114,6 +118,9 @@ const TimerScreen: React.FC = () => {
         fetchActiveTimerRun(token),
         fetchTimerRuns(token, { run_type: 'sleeping' }),
       ]);
+
+      // Ignore stale responses (e.g. a fetch that started before reset).
+      if (seq !== loadSeqRef.current) return;
 
       setHistory(sleepingRuns);
 
@@ -160,9 +167,9 @@ const TimerScreen: React.FC = () => {
       }
       void refreshWidgetState(token);
     } catch {
-      setHistory([]);
+      if (seq === loadSeqRef.current) setHistory([]);
     } finally {
-      setHistoryLoading(false);
+      if (seq === loadSeqRef.current) setHistoryLoading(false);
     }
   }, [clearTimerInterval]);
 
@@ -350,19 +357,47 @@ const TimerScreen: React.FC = () => {
     if (!shouldReset) return;
 
     const runId = activeTimerRunIdRef.current;
+    // Invalidate any in-flight loadHistory so it can't restore this run.
+    loadSeqRef.current += 1;
     resetAll();
 
     void (async () => {
       const token = await AsyncStorage.getItem('token');
-      if (!token) return;
-      if (runId != null) {
-        try {
-          await deleteTimerRun(token, runId);
-        } catch {
-          // Still refresh widget from server truth.
+      try {
+        if (!token) {
+          await clearWidgetTimerAndRefresh(null);
+          return;
+        }
+
+        let idToDelete = runId;
+        if (idToDelete == null) {
+          const activeRun = await fetchActiveTimerRun(token, {
+            run_type: 'sleeping',
+          });
+          idToDelete = activeRun?.id ?? null;
+        }
+
+        if (idToDelete != null) {
+          await deleteTimerRun(token, idToDelete);
+        }
+
+        await clearWidgetTimerAndRefresh(token);
+        await loadHistory();
+      } catch (error) {
+        const apiMessage =
+          axios.isAxiosError(error) &&
+          typeof error.response?.data?.error === 'string'
+            ? error.response.data.error
+            : null;
+        Alert.alert(
+          'Error',
+          apiMessage ?? 'Could not delete timer run. Please try again.'
+        );
+        if (token) {
+          await clearWidgetTimerAndRefresh(token);
+          await loadHistory();
         }
       }
-      await refreshWidgetState(token);
     })();
   };
 

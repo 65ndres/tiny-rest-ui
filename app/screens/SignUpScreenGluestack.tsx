@@ -143,6 +143,10 @@ const SignUpScreenGluestack: React.FC = () => {
               editable={!isLoading}
               accessibilityLabel="Email"
               className={inputClassName}
+              style={{
+                lineHeight: 25,
+                height: 30,
+              }}
               cursorColor="#ffffff"
               selectionColor="white"
               autoCapitalize="none"

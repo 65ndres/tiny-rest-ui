@@ -178,3 +178,13 @@ export const refreshWidgetState = async (token: string): Promise<void> => {
     // Keep last known widget payload on failure.
   }
 };
+
+/** Drop timer payload from the widget immediately, then show prediction if possible. */
+export const clearWidgetTimerAndRefresh = async (
+  token: string | null
+): Promise<void> => {
+  clearWidgetTimer();
+  reload();
+  if (!token) return;
+  await refreshWidgetState(token);
+};

@@ -522,9 +522,19 @@ export const deleteTimerRun = async (
   token: string,
   id: number
 ): Promise<void> => {
-  await axios.delete(`${API_URL}/timer_runs/${id}`, {
-    headers: authHeaders(token),
-  });
+  try {
+    await axios.delete(`${API_URL}/timer_runs/${id}`, {
+      headers: authHeaders(token),
+      validateStatus: (status) =>
+        (status >= 200 && status < 300) || status === 404,
+    });
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      // Already gone — treat as success for reset/delete flows.
+      return;
+    }
+    throw error;
+  }
 };
 
 const dateTimeFormat: Intl.DateTimeFormatOptions = {

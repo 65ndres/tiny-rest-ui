@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import { Text } from '@/components/ui/text';
@@ -41,6 +42,7 @@ import {
   type TimerSession,
 } from '@/app/utils/timerHistory';
 import {
+  clearWidgetTimerAndRefresh,
   getStoredPausedElapsedForRun,
   refreshWidgetState,
   syncLocalTimerToWidget,
@@ -107,6 +109,7 @@ const AddFeedingScreen: React.FC = () => {
   const startTimeRef = useRef<Date | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const activeTimerRunIdRef = useRef<number | null>(null);
+  const loadSeqRef = useRef(0);
 
   const clearTimerInterval = useCallback(() => {
     if (intervalRef.current) {
@@ -204,11 +207,12 @@ const AddFeedingScreen: React.FC = () => {
   );
 
   const loadFeedingHistory = useCallback(async () => {
+    const seq = ++loadSeqRef.current;
     setHistoryLoading(true);
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) {
-        setHistory([]);
+        if (seq === loadSeqRef.current) setHistory([]);
         return;
       }
 
@@ -217,13 +221,16 @@ const AddFeedingScreen: React.FC = () => {
         fetchTimerRuns(token),
       ]);
 
+      // Ignore stale responses (e.g. a fetch that started before reset).
+      if (seq !== loadSeqRef.current) return;
+
       setHistory(filterFeedingSessions(allRuns));
       applyNursingContextFromRuns(allRuns, activeRun);
       void refreshWidgetState(token);
     } catch {
-      setHistory([]);
+      if (seq === loadSeqRef.current) setHistory([]);
     } finally {
-      setHistoryLoading(false);
+      if (seq === loadSeqRef.current) setHistoryLoading(false);
     }
   }, [applyNursingContextFromRuns]);
 
@@ -436,19 +443,50 @@ const AddFeedingScreen: React.FC = () => {
     if (!shouldReset) return;
 
     const runId = activeTimerRunIdRef.current;
+    // Invalidate any in-flight load so it can't restore this run.
+    loadSeqRef.current += 1;
     resetNursing();
 
     void (async () => {
       const token = await AsyncStorage.getItem('token');
-      if (!token) return;
-      if (runId != null) {
-        try {
-          await deleteTimerRun(token, runId);
-        } catch {
-          // Still refresh widget from server truth.
+      try {
+        if (!token) {
+          await clearWidgetTimerAndRefresh(null);
+          return;
+        }
+
+        let idToDelete = runId;
+        if (idToDelete == null) {
+          const activeRun = await fetchActiveTimerRun(token);
+          if (
+            activeRun?.run_type &&
+            NURSING_RUN_TYPES.includes(activeRun.run_type)
+          ) {
+            idToDelete = activeRun.id;
+          }
+        }
+
+        if (idToDelete != null) {
+          await deleteTimerRun(token, idToDelete);
+        }
+
+        await clearWidgetTimerAndRefresh(token);
+        await loadFeedingHistory();
+      } catch (error) {
+        const apiMessage =
+          axios.isAxiosError(error) &&
+          typeof error.response?.data?.error === 'string'
+            ? error.response.data.error
+            : null;
+        Alert.alert(
+          'Error',
+          apiMessage ?? 'Could not delete timer run. Please try again.'
+        );
+        if (token) {
+          await clearWidgetTimerAndRefresh(token);
+          await loadFeedingHistory();
         }
       }
-      await refreshWidgetState(token);
     })();
   };
 

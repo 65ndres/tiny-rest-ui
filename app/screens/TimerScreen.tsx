@@ -13,6 +13,7 @@ import {
 import {
   createTimerRun,
   confirmReplaceActiveTimer,
+  deleteTimerRun,
   fetchActiveTimerRun,
   fetchTimerRuns,
   formatClockTime,
@@ -21,6 +22,12 @@ import {
   submitTimerRun,
   type TimerSession,
 } from '@/app/utils/timerHistory';
+import {
+  getStoredPausedElapsedForRun,
+  refreshWidgetState,
+  syncLocalTimerToWidget,
+  syncWidgetActiveTimer,
+} from '@/app/utils/widgetStorage';
 import ScreenScrollLayout from '@/app/sharedComponents/ScreenScrollLayout';
 import TimerDateTimePickerDrawer from '@/app/sharedComponents/TimerDateTimePickerDrawer';
 import TimerElapsedDisplay from '@/app/sharedComponents/TimerElapsedDisplay';
@@ -114,11 +121,28 @@ const TimerScreen: React.FC = () => {
         const parsedStart = new Date(activeRun.start_time);
         setStartTime(parsedStart);
         startTimeRef.current = parsedStart;
-        setIsRunning(true);
-        setEndTime(null);
-        setHasStoppedSession(false);
         activeTimerRunIdRef.current = activeRun.id;
-        setElapsedMs(Date.now() - parsedStart.getTime());
+
+        const pausedElapsed = getStoredPausedElapsedForRun(activeRun.start_time);
+        if (pausedElapsed != null) {
+          const end = new Date(parsedStart.getTime() + pausedElapsed);
+          setIsRunning(false);
+          setEndTime(end);
+          setHasStoppedSession(true);
+          setElapsedMs(pausedElapsed);
+          syncLocalTimerToWidget({
+            startTime: parsedStart,
+            endTime: end,
+            isRunning: false,
+            runType: 'sleeping',
+          });
+        } else {
+          setIsRunning(true);
+          setEndTime(null);
+          setHasStoppedSession(false);
+          setElapsedMs(Date.now() - parsedStart.getTime());
+          syncWidgetActiveTimer(activeRun);
+        }
         return;
       }
 
@@ -134,6 +158,7 @@ const TimerScreen: React.FC = () => {
         setHasStoppedSession(false);
         activeTimerRunIdRef.current = null;
       }
+      void refreshWidgetState(token);
     } catch {
       setHistory([]);
     } finally {
@@ -161,14 +186,31 @@ const TimerScreen: React.FC = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    let nextStart = startTime;
+    let nextEnd = endTime;
+
     if (activePicker === 'start') {
-      const normalized = normalizePickedTimerDate(selectedDate, today);
-      setStartTime(normalized);
-      startTimeRef.current = normalized;
+      nextStart = normalizePickedTimerDate(selectedDate, today);
+      setStartTime(nextStart);
+      startTimeRef.current = nextStart;
     } else if (activePicker === 'end') {
       const base = startTime ?? today;
-      const normalized = normalizePickedTimerDate(selectedDate, base);
-      setEndTime(normalized);
+      nextEnd = normalizePickedTimerDate(selectedDate, base);
+      setEndTime(nextEnd);
+    }
+
+    if (
+      activeTimerRunIdRef.current != null &&
+      !isRunning &&
+      nextStart &&
+      (hasStoppedSession || nextEnd)
+    ) {
+      syncLocalTimerToWidget({
+        startTime: nextStart,
+        endTime: nextEnd,
+        isRunning: false,
+        runType: 'sleeping',
+      });
     }
   };
 
@@ -196,6 +238,11 @@ const TimerScreen: React.FC = () => {
       setElapsedMs(0);
       setIsRunning(true);
       setElapsedMs(Date.now() - nextStart.getTime());
+      syncLocalTimerToWidget({
+        startTime: nextStart,
+        isRunning: true,
+        runType: 'sleeping',
+      });
       return;
     }
 
@@ -226,13 +273,23 @@ const TimerScreen: React.FC = () => {
       setElapsedMs(0);
       setIsRunning(true);
       setElapsedMs(Date.now() - nextStart.getTime());
+      syncLocalTimerToWidget({
+        startTime: nextStart,
+        isRunning: true,
+        runType: 'sleeping',
+      });
 
       const timerRun = await createTimerRun(token, nextStart.toISOString(), {
         run_type: 'sleeping',
       });
       activeTimerRunIdRef.current = timerRun.id;
+      syncWidgetActiveTimer(timerRun);
     } catch {
       rollbackPlayState();
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        void refreshWidgetState(token);
+      }
       Alert.alert('Error', 'Could not start timer. Please try again.');
     } finally {
       setIsStarting(false);
@@ -246,11 +303,21 @@ const TimerScreen: React.FC = () => {
     setEndTime(now);
 
     const start = startTimeRef.current;
+    const elapsed = start ? now.getTime() - start.getTime() : 0;
     if (start) {
-      setElapsedMs(now.getTime() - start.getTime());
+      setElapsedMs(elapsed);
     }
 
     setHasStoppedSession(true);
+
+    if (start) {
+      syncLocalTimerToWidget({
+        startTime: start,
+        endTime: now,
+        isRunning: false,
+        runType: 'sleeping',
+      });
+    }
   };
 
   const handlePlayStopPress = () => {
@@ -274,19 +341,29 @@ const TimerScreen: React.FC = () => {
   }, [clearTimerInterval]);
 
   const handleReset = () => {
-    if (isRunning) {
-      resetAll();
-      return;
-    }
+    const shouldReset =
+      isRunning ||
+      (!!startTime && !!endTime) ||
+      !!startTime ||
+      !!endTime ||
+      elapsedMs > 0;
+    if (!shouldReset) return;
 
-    if (startTime && endTime) {
-      resetAll();
-      return;
-    }
+    const runId = activeTimerRunIdRef.current;
+    resetAll();
 
-    if (startTime || endTime || elapsedMs > 0) {
-      resetAll();
-    }
+    void (async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) return;
+      if (runId != null) {
+        try {
+          await deleteTimerRun(token, runId);
+        } catch {
+          // Still refresh widget from server truth.
+        }
+      }
+      await refreshWidgetState(token);
+    })();
   };
 
   const canReset =
@@ -340,6 +417,7 @@ const TimerScreen: React.FC = () => {
       await submitTimerRun(token, timerRunId, payload);
       Alert.alert('Success', 'Timer session saved.');
       resetAll();
+      void refreshWidgetState(token);
       void loadHistory();
     } catch {
       Alert.alert('Error', 'Could not submit timer. Please try again.');

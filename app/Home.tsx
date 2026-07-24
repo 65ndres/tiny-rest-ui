@@ -17,6 +17,7 @@ import {
   fetchSleepPrediction,
   formatPredictionDisplay,
 } from '@/app/utils/sleepPrediction';
+import { refreshWidgetState } from '@/app/utils/widgetStorage';
 import { useAuth } from './context/AuthContext';
 import { useRevenueCat } from './context/RevenueCatContext';
 import HomeRoutineCard from './sharedComponents/home/HomeRoutineCard';
@@ -74,6 +75,7 @@ const Home: React.FC = () => {
       setHeroLabel(display.label);
       setHeroValue(display.value);
       setHeroSubtitle(display.subtitle);
+      void refreshWidgetState(token);
     } catch {
       setHeroLabel('next nap');
       setHeroValue('--:--');
@@ -114,7 +116,6 @@ const Home: React.FC = () => {
           )}
         </VStack>
 
-        <View style={{ paddingBottom: 40 }}></View>
 
         <HomeTipCard />
 
@@ -128,7 +129,7 @@ const Home: React.FC = () => {
 
           <HomeRoutineCard
             title="Add feeding"
-            subtitle="Log a bottle or nursing session"
+            subtitle="Bottle or nursing session"
             iconName="water-sharp"
             onPress={() => navigateOrPaywall('AddFeeding')}
             accessibilityLabel="Add feeding"

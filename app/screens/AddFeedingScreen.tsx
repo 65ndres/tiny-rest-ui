@@ -26,6 +26,7 @@ import {
   confirmReplaceActiveTimer,
   createBottleFeeding,
   createTimerRun,
+  deleteTimerRun,
   fetchActiveTimerRun,
   fetchTimerRuns,
   filterFeedingSessions,
@@ -39,6 +40,12 @@ import {
   type TimerRunType,
   type TimerSession,
 } from '@/app/utils/timerHistory';
+import {
+  getStoredPausedElapsedForRun,
+  refreshWidgetState,
+  syncLocalTimerToWidget,
+  syncWidgetActiveTimer,
+} from '@/app/utils/widgetStorage';
 
 type RootDrawerParamList = {
   AddFeeding: undefined;
@@ -155,11 +162,28 @@ const AddFeedingScreen: React.FC = () => {
         setStartTime(parsedStart);
         startTimeRef.current = parsedStart;
         setActiveSide(side);
-        setIsRunning(true);
-        setEndTime(null);
-        setHasStoppedSession(false);
         activeTimerRunIdRef.current = activeRun.id;
-        setElapsedMs(Date.now() - parsedStart.getTime());
+
+        const pausedElapsed = getStoredPausedElapsedForRun(activeRun.start_time);
+        if (pausedElapsed != null) {
+          const end = new Date(parsedStart.getTime() + pausedElapsed);
+          setIsRunning(false);
+          setEndTime(end);
+          setHasStoppedSession(true);
+          setElapsedMs(pausedElapsed);
+          syncLocalTimerToWidget({
+            startTime: parsedStart,
+            endTime: end,
+            isRunning: false,
+            runType: activeRun.run_type,
+          });
+        } else {
+          setIsRunning(true);
+          setEndTime(null);
+          setHasStoppedSession(false);
+          setElapsedMs(Date.now() - parsedStart.getTime());
+          syncWidgetActiveTimer(activeRun);
+        }
         return;
       }
 
@@ -195,6 +219,7 @@ const AddFeedingScreen: React.FC = () => {
 
       setHistory(filterFeedingSessions(allRuns));
       applyNursingContextFromRuns(allRuns, activeRun);
+      void refreshWidgetState(token);
     } catch {
       setHistory([]);
     } finally {
@@ -221,14 +246,32 @@ const AddFeedingScreen: React.FC = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    let nextStart = startTime;
+    let nextEnd = endTime;
+    const side = activeSide ?? selectedSide;
+
     if (activePicker === 'start') {
-      const normalized = normalizePickedTimerDate(selectedDate, today);
-      setStartTime(normalized);
-      startTimeRef.current = normalized;
+      nextStart = normalizePickedTimerDate(selectedDate, today);
+      setStartTime(nextStart);
+      startTimeRef.current = nextStart;
     } else if (activePicker === 'end') {
       const base = startTime ?? today;
-      const normalized = normalizePickedTimerDate(selectedDate, base);
-      setEndTime(normalized);
+      nextEnd = normalizePickedTimerDate(selectedDate, base);
+      setEndTime(nextEnd);
+    }
+
+    if (
+      activeTimerRunIdRef.current != null &&
+      !isRunning &&
+      nextStart &&
+      (hasStoppedSession || nextEnd)
+    ) {
+      syncLocalTimerToWidget({
+        startTime: nextStart,
+        endTime: nextEnd,
+        isRunning: false,
+        runType: runTypeForSide(side),
+      });
     }
   };
 
@@ -243,6 +286,7 @@ const AddFeedingScreen: React.FC = () => {
 
   const handlePlay = useCallback(async () => {
     const side = activeSide ?? selectedSide;
+    const runType = runTypeForSide(side);
 
     if (activeTimerRunIdRef.current) {
       const now = new Date();
@@ -260,6 +304,11 @@ const AddFeedingScreen: React.FC = () => {
       setElapsedMs(0);
       setIsRunning(true);
       setElapsedMs(Date.now() - nextStart.getTime());
+      syncLocalTimerToWidget({
+        startTime: nextStart,
+        isRunning: true,
+        runType,
+      });
       return;
     }
 
@@ -291,15 +340,25 @@ const AddFeedingScreen: React.FC = () => {
       setElapsedMs(0);
       setIsRunning(true);
       setElapsedMs(Date.now() - nextStart.getTime());
+      syncLocalTimerToWidget({
+        startTime: nextStart,
+        isRunning: true,
+        runType,
+      });
 
       const timerRun = await createTimerRun(
         token,
         nextStart.toISOString(),
-        { run_type: runTypeForSide(side) }
+        { run_type: runType }
       );
       activeTimerRunIdRef.current = timerRun.id;
+      syncWidgetActiveTimer(timerRun);
     } catch {
       rollbackPlayState();
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        void refreshWidgetState(token);
+      }
       Alert.alert('Error', 'Could not start nursing timer.');
     } finally {
       setIsStarting(false);
@@ -313,11 +372,22 @@ const AddFeedingScreen: React.FC = () => {
     setEndTime(now);
 
     const start = startTimeRef.current;
+    const elapsed = start ? now.getTime() - start.getTime() : 0;
     if (start) {
-      setElapsedMs(now.getTime() - start.getTime());
+      setElapsedMs(elapsed);
     }
 
     setHasStoppedSession(true);
+
+    if (start) {
+      const side = activeSide ?? selectedSide;
+      syncLocalTimerToWidget({
+        startTime: start,
+        endTime: now,
+        isRunning: false,
+        runType: runTypeForSide(side),
+      });
+    }
   };
 
   const handlePlayStopPress = () => {
@@ -355,6 +425,31 @@ const AddFeedingScreen: React.FC = () => {
     setElapsedMs(0);
     setHasStoppedSession(false);
     activeTimerRunIdRef.current = null;
+  };
+
+  const handleResetNursing = () => {
+    const shouldReset =
+      isRunning ||
+      !!startTime ||
+      !!endTime ||
+      elapsedMs > 0;
+    if (!shouldReset) return;
+
+    const runId = activeTimerRunIdRef.current;
+    resetNursing();
+
+    void (async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) return;
+      if (runId != null) {
+        try {
+          await deleteTimerRun(token, runId);
+        } catch {
+          // Still refresh widget from server truth.
+        }
+      }
+      await refreshWidgetState(token);
+    })();
   };
 
   const handleNursingSubmit = async () => {
@@ -405,6 +500,7 @@ const AddFeedingScreen: React.FC = () => {
 
       Alert.alert('Success', 'Nursing session saved.');
       resetNursing();
+      void refreshWidgetState(token);
       void loadFeedingHistory();
     } catch {
       Alert.alert('Error', 'Could not save nursing session.');
@@ -528,7 +624,7 @@ const AddFeedingScreen: React.FC = () => {
                 />
 
                 <Pressable
-                  onPress={resetNursing}
+                  onPress={handleResetNursing}
                   disabled={isSubmitting || isStarting || !canResetNursing}
                   accessibilityRole="button"
                   accessibilityLabel="Reset nursing timer"

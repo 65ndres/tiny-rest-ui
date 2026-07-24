@@ -84,7 +84,7 @@ const LoginScreenGluestack: React.FC = () => {
 
   return (
     <ScreenScrollLayout
-      contentContainerClassName={`${timerScrollContentClassName} justify-center`}
+      contentContainerClassName={`${timerScrollContentClassName}`}
       keyboardShouldPersistTaps="handled"
     >
       <VStack space="md" className={timerContentStackClassName}>
@@ -116,7 +116,7 @@ const LoginScreenGluestack: React.FC = () => {
             />
           </FieldRow>
           {emailError ? (
-            <Text className="text-error-400 text-sm mt-1">{emailError}</Text>
+            <Text className="text-error-400 text-lg font-semibold mt-1">{emailError}</Text>
           ) : null}
 
           <FieldRow label="Password:">
@@ -152,7 +152,7 @@ const LoginScreenGluestack: React.FC = () => {
             </Pressable>
           </FieldRow>
           {passwordError ? (
-            <Text className="text-error-400 text-sm mt-1">{passwordError}</Text>
+            <Text className="text-error-400 text-lg font-semibold mt-1">{passwordError}</Text>
           ) : null}
 
 

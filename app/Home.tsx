@@ -116,6 +116,7 @@ const Home: React.FC = () => {
           )}
         </VStack>
 
+        <View style={{ paddingBottom: 40 }}></View>
 
         <HomeTipCard />
 

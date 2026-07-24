@@ -112,7 +112,7 @@ const SignUpScreenGluestack: React.FC = () => {
 
   return (
     <ScreenScrollLayout
-      contentContainerClassName={`${timerScrollContentClassName} justify-center`}
+      contentContainerClassName={`${timerScrollContentClassName}`}
       keyboardShouldPersistTaps="handled"
     >
       <VStack space="md" className={timerContentStackClassName}>
@@ -155,7 +155,7 @@ const SignUpScreenGluestack: React.FC = () => {
             />
           </FieldRow>
           {emailError ? (
-            <Text className="text-error-400 text-sm mt-1">{emailError}</Text>
+            <Text className="text-error-400 text-lg font-semibold mt-1">{emailError}</Text>
           ) : null}
 
           <FieldRow label="Password:">
@@ -192,7 +192,7 @@ const SignUpScreenGluestack: React.FC = () => {
             </Pressable>
           </FieldRow>
           {passwordError ? (
-            <Text className="text-error-400 text-sm mt-1">{passwordError}</Text>
+            <Text className="text-error-400 text-lg font-semibold mt-1">{passwordError}</Text>
           ) : null}
 
           <FieldRow label="Confirm:">
@@ -231,7 +231,7 @@ const SignUpScreenGluestack: React.FC = () => {
             </Pressable>
           </FieldRow>
           {passwordConfirmationError ? (
-            <Text className="text-error-400 text-sm mt-1">
+            <Text className="text-error-400 text-lg font-semibold mt-1">
               {passwordConfirmationError}
             </Text>
           ) : null}

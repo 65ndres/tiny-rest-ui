@@ -44,7 +44,7 @@ const LandingScreen: React.FC = () => {
 
   return (
     <ScreenScrollLayout
-      contentContainerClassName={`${timerScrollContentClassName} justify-center`}
+      contentContainerClassName={`${timerScrollContentClassName}`}
     >
       <VStack space="md" className={timerContentStackClassName}>
         <TimerSectionCard>

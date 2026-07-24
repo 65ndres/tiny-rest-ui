@@ -209,7 +209,6 @@ const SettingsScreen: React.FC = () => {
         onChange={(date) => {
           setBirthdatePickerValue(date);
           setBabyBirthdate(toIsoDate(date));
-          setIsBirthdatePickerOpen(false);
         }}
         onClose={() => setIsBirthdatePickerOpen(false)}
       />

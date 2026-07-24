@@ -8,15 +8,15 @@ export type SubscriptionPlanPerks = {
 export const subscriptionPlanPerks = {
   basic: {
     sectionTitle: 'Included with Basic:',
-    lines: ['Home', 'Timer', 'Settings', 'Profile'],
+    lines: ['Sleep tracking', 'Nap time prediction'],
   },
   pro: {
     sectionTitle: 'Included with Pro:',
     lines: [
       'Everything in Basic',
-      'Timeline',
+      'Feeding tracking',
+      'Timeline of entries',
       'Soothing sounds',
-      'Add feeding',
       'Premium support',
     ],
   },

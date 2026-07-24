@@ -4,6 +4,7 @@
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { Alert } from 'react-native';
 import type { TimelineEventProps } from 'react-native-calendars';
 import { API_URL } from '@/constants/Config';
 
@@ -354,6 +355,68 @@ export const fetchActiveTimerRun = async (
   );
 
   return response.data.timer_run ?? null;
+};
+
+export const formatActiveTimerLabel = (
+  run: TimerRunApiRecord
+): string => {
+  switch (run.run_type) {
+    case 'nursing_left':
+      return 'nursing (left) timer';
+    case 'nursing_right':
+      return 'nursing (right) timer';
+    case 'bottle':
+      return 'bottle timer';
+    case 'sleeping':
+    default:
+      return 'sleep timer';
+  }
+};
+
+export type ConfirmReplaceActiveTimerOptions = {
+  excludeRunId?: number | null;
+};
+
+/**
+ * Returns true if the caller may proceed with starting a new timer.
+ * Shows a confirmation when another active run would be stopped.
+ */
+export const confirmReplaceActiveTimer = async (
+  token: string,
+  options?: ConfirmReplaceActiveTimerOptions
+): Promise<boolean> => {
+  const activeRun = await fetchActiveTimerRun(token);
+  if (!activeRun) {
+    return true;
+  }
+
+  if (
+    options?.excludeRunId != null &&
+    activeRun.id === options.excludeRunId
+  ) {
+    return true;
+  }
+
+  const label = formatActiveTimerLabel(activeRun);
+
+  return new Promise((resolve) => {
+    Alert.alert(
+      'Timer already running',
+      `A ${label} is already running. Starting this one will stop it. Continue?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: () => resolve(false),
+        },
+        {
+          text: 'Continue',
+          style: 'destructive',
+          onPress: () => resolve(true),
+        },
+      ]
+    );
+  });
 };
 
 export const NURSING_RUN_TYPES: TimerRunType[] = ['nursing_left', 'nursing_right'];

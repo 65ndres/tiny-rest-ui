@@ -23,6 +23,7 @@ import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton'
 import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
 import TimerSettingRow from '@/app/sharedComponents/timer/TimerSettingRow';
 import {
+  confirmReplaceActiveTimer,
   createBottleFeeding,
   createTimerRun,
   fetchActiveTimerRun,
@@ -159,9 +160,23 @@ const AddFeedingScreen: React.FC = () => {
         setHasStoppedSession(false);
         activeTimerRunIdRef.current = activeRun.id;
         setElapsedMs(Date.now() - parsedStart.getTime());
+        return;
+      }
+
+      // Sleep (or no) timer is active — clear stale local nursing UI.
+      if (activeTimerRunIdRef.current != null) {
+        clearTimerInterval();
+        setIsRunning(false);
+        setActiveSide(null);
+        setStartTime(null);
+        startTimeRef.current = null;
+        setEndTime(null);
+        setElapsedMs(0);
+        setHasStoppedSession(false);
+        activeTimerRunIdRef.current = null;
       }
     },
-    []
+    [clearTimerInterval]
   );
 
   const loadFeedingHistory = useCallback(async () => {
@@ -227,24 +242,24 @@ const AddFeedingScreen: React.FC = () => {
   }, [clearTimerInterval]);
 
   const handlePlay = useCallback(async () => {
-    const now = new Date();
-    let nextStart = startTime;
     const side = activeSide ?? selectedSide;
 
-    if (!nextStart) {
-      nextStart = now;
-      setStartTime(now);
-      startTimeRef.current = now;
-    }
-
-    setActiveSide(side);
-    setEndTime(null);
-    setHasStoppedSession(false);
-    setElapsedMs(0);
-    setIsRunning(true);
-    setElapsedMs(Date.now() - nextStart.getTime());
-
     if (activeTimerRunIdRef.current) {
+      const now = new Date();
+      let nextStart = startTime;
+
+      if (!nextStart) {
+        nextStart = now;
+        setStartTime(now);
+        startTimeRef.current = now;
+      }
+
+      setActiveSide(side);
+      setEndTime(null);
+      setHasStoppedSession(false);
+      setElapsedMs(0);
+      setIsRunning(true);
+      setElapsedMs(Date.now() - nextStart.getTime());
       return;
     }
 
@@ -252,10 +267,30 @@ const AddFeedingScreen: React.FC = () => {
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) {
-        rollbackPlayState();
         Alert.alert('Error', 'You must be signed in to start a timer.');
         return;
       }
+
+      const canStart = await confirmReplaceActiveTimer(token);
+      if (!canStart) {
+        return;
+      }
+
+      const now = new Date();
+      let nextStart = startTime;
+
+      if (!nextStart) {
+        nextStart = now;
+        setStartTime(now);
+        startTimeRef.current = now;
+      }
+
+      setActiveSide(side);
+      setEndTime(null);
+      setHasStoppedSession(false);
+      setElapsedMs(0);
+      setIsRunning(true);
+      setElapsedMs(Date.now() - nextStart.getTime());
 
       const timerRun = await createTimerRun(
         token,

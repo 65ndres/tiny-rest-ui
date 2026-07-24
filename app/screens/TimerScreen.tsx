@@ -12,6 +12,8 @@ import {
 } from '@/app/constants/screenLayout';
 import {
   createTimerRun,
+  confirmReplaceActiveTimer,
+  fetchActiveTimerRun,
   fetchTimerRuns,
   formatClockTime,
   normalizePickedTimerDate,
@@ -44,6 +46,7 @@ const TimerScreen: React.FC = () => {
   const startTimeRef = useRef<Date | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const activeTimerRunIdRef = useRef<number | null>(null);
+  const isRunningRef = useRef(false);
 
   const clearTimerInterval = useCallback(() => {
     if (intervalRef.current) {
@@ -61,6 +64,10 @@ const TimerScreen: React.FC = () => {
   useEffect(() => {
     startTimeRef.current = startTime;
   }, [startTime]);
+
+  useEffect(() => {
+    isRunningRef.current = isRunning;
+  }, [isRunning]);
 
   useEffect(() => {
     if (isRunning || !startTime || !endTime) return;
@@ -95,13 +102,44 @@ const TimerScreen: React.FC = () => {
         setHistory([]);
         return;
       }
-      setHistory(await fetchTimerRuns(token, { run_type: 'sleeping' }));
+
+      const [activeRun, sleepingRuns] = await Promise.all([
+        fetchActiveTimerRun(token),
+        fetchTimerRuns(token, { run_type: 'sleeping' }),
+      ]);
+
+      setHistory(sleepingRuns);
+
+      if (activeRun?.run_type === 'sleeping') {
+        const parsedStart = new Date(activeRun.start_time);
+        setStartTime(parsedStart);
+        startTimeRef.current = parsedStart;
+        setIsRunning(true);
+        setEndTime(null);
+        setHasStoppedSession(false);
+        activeTimerRunIdRef.current = activeRun.id;
+        setElapsedMs(Date.now() - parsedStart.getTime());
+        return;
+      }
+
+      // Another timer type is active (or none) — clear stale local sleep UI.
+      if (activeTimerRunIdRef.current != null || isRunningRef.current) {
+        clearTimerInterval();
+        setIsRunning(false);
+        setActivePicker(null);
+        setStartTime(null);
+        startTimeRef.current = null;
+        setEndTime(null);
+        setElapsedMs(0);
+        setHasStoppedSession(false);
+        activeTimerRunIdRef.current = null;
+      }
     } catch {
       setHistory([]);
     } finally {
       setHistoryLoading(false);
     }
-  }, []);
+  }, [clearTimerInterval]);
 
   useFocusEffect(
     useCallback(() => {
@@ -143,22 +181,21 @@ const TimerScreen: React.FC = () => {
   }, [clearTimerInterval]);
 
   const handlePlay = async () => {
-    const now = new Date();
-    let nextStart = startTime;
-
-    if (!nextStart) {
-      nextStart = now;
-      setStartTime(now);
-      startTimeRef.current = now;
-    }
-
-    setEndTime(null);
-    setHasStoppedSession(false);
-    setElapsedMs(0);
-    setIsRunning(true);
-    setElapsedMs(Date.now() - nextStart.getTime());
-
     if (activeTimerRunIdRef.current) {
+      const now = new Date();
+      let nextStart = startTime;
+
+      if (!nextStart) {
+        nextStart = now;
+        setStartTime(now);
+        startTimeRef.current = now;
+      }
+
+      setEndTime(null);
+      setHasStoppedSession(false);
+      setElapsedMs(0);
+      setIsRunning(true);
+      setElapsedMs(Date.now() - nextStart.getTime());
       return;
     }
 
@@ -166,10 +203,29 @@ const TimerScreen: React.FC = () => {
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) {
-        rollbackPlayState();
         Alert.alert('Error', 'You must be signed in to start a timer.');
         return;
       }
+
+      const canStart = await confirmReplaceActiveTimer(token);
+      if (!canStart) {
+        return;
+      }
+
+      const now = new Date();
+      let nextStart = startTime;
+
+      if (!nextStart) {
+        nextStart = now;
+        setStartTime(now);
+        startTimeRef.current = now;
+      }
+
+      setEndTime(null);
+      setHasStoppedSession(false);
+      setElapsedMs(0);
+      setIsRunning(true);
+      setElapsedMs(Date.now() - nextStart.getTime());
 
       const timerRun = await createTimerRun(token, nextStart.toISOString(), {
         run_type: 'sleeping',

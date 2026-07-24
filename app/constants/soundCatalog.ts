@@ -20,11 +20,10 @@ export const SOUND_CATALOG: SoundTrack[] = [
     coverImage: require('../../assets/images/sound1.png'),
   },
   {
-    id: 'night-rain',
-    title: 'Night Rain',
-    source: NIGHT_RAIN,
-    coverImage: require('../../assets/images/sound2.png'),
-    seamlessLoop: true,
+    id: 'cozy-fireplace',
+    title: 'Cozy Fireplace',
+    source: COZY_FIREPLACE,
+    coverImage: require('../../assets/images/sound4.png'),
   },
   {
     id: 'tranquil-ocean',
@@ -34,10 +33,11 @@ export const SOUND_CATALOG: SoundTrack[] = [
     seamlessLoop: true,
   },
   {
-    id: 'cozy-fireplace',
-    title: 'Cozy Fireplace',
-    source: COZY_FIREPLACE,
-    coverImage: require('../../assets/images/sound4.png'),
+    id: 'night-rain',
+    title: 'Night Rain',
+    source: NIGHT_RAIN,
+    coverImage: require('../../assets/images/sound2.png'),
+    seamlessLoop: true,
   },
 ];
 

@@ -1,14 +1,14 @@
-import { Button } from '@rneui/themed';
 import React from 'react';
-import { Text, View } from 'react-native';
-import OnboardingSlideShell from './OnboardingSlideShell';
+import { View } from 'react-native';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
 import {
-  onboardingBenefitListStyles,
-  onboardingSlideLayoutStyles,
-  onboardingSampleStyles,
-  slideNextButtonStyles,
-  slideStyles,
-} from './onboardingLayout';
+  mutedTextClassName,
+  timerContentStackClassName,
+} from '@/app/constants/screenLayout';
+import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
+import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
+import OnboardingSlideShell from './OnboardingSlideShell';
 
 type BasicSlideProps = {
   onPressNext?: () => void;
@@ -17,55 +17,49 @@ type BasicSlideProps = {
 const BasicSlide: React.FC<BasicSlideProps> = ({ onPressNext }) => {
   return (
     <OnboardingSlideShell>
-      <View style={onboardingSlideLayoutStyles.root}>
-        <View style={onboardingSlideLayoutStyles.main}>
-          <Text style={slideStyles.titleCenter}>Basic Plan</Text>
-          <View style={onboardingBenefitListStyles.benefits}>
-            <View style={onboardingBenefitListStyles.benefitRow}>
-              <Text style={onboardingBenefitListStyles.bulletIcon} accessibilityLabel="Cross bullet">
-                {'\u271D\uFE0E'}
-              </Text>
-              <Text style={[slideStyles.bodyLeft, onboardingBenefitListStyles.benefitText]}>
-                <Text style={onboardingBenefitListStyles.boldLabel}>Free. </Text>
-                More sample items and a place to save what you like.
-              </Text>
-            </View>
-            <View style={[onboardingBenefitListStyles.benefitRow, onboardingSlideLayoutStyles.bodySpacing]}>
-              <Text style={onboardingBenefitListStyles.bulletIcon} accessibilityLabel="Cross bullet">
-                {'\u271D\uFE0E'}
-              </Text>
-              <Text style={[slideStyles.bodyLeft, onboardingBenefitListStyles.benefitText]}>
-                <Text style={onboardingBenefitListStyles.boldLabel}>More items. </Text>
-                Read beyond the starter set anytime.
-              </Text>
-            </View>
-            <View style={[onboardingBenefitListStyles.benefitRow, onboardingSlideLayoutStyles.bodySpacing]}>
-              <Text style={onboardingBenefitListStyles.bulletIcon} accessibilityLabel="Cross bullet">
-                {'\u271D\uFE0E'}
-              </Text>
-              <Text style={[slideStyles.bodyLeft, onboardingBenefitListStyles.benefitText]}>
-                <Text style={onboardingBenefitListStyles.boldLabel}>Saved items. </Text>
-                Reopen favorites when you need them.
-              </Text>
-            </View>
-          </View>
-          <View style={onboardingSampleStyles.container}>
-            <Text style={onboardingSampleStyles.text}>
-              Replace this quote with your own sample text in constants/sampleItems.ts.
+      <VStack
+        space="md"
+        className={`${timerContentStackClassName} flex-1`}
+      >
+        <TimerSectionCard>
+          <Text
+            style={{
+              fontSize: 34,
+              fontWeight: 'bold',
+              color: '#ffffff',
+              lineHeight: 40,
+            }}
+          >
+            Why timing matters
+          </Text>
+          <View style={{ marginVertical: 24 }}>
+            <Text className={`${mutedTextClassName} text-xl mb-4`}>
+              Quality rest supports your baby&apos;s mood, feeding rhythm, and
+              growth. Babies sleep best when they are tired enough—but not
+              overtired.
             </Text>
-            <Text style={onboardingSampleStyles.text}>Sample Item — 2</Text>
+            <Text className={`${mutedTextClassName} text-xl mb-4`}>
+              That sweet spot is their wake window: how long they stay awake
+              between sleeps. It changes quickly as they grow.
+            </Text>
+            <Text className={`${mutedTextClassName} text-xl`}>
+              Tracking it by hand is exhausting. Tiny Rest remembers wake times
+              and nap history so you can focus on your baby.
+            </Text>
           </View>
-        </View>
-        {onPressNext ? (
-          <Button
-            title="NEXT"
-            onPress={onPressNext}
-            buttonStyle={slideNextButtonStyles.button}
-            containerStyle={slideNextButtonStyles.container}
-            titleStyle={slideNextButtonStyles.title}
-          />
-        ) : null}
-      </View>
+          {onPressNext ? (
+            <TimerOutlineButton
+              label="Next"
+              iconName="arrow-forward-sharp"
+              onPress={onPressNext}
+              variant="solid"
+              size="xl"
+              className="mt-2"
+              accessibilityLabel="Next"
+            />
+          ) : null}
+        </TimerSectionCard>
+      </VStack>
     </OnboardingSlideShell>
   );
 };

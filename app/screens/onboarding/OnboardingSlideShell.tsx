@@ -6,7 +6,7 @@ type OnboardingSlideShellProps = {
 };
 
 const OnboardingSlideShell: React.FC<OnboardingSlideShellProps> = ({ children }) => (
-  <ScreenComponent>{children}</ScreenComponent>
+  <ScreenComponent footerLogoOffset={24}>{children}</ScreenComponent>
 );
 
 export default OnboardingSlideShell;

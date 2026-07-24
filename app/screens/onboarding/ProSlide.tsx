@@ -1,15 +1,15 @@
 import { PRO_PLAN_DISPLAY_NAME } from '@/constants/appBranding';
-import { Button } from '@rneui/themed';
 import React from 'react';
-import { Text, View } from 'react-native';
-import OnboardingSlideShell from './OnboardingSlideShell';
+import { View } from 'react-native';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
 import {
-  onboardingBenefitListStyles,
-  onboardingSlideLayoutStyles,
-  onboardingSampleStyles,
-  slideNextButtonStyles,
-  slideStyles,
-} from './onboardingLayout';
+  mutedTextClassName,
+  timerContentStackClassName,
+} from '@/app/constants/screenLayout';
+import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
+import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
+import OnboardingSlideShell from './OnboardingSlideShell';
 
 type ProSlideProps = {
   onPressNext?: () => void;
@@ -18,63 +18,53 @@ type ProSlideProps = {
 const ProSlide: React.FC<ProSlideProps> = ({ onPressNext }) => {
   return (
     <OnboardingSlideShell>
-      <View style={onboardingSlideLayoutStyles.root}>
-        <View style={onboardingSlideLayoutStyles.main}>
-          <Text style={slideStyles.titleCenter}>{PRO_PLAN_DISPLAY_NAME}</Text>
-          <View style={onboardingBenefitListStyles.benefits}>
-            <View style={onboardingBenefitListStyles.benefitRow}>
-              <Text style={onboardingBenefitListStyles.bulletIcon} accessibilityLabel="Cross bullet">
-                {'\u271D\uFE0E'}
-              </Text>
-              <Text style={[slideStyles.bodyLeft, onboardingBenefitListStyles.benefitText]}>
-                Everything in Basic, plus:
-              </Text>
-            </View>
-            <View style={[onboardingBenefitListStyles.benefitRow, onboardingSlideLayoutStyles.bodySpacing]}>
-              <Text style={onboardingBenefitListStyles.bulletIcon} accessibilityLabel="Cross bullet">
-                {'\u271D\uFE0E'}
-              </Text>
-              <Text style={[slideStyles.bodyLeft, onboardingBenefitListStyles.benefitText]}>
-                <Text style={onboardingBenefitListStyles.boldLabel}>Browse by category. </Text>
-                Filter to find sample content that fits your moment.
-              </Text>
-            </View>
-            <View style={[onboardingBenefitListStyles.benefitRow, onboardingSlideLayoutStyles.bodySpacing]}>
-              <Text style={onboardingBenefitListStyles.bulletIcon} accessibilityLabel="Cross bullet">
-                {'\u271D\uFE0E'}
-              </Text>
-              <Text style={[slideStyles.bodyLeft, onboardingBenefitListStyles.benefitText]}>
-                <Text style={onboardingBenefitListStyles.boldLabel}>Private messages. </Text>
-                DM others by username—private and in-app only.
-              </Text>
-            </View>
-            <View style={[onboardingBenefitListStyles.benefitRow, onboardingSlideLayoutStyles.bodySpacing]}>
-              <Text style={onboardingBenefitListStyles.bulletIcon} accessibilityLabel="Cross bullet">
-                {'\u271D\uFE0E'}
-              </Text>
-              <Text style={[slideStyles.bodyLeft, onboardingBenefitListStyles.benefitText]}>
-                <Text style={onboardingBenefitListStyles.boldLabel}>Premium support. </Text>
-                Priority help from our team when you need it.
-              </Text>
-            </View>
-          </View>
-          <View style={onboardingSampleStyles.container}>
-            <Text style={onboardingSampleStyles.text}>
-              Pro unlocks browse categories and sharing sample items in chat.
+      <VStack
+        space="md"
+        className={`${timerContentStackClassName} flex-1 justify-center`}
+      >
+        <TimerSectionCard>
+          <Text
+            style={{
+              fontSize: 34,
+              fontWeight: 'bold',
+              color: '#ffffff',
+              lineHeight: 40,
+            }}
+          >
+            {PRO_PLAN_DISPLAY_NAME}
+          </Text>
+          <View style={{ marginVertical: 24 }}>
+            <Text className={`${mutedTextClassName} text-xl mb-4`}>
+              Avoid overtiredness before it starts. Pro surfaces your child&apos;s
+              recent sleep pattern and suggests when the next nap window is
+              approaching.
             </Text>
-            <Text style={onboardingSampleStyles.text}>Sample Item — 3</Text>
+            <Text className={`${mutedTextClassName} text-xl mb-2`}>
+              • Next-nap prediction on your home screen
+            </Text>
+            <Text className={`${mutedTextClassName} text-xl mb-2`}>
+              • Simple start/stop timer with history by day
+            </Text>
+            <Text className={`${mutedTextClassName} text-xl mb-2`}>
+              • Feeding logs and soothing sounds
+            </Text>
+            <Text className={`${mutedTextClassName} text-xl`}>
+              • Catch sleepy cues before late fussiness
+            </Text>
           </View>
-        </View>
-        {onPressNext ? (
-          <Button
-            title="NEXT"
-            onPress={onPressNext}
-            buttonStyle={slideNextButtonStyles.button}
-            containerStyle={slideNextButtonStyles.container}
-            titleStyle={slideNextButtonStyles.title}
-          />
-        ) : null}
-      </View>
+          {onPressNext ? (
+            <TimerOutlineButton
+              label="Choose a plan"
+              iconName="arrow-forward-sharp"
+              onPress={onPressNext}
+              variant="solid"
+              size="xl"
+              className="mt-2"
+              accessibilityLabel="Choose a plan"
+            />
+          ) : null}
+        </TimerSectionCard>
+      </VStack>
     </OnboardingSlideShell>
   );
 };

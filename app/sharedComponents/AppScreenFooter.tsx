@@ -1,10 +1,14 @@
 import { useFonts } from 'expo-font';
 import React from 'react';
 import { Image, StyleSheet, View, type ViewStyle } from 'react-native';
-import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 
-const AppScreenFooter: React.FC = () => {
+type AppScreenFooterProps = {
+  /** Extra downward offset for the logo (e.g. onboarding). */
+  logoOffset?: number;
+};
+
+const AppScreenFooter: React.FC<AppScreenFooterProps> = ({ logoOffset = 0 }) => {
   const [loaded] = useFonts({
     PlaywriteGBJ: require('../../assets/fonts/PlaywriteGBJ-VariableFont_wght.ttf'),
   });
@@ -18,7 +22,7 @@ const AppScreenFooter: React.FC = () => {
       <VStack className="w-full items-center justify-center flex-1 p-3" space="xs">
         <Image
           source={require('@/assets/images/footer-logo.png')}
-          style={styles.logo}
+          style={[styles.logo, { marginTop: 15 + logoOffset }]}
           resizeMode="contain"
         />
       </VStack>
@@ -32,7 +36,6 @@ const styles = StyleSheet.create({
     width: '100%',
   } as ViewStyle,
   logo: {
-    marginTop: 15,
     height: 100,
   },
 });

@@ -3,7 +3,6 @@ import { ImageBackground, StyleSheet, type ViewStyle } from 'react-native';
 import OnboardingSwiper from 'react-native-onboarding-swiper';
 import {
   BasicSlide,
-  ProSlide,
   SubscriptionChoiceSlide,
   WelcomeSlide,
 } from './onboarding';
@@ -31,13 +30,6 @@ const OnboardingScreen: React.FC = () => {
       title: <></>,
       subtitle: <></>,
       image: <BasicSlide onPressNext={goNextSlide} />,
-    },
-    {
-      backgroundColor: 'transparent',
-      isLight: false,
-      title: <></>,
-      subtitle: <></>,
-      image: <ProSlide onPressNext={goNextSlide} />,
     },
     {
       backgroundColor: 'transparent',

@@ -1,14 +1,15 @@
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
-import { Button } from '@rneui/themed';
 import React from 'react';
-import { Text, View } from 'react-native';
-import OnboardingSlideShell from './OnboardingSlideShell';
+import { View } from 'react-native';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
 import {
-  onboardingSlideLayoutStyles,
-  onboardingSampleStyles,
-  slideNextButtonStyles,
-  slideStyles,
-} from './onboardingLayout';
+  mutedTextClassName,
+  timerContentStackClassName,
+} from '@/app/constants/screenLayout';
+import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
+import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
+import OnboardingSlideShell from './OnboardingSlideShell';
 
 type WelcomeSlideProps = {
   onPressNext?: () => void;
@@ -17,29 +18,45 @@ type WelcomeSlideProps = {
 const WelcomeSlide: React.FC<WelcomeSlideProps> = ({ onPressNext }) => {
   return (
     <OnboardingSlideShell>
-      <View style={onboardingSlideLayoutStyles.root}>
-        <View style={onboardingSlideLayoutStyles.main}>
-          <Text style={slideStyles.titleCenter}>Welcome to {APP_DISPLAY_NAME}</Text>
-          <Text style={[slideStyles.bodyLeft, onboardingSlideLayoutStyles.bodySpacing]}>
-            Thank you for creating your account—we are glad you are here.
+      <VStack
+        space="md"
+        className={`${timerContentStackClassName} flex-1`}
+      >
+        <TimerSectionCard>
+          <Text
+            style={{
+              fontSize: 34,
+              fontWeight: 'bold',
+              color: '#ffffff',
+              lineHeight: 40,
+            }}
+          >
+            Better naps start here
           </Text>
-          <View style={onboardingSampleStyles.container}>
-            <Text style={onboardingSampleStyles.text}>
-              This is sample content for your customizable app.
+          <View style={{ marginVertical: 24 }}>
+            <Text className={`${mutedTextClassName} text-xl mb-4`}>
+              Welcome to {APP_DISPLAY_NAME}. Log sleep and feeding, track wake
+              windows, and see when your little one is likely ready for their
+              next nap.
             </Text>
-            <Text style={onboardingSampleStyles.text}>Sample Item — 1</Text>
+            <Text className={`${mutedTextClassName} text-xl`}>
+              Bedtime feels less like guesswork—and more like a gentle rhythm
+              you can trust.
+            </Text>
           </View>
-        </View>
-        {onPressNext ? (
-          <Button
-            title="NEXT"
-            onPress={onPressNext}
-            buttonStyle={slideNextButtonStyles.button}
-            containerStyle={slideNextButtonStyles.container}
-            titleStyle={slideNextButtonStyles.title}
-          />
-        ) : null}
-      </View>
+          {onPressNext ? (
+            <TimerOutlineButton
+              label="Next"
+              iconName="arrow-forward-sharp"
+              onPress={onPressNext}
+              variant="solid"
+              size="xl"
+              className="mt-2"
+              accessibilityLabel="Next"
+            />
+          ) : null}
+        </TimerSectionCard>
+      </VStack>
     </OnboardingSlideShell>
   );
 };

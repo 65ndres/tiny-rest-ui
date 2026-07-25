@@ -1,13 +1,16 @@
 import React from 'react';
 import { View } from 'react-native';
+import Carousel from 'react-native-reanimated-carousel';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
   mutedTextClassName,
+  SCREEN_CONTENT_WIDTH_RATIO,
   timerContentStackClassName,
 } from '@/app/constants/screenLayout';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
+import { onboardingWidth } from './onboardingLayout';
 import OnboardingSlideShell from './OnboardingSlideShell';
 
 type TrustSlideProps = {
@@ -29,6 +32,9 @@ const REVIEWS = [
   },
 ] as const;
 
+const CAROUSEL_WIDTH = onboardingWidth * SCREEN_CONTENT_WIDTH_RATIO;
+const CAROUSEL_HEIGHT = 140;
+
 const Stars: React.FC<{ count: number }> = ({ count }) => (
   <Text className="text-white text-base font-semibold mb-2">
     {'★'.repeat(count)}
@@ -41,6 +47,7 @@ const TrustSlide: React.FC<TrustSlideProps> = ({
   dailyNapCount,
   onPressNext,
 }) => {
+  const [activeReviewIndex, setActiveReviewIndex] = React.useState(0);
   const displayName = babyName.trim() || 'your baby';
   const naps = dailyNapCount ?? 3;
   const napPhrase = naps === 1 ? '1 nap a day' : `${naps} naps a day`;
@@ -61,31 +68,45 @@ const TrustSlide: React.FC<TrustSlideProps> = ({
           </Text>
           <View style={{ marginVertical: 24 }}>
             <Text className={`${mutedTextClassName} text-xl mb-4`}>
-              We are here to help—we are parents too.
-            </Text>
-            <Text className={`${mutedTextClassName} text-xl mb-4`}>
-              Let&apos;s help {displayName} take {napPhrase} with ease.
+              Together, we&apos;ll help {displayName} take {napPhrase} with ease.
             </Text>
             <Text className={`${mutedTextClassName} text-xl`}>
               Join other parents who don&apos;t need to guess the next nap time.
             </Text>
           </View>
 
-          <View className="w-full gap-3 mb-2">
-            {REVIEWS.map((review) => (
-              <View
-                key={review.author}
-                className="w-full rounded-xl border border-white/30 bg-white/10 px-4 py-3"
-              >
-                <Stars count={review.rating} />
-                <Text className={`${mutedTextClassName} text-base mb-2`}>
-                  "{review.quote}"
-                </Text>
-                <Text className="text-white text-sm font-semibold">
-                  {review.author}
-                </Text>
-              </View>
-            ))}
+          <View className="w-full items-center">
+            <Carousel
+              width={CAROUSEL_WIDTH}
+              height={CAROUSEL_HEIGHT}
+              data={[...REVIEWS]}
+              loop={false}
+              autoPlay={false}
+              pagingEnabled
+              snapEnabled
+              onSnapToItem={setActiveReviewIndex}
+              renderItem={({ item }) => (
+                <View className="flex-1 border-t border-b border-white/30 py-4 justify-center">
+                  <Stars count={item.rating} />
+                  <Text className={`${mutedTextClassName} text-base mb-2`}>
+                    "{item.quote}"
+                  </Text>
+                  <Text className="text-white text-sm font-semibold">
+                    {item.author}
+                  </Text>
+                </View>
+              )}
+            />
+            <View className="flex-row items-center justify-center mt-3 gap-2">
+              {REVIEWS.map((review, index) => (
+                <View
+                  key={review.author}
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    index === activeReviewIndex ? 'bg-white' : 'bg-white/40'
+                  }`}
+                />
+              ))}
+            </View>
           </View>
 
           {onPressNext ? (

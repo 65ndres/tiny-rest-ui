@@ -41,6 +41,8 @@ const OnboardingScreen: React.FC = () => {
         title: <></>,
         subtitle: <></>,
         image: <WelcomeSlide onPressNext={goNextSlide} />,
+        canSwipeForward: false,
+        canSwipeBackward: false,
       },
       {
         backgroundColor: 'transparent',
@@ -48,6 +50,8 @@ const OnboardingScreen: React.FC = () => {
         title: <></>,
         subtitle: <></>,
         image: <BasicSlide onPressNext={goNextSlide} />,
+        canSwipeForward: false,
+        canSwipeBackward: false,
       },
       {
         backgroundColor: 'transparent',
@@ -66,6 +70,7 @@ const OnboardingScreen: React.FC = () => {
         showDone: false,
         showNext: false,
         canSwipeForward: false,
+        canSwipeBackward: false,
       },
       {
         backgroundColor: 'transparent',
@@ -82,6 +87,7 @@ const OnboardingScreen: React.FC = () => {
         showDone: false,
         showNext: false,
         canSwipeForward: false,
+        canSwipeBackward: false,
       },
       {
         backgroundColor: 'transparent',
@@ -95,6 +101,8 @@ const OnboardingScreen: React.FC = () => {
             onPressNext={goNextSlide}
           />
         ),
+        canSwipeForward: false,
+        canSwipeBackward: false,
       },
       {
         backgroundColor: 'transparent',
@@ -105,6 +113,7 @@ const OnboardingScreen: React.FC = () => {
         showDone: false,
         showNext: false,
         canSwipeForward: false,
+        canSwipeBackward: false,
       },
     ],
     [babyName, babyBirthdate, dailyNapCount, goNextSlide]
@@ -126,6 +135,7 @@ const OnboardingScreen: React.FC = () => {
         controlStatusBar={false}
         pageIndexCallback={setCurrentPage}
         imageContainerStyles={styles.imageContainer}
+        flatlistProps={{ scrollEnabled: false }}
       />
       <View pointerEvents="none" style={[styles.fixedBottom, { bottom: 10 }]}>
         <Image source={footerLogo} style={styles.logo} resizeMode="contain" />

@@ -1,55 +1,114 @@
 import React from 'react';
 import {
+  Image,
   ImageBackground,
   StyleSheet,
   View,
+  type ImageStyle,
   type ViewStyle,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import OnboardingSwiper from 'react-native-onboarding-swiper';
 import {
+  BabyProfileSlide,
   BasicSlide,
+  NapCountSlide,
   SubscriptionChoiceSlide,
+  TrustSlide,
   WelcomeSlide,
 } from './onboarding';
 
 const backgroundImage = require('../../assets/images/bg.jpg');
+const footerLogo = require('../../assets/images/footer-logo.png');
+
+const TOTAL_PAGES = 6;
 
 const OnboardingScreen: React.FC = () => {
-  const onboardingRef = React.useRef<React.ElementRef<typeof OnboardingSwiper>>(null);
-  const insets = useSafeAreaInsets();
   const [currentPage, setCurrentPage] = React.useState(0);
+  const [babyName, setBabyName] = React.useState('');
+  const [babyBirthdate, setBabyBirthdate] = React.useState<string | null>(null);
+  const [dailyNapCount, setDailyNapCount] = React.useState<number | null>(null);
 
+  // Controlled currentPage bypasses canSwipeForward blocking inside goNext/onSwipePageChange.
   const goNextSlide = React.useCallback(() => {
-    onboardingRef.current?.goNext();
+    setCurrentPage((page) => Math.min(page + 1, TOTAL_PAGES - 1));
   }, []);
 
-  const pages = [
-    {
-      backgroundColor: 'transparent',
-      isLight: false,
-      title: <></>,
-      subtitle: <></>,
-      image: <WelcomeSlide onPressNext={goNextSlide} />,
-    },
-    {
-      backgroundColor: 'transparent',
-      isLight: false,
-      title: <></>,
-      subtitle: <></>,
-      image: <BasicSlide onPressNext={goNextSlide} />,
-    },
-    {
-      backgroundColor: 'transparent',
-      isLight: false,
-      title: <></>,
-      subtitle: <></>,
-      image: <SubscriptionChoiceSlide />,
-      showDone: false,
-      showNext: false,
-      canSwipeForward: false,
-    },
-  ];
+  const pages = React.useMemo(
+    () => [
+      {
+        backgroundColor: 'transparent',
+        isLight: false,
+        title: <></>,
+        subtitle: <></>,
+        image: <WelcomeSlide onPressNext={goNextSlide} />,
+      },
+      {
+        backgroundColor: 'transparent',
+        isLight: false,
+        title: <></>,
+        subtitle: <></>,
+        image: <BasicSlide onPressNext={goNextSlide} />,
+      },
+      {
+        backgroundColor: 'transparent',
+        isLight: false,
+        title: <></>,
+        subtitle: <></>,
+        image: (
+          <BabyProfileSlide
+            babyName={babyName}
+            babyBirthdate={babyBirthdate}
+            onBabyNameChange={setBabyName}
+            onBabyBirthdateChange={setBabyBirthdate}
+            onPressNext={goNextSlide}
+          />
+        ),
+        showDone: false,
+        showNext: false,
+        canSwipeForward: false,
+      },
+      {
+        backgroundColor: 'transparent',
+        isLight: false,
+        title: <></>,
+        subtitle: <></>,
+        image: (
+          <NapCountSlide
+            dailyNapCount={dailyNapCount}
+            onDailyNapCountChange={setDailyNapCount}
+            onPressNext={goNextSlide}
+          />
+        ),
+        showDone: false,
+        showNext: false,
+        canSwipeForward: false,
+      },
+      {
+        backgroundColor: 'transparent',
+        isLight: false,
+        title: <></>,
+        subtitle: <></>,
+        image: (
+          <TrustSlide
+            babyName={babyName}
+            dailyNapCount={dailyNapCount}
+            onPressNext={goNextSlide}
+          />
+        ),
+      },
+      {
+        backgroundColor: 'transparent',
+        isLight: false,
+        title: <></>,
+        subtitle: <></>,
+        image: <SubscriptionChoiceSlide />,
+        showDone: false,
+        showNext: false,
+        canSwipeForward: false,
+      },
+    ],
+    [babyName, babyBirthdate, dailyNapCount, goNextSlide]
+  );
 
   return (
     <ImageBackground
@@ -58,8 +117,8 @@ const OnboardingScreen: React.FC = () => {
       style={[StyleSheet.absoluteFill, { backgroundColor: '#6E9AB1', height: '100%' }]}
     >
       <OnboardingSwiper
-        ref={onboardingRef}
         pages={pages}
+        currentPage={currentPage}
         showSkip={false}
         showNext={false}
         showPagination={false}
@@ -68,19 +127,19 @@ const OnboardingScreen: React.FC = () => {
         pageIndexCallback={setCurrentPage}
         imageContainerStyles={styles.imageContainer}
       />
-      <View
-        pointerEvents="none"
-        style={[styles.dotsBar, { bottom: Math.max(insets.bottom, 8) + 4 }]}
-      >
-        {pages.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.dot,
-              index === currentPage ? styles.dotSelected : styles.dotIdle,
-            ]}
-          />
-        ))}
+      <View pointerEvents="none" style={[styles.fixedBottom, { bottom: 10 }]}>
+        <Image source={footerLogo} style={styles.logo} resizeMode="contain" />
+        <View style={styles.dotsBar}>
+          {pages.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.dot,
+                index === currentPage ? styles.dotSelected : styles.dotIdle,
+              ]}
+            />
+          ))}
+        </View>
       </View>
     </ImageBackground>
   );
@@ -90,13 +149,21 @@ const styles = StyleSheet.create({
   imageContainer: {
     flex: 1,
   } as ViewStyle,
-  dotsBar: {
+  fixedBottom: {
     position: 'absolute',
     left: 0,
     right: 0,
+    alignItems: 'center',
+  } as ViewStyle,
+  logo: {
+    height: 100,
+    width: '70%',
+  } as ImageStyle,
+  dotsBar: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 4,
   } as ViewStyle,
   dot: {
     width: 6,

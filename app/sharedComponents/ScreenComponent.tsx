@@ -23,6 +23,7 @@ interface ScreenComponentProps {
   style?: ViewStyle;
   contentFlex?: boolean;
   footerLogoOffset?: number;
+  showFooter?: boolean;
 }
 
 const ScreenComponent: React.FC<ScreenComponentProps> = ({
@@ -30,6 +31,7 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({
   style,
   contentFlex = false,
   footerLogoOffset,
+  showFooter = true,
 }) => {
   const processChildren = (children: React.ReactNode): React.ReactNode => {
     if (children == null || typeof children === 'boolean') {
@@ -79,12 +81,20 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({
     <SafeAreaView style={styles.safeArea}>
       <View style={[styles.screenContainer, style]}>
         <View style={{ height: SCREEN_TOP_HEIGHT }} />
-        <View style={contentFlex ? styles.flexContent : { height: SCREEN_CONTENT_HEIGHT }}>
+        <View
+          style={
+            contentFlex
+              ? styles.flexContent
+              : { height: showFooter ? SCREEN_CONTENT_HEIGHT : '85%' }
+          }
+        >
           {processChildren(children)}
         </View>
-        <View style={{ height: SCREEN_FOOTER_HEIGHT }}>
-          <AppScreenFooter logoOffset={footerLogoOffset} />
-        </View>
+        {showFooter ? (
+          <View style={{ height: SCREEN_FOOTER_HEIGHT }}>
+            <AppScreenFooter logoOffset={footerLogoOffset} />
+          </View>
+        ) : null}
       </View>
     </SafeAreaView>
   );

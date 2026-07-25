@@ -17,10 +17,7 @@ type BasicSlideProps = {
 const BasicSlide: React.FC<BasicSlideProps> = ({ onPressNext }) => {
   return (
     <OnboardingSlideShell>
-      <VStack
-        space="md"
-        className={`${timerContentStackClassName} flex-1`}
-      >
+      <VStack space="md" className={`${timerContentStackClassName} flex-1`}>
         <TimerSectionCard>
           <Text
             style={{
@@ -30,21 +27,16 @@ const BasicSlide: React.FC<BasicSlideProps> = ({ onPressNext }) => {
               lineHeight: 40,
             }}
           >
-            Why timing matters
+            Know when they are ready
           </Text>
           <View style={{ marginVertical: 24 }}>
             <Text className={`${mutedTextClassName} text-xl mb-4`}>
-              Quality rest supports your baby&apos;s mood, feeding rhythm, and
-              growth. Babies sleep best when they are tired enough—but not
-              overtired.
-            </Text>
-            <Text className={`${mutedTextClassName} text-xl mb-4`}>
-              That sweet spot is their wake window: how long they stay awake
-              between sleeps. It changes quickly as they grow.
+              Log sleep and feeding, track wake windows, and see when your
+              little one is likely ready for their next nap.
             </Text>
             <Text className={`${mutedTextClassName} text-xl`}>
-              Tracking it by hand is exhausting. Tiny Rest remembers wake times
-              and nap history so you can focus on your baby.
+              Bedtime feels less like guesswork—and more like a gentle rhythm
+              you can trust.
             </Text>
           </View>
           {onPressNext ? (

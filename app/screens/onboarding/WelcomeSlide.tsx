@@ -1,4 +1,3 @@
-import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import React from 'react';
 import { View } from 'react-native';
 import { Text } from '@/components/ui/text';
@@ -18,10 +17,7 @@ type WelcomeSlideProps = {
 const WelcomeSlide: React.FC<WelcomeSlideProps> = ({ onPressNext }) => {
   return (
     <OnboardingSlideShell>
-      <VStack
-        space="md"
-        className={`${timerContentStackClassName} flex-1`}
-      >
+      <VStack space="md" className={`${timerContentStackClassName} flex-1`}>
         <TimerSectionCard>
           <Text
             style={{
@@ -31,17 +27,16 @@ const WelcomeSlide: React.FC<WelcomeSlideProps> = ({ onPressNext }) => {
               lineHeight: 40,
             }}
           >
-            Better naps start here
+            Tired of guessing nap time?
           </Text>
           <View style={{ marginVertical: 24 }}>
             <Text className={`${mutedTextClassName} text-xl mb-4`}>
-              Welcome to {APP_DISPLAY_NAME}. Log sleep and feeding, track wake
-              windows, and see when your little one is likely ready for their
-              next nap.
+              Missing the wake window leads to overtired meltdowns—and tracking
+              it all by hand is exhausting.
             </Text>
             <Text className={`${mutedTextClassName} text-xl`}>
-              Bedtime feels less like guesswork—and more like a gentle rhythm
-              you can trust.
+              One more thing to remember when you already have enough on your
+              plate.
             </Text>
           </View>
           {onPressNext ? (

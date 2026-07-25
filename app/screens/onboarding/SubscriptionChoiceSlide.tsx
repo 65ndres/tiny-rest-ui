@@ -107,110 +107,109 @@ const SubscriptionChoiceSlide: React.FC = () => {
   return (
     <OnboardingSlideShell>
       <View style={styles.subscriptionSlideRoot}>
-        <View style={styles.subscriptionMiddle}>
-          <Text style={styles.subscriptionTitle}>Select your plan</Text>
-          <ScrollView
-            ref={scrollViewRef}
-            style={styles.scroll}
-            contentContainerStyle={styles.subscriptionSlideContent}
-            showsVerticalScrollIndicator={false}
-            onContentSizeChange={handlePlansContentSizeChange}
+        <Text style={styles.subscriptionTitle}>Select your plan</Text>
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.scroll}
+          contentContainerStyle={styles.subscriptionSlideContent}
+          showsVerticalScrollIndicator={false}
+          onContentSizeChange={handlePlansContentSizeChange}
+        >
+          <Pressable
+            onPress={() => handleSelectPlan('basic')}
+            style={[
+              styles.planCard,
+              planCardStyle,
+              selectedPlan === 'basic' && styles.planCardSelected,
+            ]}
           >
-            <Pressable
-              onPress={() => handleSelectPlan('basic')}
-              style={[
-                styles.planCard,
-                planCardStyle,
-                selectedPlan === 'basic' && styles.planCardSelected,
-              ]}
-            >
-              <View style={styles.planHeader}>
-                <Text style={styles.planName}>Basic</Text>
-              </View>
-              <View style={styles.planPriceContainer}>
-                <Text style={styles.planPrice}>Free</Text>
-              </View>
-              <View style={styles.featuresContainer}>
-                <Text style={styles.featuresTitle}>
-                  {subscriptionPlanPerks.basic.sectionTitle}
+            <View style={styles.planHeader}>
+              <Text style={styles.planName}>Basic</Text>
+            </View>
+            <View style={styles.planPriceContainer}>
+              <Text style={styles.planPrice}>Free</Text>
+            </View>
+            <View style={styles.featuresContainer}>
+              <Text style={styles.featuresTitle}>
+                {subscriptionPlanPerks.basic.sectionTitle}
+              </Text>
+              {subscriptionPlanPerks.basic.lines.map((line) => (
+                <Text key={line} style={styles.featureItem}>
+                  • {line}
                 </Text>
-                {subscriptionPlanPerks.basic.lines.map((line) => (
-                  <Text key={line} style={styles.featureItem}>
-                    • {line}
-                  </Text>
-                ))}
-              </View>
-            </Pressable>
+              ))}
+            </View>
+          </Pressable>
 
-            <Pressable
-              onPress={() => handleSelectPlan('pro')}
-              style={[
-                styles.planCard,
-                planCardStyle,
-                selectedPlan === 'pro' && styles.planCardSelected,
-              ]}
-            >
-              <View style={styles.planHeader}>
-                <Text style={styles.planName}>{proPlanDisplayName}</Text>
-              </View>
-              <View style={styles.planPriceContainer}>
-                <Text style={styles.planPrice}>
-                  {monthlyPackage ? monthlyPackage.product.priceString : '...'}
+          <Pressable
+            onPress={() => handleSelectPlan('pro')}
+            style={[
+              styles.planCard,
+              planCardStyle,
+              selectedPlan === 'pro' && styles.planCardSelected,
+            ]}
+          >
+            <View style={styles.planHeader}>
+              <Text style={styles.planName}>{proPlanDisplayName}</Text>
+            </View>
+            <View style={styles.planPriceContainer}>
+              <Text style={styles.planPrice}>
+                {monthlyPackage ? monthlyPackage.product.priceString : '...'}
+              </Text>
+              <Text style={styles.planInterval}>/month</Text>
+            </View>
+            <View style={styles.featuresContainer}>
+              <Text style={styles.featuresTitle}>
+                {subscriptionPlanPerks.pro.sectionTitle}
+              </Text>
+              {subscriptionPlanPerks.pro.lines.map((line) => (
+                <Text key={line} style={styles.featureItem}>
+                  • {line}
                 </Text>
-                <Text style={styles.planInterval}>/month</Text>
-              </View>
-              <View style={styles.featuresContainer}>
-                <Text style={styles.featuresTitle}>
-                  {subscriptionPlanPerks.pro.sectionTitle}
-                </Text>
-                {subscriptionPlanPerks.pro.lines.map((line) => (
-                  <Text key={line} style={styles.featureItem}>
-                    • {line}
-                  </Text>
-                ))}
-              </View>
-            </Pressable>
-          </ScrollView>
-        </View>
-        <View style={styles.subscriptionBottom}>
-          <Text style={styles.legalFinePrint}>
-            <Text
-              onPress={() => void Linking.openURL(PRIVACY_POLICY_URL)}
-              style={styles.legalLink}
-            >
-              Privacy Policy
+              ))}
+            </View>
+          </Pressable>
+
+          <View style={styles.ctaBlock}>
+            <Text style={styles.legalFinePrint}>
+              <Text
+                onPress={() => void Linking.openURL(PRIVACY_POLICY_URL)}
+                style={styles.legalLink}
+              >
+                Privacy Policy
+              </Text>
+              <Text style={styles.legalFinePrint}> · </Text>
+              <Text
+                onPress={() => void Linking.openURL(TERMS_OF_USE_URL)}
+                style={styles.legalLink}
+              >
+                Terms of Use
+              </Text>
             </Text>
-            <Text style={styles.legalFinePrint}> · </Text>
-            <Text
-              onPress={() => void Linking.openURL(TERMS_OF_USE_URL)}
-              style={styles.legalLink}
-            >
-              Terms of Use
-            </Text>
-          </Text>
-          <Button
-            title={
-              selectedPlan === null
-                ? 'Continue'
-                : selectedPlan === 'basic'
-                  ? 'Continue with Basic'
-                  : `Continue with ${proPlanDisplayName}`
-            }
-            buttonStyle={styles.primaryButton}
-            containerStyle={styles.buttonContainer}
-            titleStyle={styles.primaryButtonTitle}
-            onPress={() => {
-              if (selectedPlan === 'basic') handleBasic();
-              else if (selectedPlan === 'pro') handlePro();
-            }}
-            disabled={
-              selectedPlan === null ||
-              (selectedPlan === 'basic' && isSubscribing) ||
-              (selectedPlan === 'pro' && (isSubscribing || !monthlyPackage))
-            }
-            loading={(selectedPlan === 'basic' || selectedPlan === 'pro') && isSubscribing}
-          />
-        </View>
+            <Button
+              title={
+                selectedPlan === null
+                  ? 'Continue'
+                  : selectedPlan === 'basic'
+                    ? 'Continue with Basic'
+                    : `Continue with ${proPlanDisplayName}`
+              }
+              buttonStyle={styles.primaryButton}
+              containerStyle={styles.buttonContainer}
+              titleStyle={styles.primaryButtonTitle}
+              onPress={() => {
+                if (selectedPlan === 'basic') handleBasic();
+                else if (selectedPlan === 'pro') handlePro();
+              }}
+              disabled={
+                selectedPlan === null ||
+                (selectedPlan === 'basic' && isSubscribing) ||
+                (selectedPlan === 'pro' && (isSubscribing || !monthlyPackage))
+              }
+              loading={(selectedPlan === 'basic' || selectedPlan === 'pro') && isSubscribing}
+            />
+          </View>
+        </ScrollView>
       </View>
     </OnboardingSlideShell>
   );
@@ -230,18 +229,12 @@ const styles = StyleSheet.create({
   subscriptionSlideRoot: {
     flex: 1,
     flexDirection: 'column',
-    justifyContent: 'space-between',
     minHeight: 0,
     width: '100%',
   } as ViewStyle,
-  subscriptionMiddle: {
-    flex: 1,
-    minHeight: 0,
+  ctaBlock: {
     width: '100%',
-  } as ViewStyle,
-  subscriptionBottom: {
-    paddingTop: vh(12),
-    width: '100%',
+    paddingTop: vh(4),
   } as ViewStyle,
   legalFinePrint: {
     color: 'rgba(255, 255, 255, 0.65)',
@@ -269,7 +262,7 @@ const styles = StyleSheet.create({
   } as TextStyle,
   subscriptionSlideContent: {
     gap: vh(20),
-    paddingBottom: vh(24),
+    paddingBottom: vh(140),
     flexGrow: 1,
   } as ViewStyle,
   planCard: {} as ViewStyle,

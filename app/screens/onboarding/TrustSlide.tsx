@@ -30,13 +30,26 @@ const REVIEWS = [
     author: 'Jordan, dad of twins',
     rating: 5,
   },
+  {
+    quote: 'Our evenings are calmer. I know when the next nap should start.',
+    author: 'Priya, mom of 2',
+    rating: 5,
+  },
+  {
+    quote: 'Simple tracking that actually helps. Wish we had this sooner.',
+    author: 'Alex, dad of 1',
+    rating: 5,
+  },
 ] as const;
 
 const CAROUSEL_WIDTH = onboardingWidth * SCREEN_CONTENT_WIDTH_RATIO;
 const CAROUSEL_HEIGHT = 140;
 
 const Stars: React.FC<{ count: number }> = ({ count }) => (
-  <Text className="text-white text-base font-semibold mb-2">
+  <Text
+    className="text-base font-semibold mb-2"
+    style={{ color: '#F5C518' }}
+  >
     {'★'.repeat(count)}
     {'☆'.repeat(Math.max(0, 5 - count))}
   </Text>
@@ -64,7 +77,17 @@ const TrustSlide: React.FC<TrustSlideProps> = ({
               lineHeight: 40,
             }}
           >
-            We&apos;re here to help
+            We&apos;re here
+          </Text>
+          <Text
+            style={{
+              fontSize: 34,
+              fontWeight: 'bold',
+              color: '#ffffff',
+              lineHeight: 40,
+            }}
+          >
+            to help
           </Text>
           <View style={{ marginVertical: 24 }}>
             <Text className={`${mutedTextClassName} text-xl mb-4`}>
@@ -75,18 +98,21 @@ const TrustSlide: React.FC<TrustSlideProps> = ({
             </Text>
           </View>
 
-          <View className="w-full items-center">
+          <View className='border-b border-white/30 pb-4'></View>
+
+          <View className=" items-center" >
             <Carousel
               width={CAROUSEL_WIDTH}
               height={CAROUSEL_HEIGHT}
               data={[...REVIEWS]}
-              loop={false}
-              autoPlay={false}
+              loop={true}
+              autoPlay={true}
+              autoPlayInterval={4000}
               pagingEnabled
-              snapEnabled
+              // snapEnabled
               onSnapToItem={setActiveReviewIndex}
               renderItem={({ item }) => (
-                <View className="flex-1 border-t border-b border-white/30 py-4 justify-center">
+                <View className="flex-1 py-4 justify-center px-9">
                   <Stars count={item.rating} />
                   <Text className={`${mutedTextClassName} text-base mb-2`}>
                     "{item.quote}"

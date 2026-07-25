@@ -6,6 +6,10 @@ import { useNavigation } from 'expo-router';
 import { jwtDecode } from 'jwt-decode';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { API_URL } from '../../constants/Config';
+import {
+  setWidgetAuthenticated,
+  setWidgetLoggedOut,
+} from '@/app/utils/widgetStorage';
 
 const ONBOARDING_COMPLETED_KEY = 'onboarding_completed';
 
@@ -38,13 +42,25 @@ export interface SignupErrorResponse {
   errors?: string[];
 }
 
-export type SignupResult = { success: true } | { success: false; errors: string[] };
+export type SignupResult =
+  | { success: true; needsVerification: true; email: string }
+  | { success: false; errors: string[] };
+
+export type VerifySignupResult =
+  | { success: true }
+  | { success: false; error: string };
+
+export type ResendSignupCodeResult =
+  | { success: true; message: string }
+  | { success: false; error: string };
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   signup: (email: string, password: string, passwordConfirmation: string) => Promise<SignupResult>;
+  verifySignup: (email: string, code: string) => Promise<VerifySignupResult>;
+  resendSignupCode: (email: string) => Promise<ResendSignupCodeResult>;
   logout: () => Promise<void>;
   completeOnboarding: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -78,9 +94,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               onboarding_completed: onboardingCompleted,
               subscription_type: payload.subscription_type,
             });
+            setWidgetAuthenticated();
           } catch {
             setUser({ token });
+            setWidgetAuthenticated();
           }
+        } else {
+          setWidgetLoggedOut();
         }
       } catch (e) {
         console.error('Failed to load user', e);
@@ -95,32 +115,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await axios.post<{
         token: string;
-        user: { id: number; email: string; onboarding_completed?: boolean };
+        user: {
+          id: number;
+          email: string;
+          onboarding_completed?: boolean;
+          subscription_type?: string;
+        };
       }>(`${API_URL}/auth/login`, { email, password });
       const { token, user: userData } = response.data;
-      await AsyncStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      let onboardingCompleted = userData.onboarding_completed;
-      if (onboardingCompleted === undefined) {
-        try {
-          onboardingCompleted = jwtDecode<JwtPayload>(token).onboarding_completed;
-        } catch {
-          // keep undefined
-        }
-      }
-      let subscriptionType: string | undefined;
-      try {
-        subscriptionType = jwtDecode<JwtPayload>(token).subscription_type;
-      } catch {
-        // ignore
-      }
-      setUser({
-        token,
-        id: userData.id,
-        email: userData.email,
-        onboarding_completed: onboardingCompleted,
-        subscription_type: subscriptionType,
-      });
+      await applySession(token, userData);
       return true;
     } catch (e: unknown) {
       console.error('Login failed', e);
@@ -128,33 +131,121 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signup = async (email: string, password: string, passwordConfirmation: string): Promise<SignupResult> => {
+  const applySession = async (
+    token: string,
+    userData: {
+      id: number;
+      email: string;
+      onboarding_completed?: boolean;
+      subscription_type?: string;
+    }
+  ): Promise<void> => {
+    await AsyncStorage.setItem('token', token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+    let onboardingCompleted = userData.onboarding_completed;
+    if (onboardingCompleted === undefined) {
+      try {
+        onboardingCompleted = jwtDecode<JwtPayload>(token).onboarding_completed;
+      } catch {
+        // keep undefined
+      }
+    }
+
+    let subscriptionType = userData.subscription_type;
+    if (subscriptionType === undefined) {
+      try {
+        subscriptionType = jwtDecode<JwtPayload>(token).subscription_type;
+      } catch {
+        // ignore
+      }
+    }
+
+    setUser({
+      token,
+      id: userData.id,
+      email: userData.email,
+      onboarding_completed: onboardingCompleted,
+      subscription_type: subscriptionType,
+    });
+    setWidgetAuthenticated();
+  };
+
+  const signup = async (
+    email: string,
+    password: string,
+    passwordConfirmation: string
+  ): Promise<SignupResult> => {
     try {
       const response = await axios.post<{
-        token: string;
-        user: { id: number; email: string; onboarding_completed?: boolean, subscription_type: string; };
+        message: string;
+        email: string;
+        needs_verification: boolean;
       }>(`${API_URL}/auth/signup`, {
         email,
         password,
         password_confirmation: passwordConfirmation,
       });
-      const { token, user: userData } = response.data;
-      await AsyncStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser({
-        token,
-        id: userData.id,
-        email: userData.email,
-        onboarding_completed: userData.onboarding_completed ?? false,
-        subscription_type: "Nothing",
-      });
-      return { success: true };
+      return {
+        success: true,
+        needsVerification: true,
+        email: response.data.email || email.toLowerCase(),
+      };
     } catch (error: unknown) {
       const axiosError = error as AxiosError<SignupErrorResponse>;
       const data = axiosError.response?.data;
-      const errors = Array.isArray(data?.errors) ? data.errors : [data?.message || 'Signup failed. Please try again.'];
+      const errors = Array.isArray(data?.errors)
+        ? data.errors
+        : [data?.message || 'Signup failed. Please try again.'];
       console.error('Signup failed', error);
       return { success: false, errors };
+    }
+  };
+
+  const verifySignup = async (
+    email: string,
+    code: string
+  ): Promise<VerifySignupResult> => {
+    try {
+      const response = await axios.post<{
+        token: string;
+        user: {
+          id: number;
+          email: string;
+          onboarding_completed?: boolean;
+          subscription_type?: string;
+        };
+      }>(`${API_URL}/auth/signup/verify`, { email, code });
+      const { token, user: userData } = response.data;
+      await applySession(token, userData);
+      return { success: true };
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ error?: string }>;
+      const message =
+        axiosError.response?.data?.error || 'Invalid or expired code';
+      console.error('Signup verification failed', error);
+      return { success: false, error: message };
+    }
+  };
+
+  const resendSignupCode = async (email: string): Promise<ResendSignupCodeResult> => {
+    try {
+      const response = await axios.post<{ message: string }>(
+        `${API_URL}/auth/signup/resend`,
+        { email }
+      );
+      return {
+        success: true,
+        message:
+          response.data.message ||
+          'If an unverified account with that email exists, you will receive a verification code.',
+      };
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ error?: string }>;
+      const message =
+        axiosError.response?.data?.error || 'Could not resend verification code.';
+      console.error('Resend signup code failed', error);
+      return { success: false, error: message };
     }
   };
 
@@ -195,6 +286,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       delete axios.defaults.headers.common['Authorization'];
       setUser(null);
+      setWidgetLoggedOut();
     }
   };
 
@@ -246,7 +338,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => axios.interceptors.response.eject(interceptor);
   }, []);
 
-  const value: AuthContextType = { user, loading, login, signup, logout, completeOnboarding, refreshUser };
+  const value: AuthContextType = {
+    user,
+    loading,
+    login,
+    signup,
+    verifySignup,
+    resendSignupCode,
+    logout,
+    completeOnboarding,
+    refreshUser,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

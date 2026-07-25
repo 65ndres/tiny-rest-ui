@@ -1,68 +1,53 @@
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Input, Text } from '@rneui/themed';
 import axios from 'axios';
-import { useFonts } from 'expo-font';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Image, ImageStyle, StyleSheet, View, type TextStyle, type ViewStyle } from 'react-native';
-import 'react-native-reanimated';
+import React, { useState } from 'react';
+import { Pressable, TextInput, View } from 'react-native';
+import { Link, LinkText } from '@/components/ui/link';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
+import {
+  mutedTextClassName,
+  timerContentStackClassName,
+  timerScrollContentClassName,
+  timerSettingRowClassName,
+} from '@/app/constants/screenLayout';
 import { API_URL } from '../../constants/Config';
-import ScreenComponent from '../sharedComponents/ScreenComponent';
-import BackButton from '../SampleModule/BackButton';
+import ScreenScrollLayout from '../sharedComponents/ScreenScrollLayout';
+import TimerOutlineButton from '../sharedComponents/timer/TimerOutlineButton';
+import TimerSectionCard from '../sharedComponents/timer/TimerSectionCard';
 
 type AuthStackParamList = {
-  Login: undefined;
-  SignUp: undefined;
-  PasswordReset: undefined;
-  PasswordCode: {
-    email: string;
-  };
+  LoginGluestack: undefined;
+  SignUpGluestack: undefined;
+  PasswordCode: { email: string };
 };
 
-const screenWidth = Dimensions.get('window').width;
-const screenHeight = Dimensions.get('window').height;
-const REFERENCE_HEIGHT = 812;
-const REFERENCE_WIDTH = 375;
-const scale = Math.min(screenHeight / REFERENCE_HEIGHT, screenWidth / REFERENCE_WIDTH);
-const s = (value: number) => value * scale;
+type NavigationProp = DrawerNavigationProp<AuthStackParamList>;
 
-type NavigationProp = NativeStackNavigationProp<AuthStackParamList>;
+const inputClassName =
+  'text-white text-lg font-semibold underline text-right min-w-[120px] flex-1 py-0';
+const labelClassName = 'text-white text-xl font-semibold mr-2';
+
+type FieldRowProps = {
+  label: string;
+  isFirst?: boolean;
+  children: React.ReactNode;
+};
+
+const FieldRow: React.FC<FieldRowProps> = ({ label, isFirst = false, children }) => (
+  <View className={`${timerSettingRowClassName}${isFirst ? ' border-t-0' : ''}`}>
+    <Text className={labelClassName}>{label}</Text>
+    {children}
+  </View>
+);
 
 const PasswordResetScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [loaded] = useFonts({
-    SpaceMono: require('../../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  const [email, setEmail] = useState<string>('');
-  const [emailError, setEmailError] = useState<string>('');
-  const [emailSubmitted, setEmailSubmitted] = useState<boolean>(false);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  }, [fadeAnim]);
-
-  const handleBackPress = () => {
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start(() => {
-      navigation.goBack();
-    });
-  };
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => <BackButton text="" onPress={handleBackPress} />,
-    });
-  }, [navigation]);
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateEmail = (): boolean => {
     if (!email.trim()) {
@@ -92,7 +77,9 @@ const PasswordResetScreen: React.FC = () => {
     } catch (error: unknown) {
       console.error('Password reset request failed', error);
       const err = error as { response?: { data?: { error?: string } } };
-      setEmailError(err.response?.data?.error || 'Failed to send reset email. Please try again.');
+      setEmailError(
+        err.response?.data?.error || 'Failed to send reset email. Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -108,252 +95,142 @@ const PasswordResetScreen: React.FC = () => {
     navigation.navigate('PasswordCode', { email: email.trim() });
   };
 
-  const handleNavigateToLogin = () => {
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start(() => {
-      navigation.navigate('Login');
-    });
-  };
-
-  const handleNavigateToSignUp = () => {
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start(() => {
-      navigation.navigate('SignUp');
-    });
-  };
-
-  if (!loaded) {
-    return null;
-  }
-
   return (
-    <ScreenComponent style={styles.screen}>
-      <Animated.View style={[styles.animatedView, { opacity: fadeAnim }]}>
-        <View style={styles.wrapper}>
-          <View style={styles.main}>
-            <Text style={styles.headline}>FORGOT?</Text>
+    <ScreenScrollLayout
+      contentContainerClassName={`${timerScrollContentClassName}`}
+      keyboardShouldPersistTaps="handled"
+    >
+      <VStack space="md" className={timerContentStackClassName}>
+        <TimerSectionCard>
+          <Text
+            style={{
+              fontSize: 34,
+              fontWeight: 'bold',
+              color: '#ffffff',
+              lineHeight: 40,
+            }}
+          >
+            Forgot password
+          </Text>
+          <Text className={`${mutedTextClassName} text-lg mb-6`}>
+            {emailSubmitted
+              ? 'Check your inbox for a reset code'
+              : 'Enter your email to receive a reset code'}
+          </Text>
 
-            {!emailSubmitted ? (
-              <View style={styles.form}>
-                <Input
+          {!emailSubmitted ? (
+            <>
+              <FieldRow label="Email:" isFirst>
+                <TextInput
                   value={email}
                   onChangeText={(text) => {
-                    setEmail(text);
+                    setEmail(text.toLowerCase());
                     if (emailError) setEmailError('');
                   }}
+                  placeholder="Enter email"
+                  placeholderTextColor="rgba(255,255,255,0.5)"
+                  editable={!isSubmitting}
+                  accessibilityLabel="Email"
+                  className={inputClassName}
+                  style={{
+                    lineHeight: 25,
+                    height: 30,
+                  }}
                   cursorColor="#ffffff"
-                  placeholder="user@email.com"
                   selectionColor="white"
-                  placeholderTextColor="#d8d8d8ff"
-                  leftIcon={{ type: 'font-awesome', name: 'user', color: '#ffffffff', size: s(22) }}
-                  inputStyle={styles.inputStyle}
-                  labelStyle={styles.labelStyle}
-                  inputContainerStyle={styles.inputContainerStyle}
-                  errorMessage={emailError}
-                  errorStyle={styles.errorStyle}
-                  disabled={isSubmitting}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  autoCorrect={false}
                 />
-                <Button
-                  title={isSubmitting ? 'SENDING...' : 'RESET PASSWORD'}
-                  buttonStyle={styles.primaryButton}
-                  containerStyle={styles.primaryButtonContainer}
-                  titleStyle={styles.primaryButtonTitle}
-                  onPress={handleEmailSubmit}
-                  disabled={isSubmitting}
-                  loading={isSubmitting}
-                />
-                <Button
-                  containerStyle={styles.secondaryButtonContainer}
-                  title="Log in"
-                  type="clear"
-                  titleStyle={styles.secondaryLinkTitle}
-                  onPress={handleNavigateToLogin}
-                  disabled={isSubmitting}
-                />
-                <Button
-                  title="Sign up"
-                  type="clear"
-                  titleStyle={styles.secondaryLinkTitle}
-                  onPress={handleNavigateToSignUp}
-                  disabled={isSubmitting}
-                />
-              </View>
-            ) : (
-              <View style={styles.successBlock}>
-                <Text style={styles.successTitle}>
-                  We will send you an email if the email is registered.
+              </FieldRow>
+              {emailError ? (
+                <Text className="text-error-400 text-lg font-semibold mt-1">
+                  {emailError}
                 </Text>
-                <Text style={styles.successSubtitle}>
-                  If you don't receive an email, please check your spam folder.
-                </Text>
-                <View style={styles.dualButtonRow}>
-                  <Button
-                    title="TRY AGAIN"
-                    buttonStyle={styles.secondaryPrimaryButton}
-                    containerStyle={styles.dualButtonFlex}
-                    titleStyle={styles.primaryButtonTitle}
-                    onPress={handleTryAgain}
-                  />
-                  <Button
-                    title="INPUT CODE"
-                    buttonStyle={styles.secondaryPrimaryButton}
-                    containerStyle={styles.dualButtonFlex}
-                    titleStyle={styles.primaryButtonTitle}
-                    onPress={handleInputCode}
-                  />
-                </View>
-                <Button
-                  containerStyle={styles.secondaryButtonContainer}
-                  title="Log in"
-                  type="clear"
-                  titleStyle={styles.secondaryLinkTitle}
-                  onPress={handleNavigateToLogin}
-                />
-                <Button
-                  title="Sign up"
-                  type="clear"
-                  titleStyle={styles.secondaryLinkTitle}
-                  onPress={handleNavigateToSignUp}
-                />
-              </View>
-            )}
-          </View>
+              ) : null}
+
+              <TimerOutlineButton
+                label="Reset password"
+                iconName="mail-sharp"
+                onPress={() => void handleEmailSubmit()}
+                disabled={isSubmitting}
+                isLoading={isSubmitting}
+                variant="solid"
+                size="xl"
+                className="mt-4"
+                accessibilityLabel="Reset password"
+              />
+            </>
+          ) : (
+            <>
+              <Text className={`${mutedTextClassName} text-lg mb-4`}>
+                We will send you an email if the email is registered.
+              </Text>
+              <Text className={`${mutedTextClassName} text-lg mb-6`}>
+                If you don&apos;t receive an email, please check your spam folder.
+              </Text>
+
+              <TimerOutlineButton
+                label="Try again"
+                iconName="refresh-sharp"
+                onPress={handleTryAgain}
+                variant="solid"
+                size="xl"
+                className="mt-2"
+                accessibilityLabel="Try again"
+              />
+              <TimerOutlineButton
+                label="Input code"
+                iconName="keypad-sharp"
+                onPress={handleInputCode}
+                variant="solid"
+                size="xl"
+                className="mt-3"
+                accessibilityLabel="Input code"
+              />
+            </>
+          )}
+        </TimerSectionCard>
+
+        <View className="w-full items-center mt-6 mb-2 gap-6">
+          <Pressable
+            onPress={() => navigation.navigate('LoginGluestack')}
+            disabled={isSubmitting}
+            accessibilityRole="link"
+            className="items-center"
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: 'bold',
+                color: '#ffffff',
+                lineHeight: 20,
+              }}
+            >
+              Log in
+            </Text>
+          </Pressable>
+
+          <Link
+            onPress={() => navigation.navigate('SignUpGluestack')}
+            disabled={isSubmitting}
+            className="items-center"
+          >
+            <LinkText
+              style={{
+                fontSize: 18,
+                fontWeight: 'bold',
+                color: '#ffffff',
+                lineHeight: 20,
+              }}
+            >
+              Don&apos;t have an account? Sign up
+            </LinkText>
+          </Link>
         </View>
-        <View style={styles.logoWrap}>
-            <Image source={require('../../assets/images/splash-icon.png')} style={styles.logoImage} />
-          </View>
-      </Animated.View>
-    </ScreenComponent>
+      </VStack>
+    </ScreenScrollLayout>
   );
 };
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  } as ViewStyle,
-  animatedView: {
-    flex: 1,
-  } as ViewStyle,
-  wrapper: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingTop: s(28),
-    paddingBottom: s(18),
-  } as ViewStyle,
-  main: {
-    flex: 1,
-    paddingHorizontal: s(18),
-    paddingTop: s(8),
-  } as ViewStyle,
-  headline: {
-    color: 'white',
-    textAlign: 'center',
-    fontSize: s(30),
-    fontWeight: '700',
-    letterSpacing: s(1),
-    marginBottom: s(18),
-  } as TextStyle,
-  form: {
-    marginTop: s(8),
-    width: '100%',
-  } as ViewStyle,
-  inputStyle: {
-    color: 'white',
-    fontSize: s(18),
-    paddingLeft: s(12),
-  } as TextStyle,
-  labelStyle: {
-    color: 'white',
-  } as TextStyle,
-  inputContainerStyle: {
-    borderBottomColor: 'white',
-  } as ViewStyle,
-  errorStyle: {
-    color: '#ff6b6b',
-    fontSize: s(12),
-  } as TextStyle,
-  primaryButton: {
-    backgroundColor: 'white',
-    borderWidth: s(2),
-    borderColor: 'white',
-    borderRadius: s(30),
-    paddingVertical: s(12),
-    minHeight: s(48),
-    justifyContent: 'center',
-  } as ViewStyle,
-  primaryButtonContainer: {
-    marginHorizontal: s(22),
-    marginTop: s(14),
-  } as ViewStyle,
-  primaryButtonTitle: {
-    fontWeight: 'bold',
-    color: '#ac8861ff',
-    fontSize: s(16),
-  } as TextStyle,
-  secondaryButtonContainer: {
-    marginTop: s(8),
-  } as ViewStyle,
-  secondaryLinkTitle: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: s(16),
-    textDecorationLine: 'underline',
-  } as TextStyle,
-  successBlock: {
-    flex: 1,
-    justifyContent: 'center',
-    width: '100%',
-  } as ViewStyle,
-  successTitle: {
-    color: 'white',
-    fontSize: s(18),
-    fontWeight: '500',
-    textAlign: 'center',
-    marginBottom: s(12),
-  } as TextStyle,
-  successSubtitle: {
-    color: 'white',
-    fontSize: s(16),
-    fontWeight: '300',
-    textAlign: 'center',
-    marginBottom: s(22),
-  } as TextStyle,
-  dualButtonRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'stretch',
-    gap: s(12),
-    marginBottom: s(8),
-  } as ViewStyle,
-  dualButtonFlex: {
-    flex: 1,
-    maxWidth: s(180),
-  } as ViewStyle,
-  secondaryPrimaryButton: {
-    backgroundColor: 'white',
-    borderWidth: s(2),
-    borderColor: 'white',
-    borderRadius: s(30),
-    paddingVertical: s(12),
-    minHeight: s(48),
-    justifyContent: 'center',
-  } as ViewStyle,
-  logoWrap: {
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingTop: s(10),
-  } as ViewStyle,
-  logoImage: {
-    height: s(64),
-    width: s(64),
-    alignSelf: 'center',
-  } as ImageStyle,
-});
 
 export default PasswordResetScreen;

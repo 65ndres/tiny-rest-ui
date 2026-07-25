@@ -14,6 +14,7 @@ import {
 const APP_GROUP = 'group.com.afre92.tinyrest';
 
 const KEYS = {
+  authenticated: 'widget.authenticated',
   mode: 'widget.mode',
   label: 'widget.label',
   value: 'widget.value',
@@ -69,7 +70,25 @@ export const getStoredPausedElapsedForRun = (
   return parseElapsedString(storage.get(KEYS.timerElapsed));
 };
 
+/** Mark the widget as signed-in so it can show timer / prediction data. */
+export const setWidgetAuthenticated = (): void => {
+  storage.set(KEYS.authenticated, 1);
+  reload();
+};
+
+/**
+ * Clear timer/prediction payload and mark the widget as signed-out.
+ * The widget UI then prompts the user to create an account.
+ */
+export const setWidgetLoggedOut = (): void => {
+  clearWidgetTimer();
+  storage.set(KEYS.authenticated, 0);
+  storage.set(KEYS.mode, 'locked');
+  reload();
+};
+
 export const syncWidgetPrediction = (display: SleepPredictionDisplay): void => {
+  storage.set(KEYS.authenticated, 1);
   storage.set(KEYS.mode, 'prediction');
   storage.set(KEYS.label, display.label);
   storage.set(KEYS.value, display.value);
@@ -99,6 +118,7 @@ export const syncWidgetActiveTimer = (
   const paused = options?.paused === true;
   const elapsedMs = options?.elapsedMs ?? 0;
 
+  storage.set(KEYS.authenticated, 1);
   storage.set(KEYS.mode, 'timer');
   storage.set(KEYS.timerType, timerType);
   storage.set(KEYS.timerStart, run.start_time);

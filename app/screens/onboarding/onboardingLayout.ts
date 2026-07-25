@@ -46,22 +46,22 @@ export const slideStyles = StyleSheet.create({
 export const onboardingSlideLayoutStyles = StyleSheet.create({
   root: {
     flex: 1,
-    paddingTop: vh(8),
-    paddingBottom: vh(28),
-    paddingHorizontal: vh(16),
+    // paddingTop: vh(8),
+    // paddingBottom: vh(28),
+    // paddingHorizontal: vh(16),
   } as ViewStyle,
   main: {
     flex: 1,
     justifyContent: 'flex-start',
   } as ViewStyle,
   bodySpacing: {
-    marginTop: vh(12),
+    // marginTop: vh(12),
   },
 });
 
 export const onboardingSampleStyles = StyleSheet.create({
   container: {
-    marginTop: vh(30),
+    // marginTop: vh(30),
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'stretch',

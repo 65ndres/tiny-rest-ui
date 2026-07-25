@@ -82,7 +82,7 @@ const LandingScreen: React.FC = () => {
             label="Sign up"
             iconName="person-add-sharp"
             onPress={handleSignUp}
-            variant="outline"
+            variant="solid"
             size="xl"
             className="mt-3"
             accessibilityLabel="Sign up"

@@ -23,6 +23,7 @@ import OnboardingScreen from './screens/OnboardingScreen';
 import PasswordCodeScreen from './screens/PasswordCodeScreen';
 import PasswordResetScreen from './screens/PasswordResetScreen';
 import SignUpScreen from './screens/SignUpScreen';
+import SignUpCodeScreenGluestack from './screens/SignUpCodeScreenGluestack';
 import SignUpScreenGluestack from './screens/SignUpScreenGluestack';
 import SubscriptionScreen from './screens/SubscriptionScreen';
 import SupportScreen from './screens/SupportScreen';
@@ -77,6 +78,9 @@ type AuthStackParamList = {
   LoginGluestack: undefined;
   SignUp: undefined;
   SignUpGluestack: undefined;
+  SignUpCode: {
+    email: string;
+  };
   PasswordReset: undefined;
   PasswordCode: {
     email: string;
@@ -368,7 +372,7 @@ const UnauthenticatedNavigator: React.FC = () => {
           options={{
             drawerLabel: 'HOME',
             headerLeft: () => null,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>Hello</Text>,
           }}
         />
         <AuthDrawer.Screen
@@ -390,7 +394,7 @@ const UnauthenticatedNavigator: React.FC = () => {
           options={{
             drawerLabel: 'LOG IN',
             headerLeft: () => <BackButton text=" " />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>Hello</Text>,
           }}
         />
         <AuthDrawer.Screen
@@ -399,7 +403,17 @@ const UnauthenticatedNavigator: React.FC = () => {
           options={{
             drawerLabel: 'SIGN UP',
             headerLeft: () => <BackButton text=" " />,
-            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>{APP_DISPLAY_NAME}</Text>,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>Hello</Text>,
+          }}
+        />
+        <AuthDrawer.Screen
+          name="SignUpCode"
+          component={SignUpCodeScreenGluestack}
+          options={{
+            drawerLabel: () => null,
+            drawerItemStyle: { display: 'none' },
+            headerLeft: () => <BackButton text=" " />,
+            headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>Hello</Text>,
           }}
         />
         <AuthDrawer.Screen

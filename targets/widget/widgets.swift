@@ -6,6 +6,7 @@ private let appGroupId = "group.com.afre92.tinyrest"
 enum WidgetMode: String {
     case prediction
     case timer
+    case locked
 }
 
 struct WidgetPayload {
@@ -29,11 +30,34 @@ struct WidgetPayload {
         timerElapsed: nil
     )
 
+    static let locked = WidgetPayload(
+        mode: .locked,
+        label: "Create an account",
+        value: "",
+        subtitle: "to see your timer",
+        timerType: nil,
+        timerStart: nil,
+        timerPaused: false,
+        timerElapsed: nil
+    )
+
     static func load(from defaults: UserDefaults?) -> WidgetPayload {
-        guard let defaults else { return .placeholder }
+        guard let defaults else { return .locked }
+
+        let authRaw = defaults.string(forKey: "widget.authenticated")
+        let authenticated =
+            defaults.integer(forKey: "widget.authenticated") == 1
+            || authRaw == "1"
+        if !authenticated {
+            return .locked
+        }
 
         let modeRaw = defaults.string(forKey: "widget.mode") ?? WidgetMode.prediction.rawValue
         let mode = WidgetMode(rawValue: modeRaw) ?? .prediction
+
+        if mode == .locked {
+            return .locked
+        }
 
         if mode == .timer {
             let timerType = defaults.string(forKey: "widget.timerType") ?? "sleeping"
@@ -132,54 +156,73 @@ struct widgetEntryView: View {
     var entry: Provider.Entry
 
     var body: some View {
-        VStack(alignment: .center, spacing: 8) {
-            Text(entry.payload.label)
-                .font(.system(size: 17, weight: .medium))
-                .foregroundStyle(.white.opacity(0.85))
-                .multilineTextAlignment(.center)
-                .lineLimit(1)
-
-            Group {
-                if entry.payload.mode == .timer {
-                    if entry.payload.timerPaused {
-                        Text(entry.payload.timerElapsed ?? entry.payload.value)
-                            .font(.system(size: 42, weight: .regular, design: .monospaced))
-                            .foregroundStyle(.white)
-                            .minimumScaleFactor(0.5)
-                            .lineLimit(1)
-                            .multilineTextAlignment(.center)
-                    } else if let start = entry.payload.timerStart {
-                        Text(start, style: .timer)
-                            .font(.system(size: 42, weight: .regular, design: .monospaced))
-                            .foregroundStyle(.white)
-                            .minimumScaleFactor(0.5)
-                            .lineLimit(1)
-                            .monospacedDigit()
-                            .multilineTextAlignment(.center)
-                    } else {
-                        Text("--:--:--")
-                            .font(.system(size: 42, weight: .regular, design: .monospaced))
-                            .foregroundStyle(.white)
-                            .minimumScaleFactor(0.5)
-                            .lineLimit(1)
-                            .multilineTextAlignment(.center)
-                    }
-                } else {
-                    Text(entry.payload.value)
-                        .font(.system(size: 42, weight: .regular, design: .monospaced))
+        Group {
+            if entry.payload.mode == .locked {
+                VStack(alignment: .center, spacing: 6) {
+                    Text("Create an account")
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.white)
-                        .minimumScaleFactor(0.5)
-                        .lineLimit(1)
                         .multilineTextAlignment(.center)
-                }
-            }
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.8)
 
-            if let subtitle = entry.payload.subtitle, !subtitle.isEmpty {
-                Text(subtitle)
-                    .font(.system(size: 14, weight: .regular))
-                    .foregroundStyle(.white.opacity(0.7))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
+                    Text("to see your timer")
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundStyle(.white.opacity(0.75))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                }
+            } else {
+                VStack(alignment: .center, spacing: 8) {
+                    Text(entry.payload.label)
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(1)
+
+                    Group {
+                        if entry.payload.mode == .timer {
+                            if entry.payload.timerPaused {
+                                Text(entry.payload.timerElapsed ?? entry.payload.value)
+                                    .font(.system(size: 42, weight: .regular, design: .monospaced))
+                                    .foregroundStyle(.white)
+                                    .minimumScaleFactor(0.5)
+                                    .lineLimit(1)
+                                    .multilineTextAlignment(.center)
+                            } else if let start = entry.payload.timerStart {
+                                Text(start, style: .timer)
+                                    .font(.system(size: 42, weight: .regular, design: .monospaced))
+                                    .foregroundStyle(.white)
+                                    .minimumScaleFactor(0.5)
+                                    .lineLimit(1)
+                                    .monospacedDigit()
+                                    .multilineTextAlignment(.center)
+                            } else {
+                                Text("--:--:--")
+                                    .font(.system(size: 42, weight: .regular, design: .monospaced))
+                                    .foregroundStyle(.white)
+                                    .minimumScaleFactor(0.5)
+                                    .lineLimit(1)
+                                    .multilineTextAlignment(.center)
+                            }
+                        } else {
+                            Text(entry.payload.value)
+                                .font(.system(size: 42, weight: .regular, design: .monospaced))
+                                .foregroundStyle(.white)
+                                .minimumScaleFactor(0.5)
+                                .lineLimit(1)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+
+                    if let subtitle = entry.payload.subtitle, !subtitle.isEmpty {
+                        Text(subtitle)
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundStyle(.white.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                            .lineLimit(2)
+                    }
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
@@ -203,7 +246,7 @@ struct widget: Widget {
                 }
         }
         .configurationDisplayName("TinyRest")
-        .description("Next nap or active timer.")
+        .description("Next nap or active timer. Requires an account.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
@@ -211,6 +254,7 @@ struct widget: Widget {
 #Preview(as: .systemSmall) {
     widget()
 } timeline: {
+    SimpleEntry(date: .now, payload: .locked)
     SimpleEntry(date: .now, payload: .placeholder)
     SimpleEntry(
         date: .now,

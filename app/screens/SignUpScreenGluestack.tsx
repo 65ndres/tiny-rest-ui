@@ -19,6 +19,7 @@ import TimerSectionCard from '../sharedComponents/timer/TimerSectionCard';
 
 type AuthStackParamList = {
   LoginGluestack: undefined;
+  SignUpCode: { email: string };
 };
 
 type NavigationProp = DrawerNavigationProp<AuthStackParamList>;
@@ -83,6 +84,8 @@ const SignUpScreenGluestack: React.FC = () => {
     const result = await signup(email, password, passwordConfirmation);
 
     if (result.success) {
+      setIsLoading(false);
+      navigation.navigate('SignUpCode', { email: result.email });
       return;
     }
 

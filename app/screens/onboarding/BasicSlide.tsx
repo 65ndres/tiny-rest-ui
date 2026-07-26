@@ -30,10 +30,6 @@ const BasicSlide: React.FC<BasicSlideProps> = ({ onPressNext }) => {
             Know when they are ready
           </Text>
           <View style={{ marginVertical: 24 }}>
-            <Text className={`${mutedTextClassName} text-xl mb-4`}>
-              Log sleep and feeding, track wake windows, and see when your
-              little one is likely ready for their next nap.
-            </Text>
             <Text className={`${mutedTextClassName} text-xl`}>
               Bedtime feels less like guesswork—and more like a gentle rhythm
               you can trust.

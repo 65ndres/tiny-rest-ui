@@ -34,10 +34,6 @@ const WelcomeSlide: React.FC<WelcomeSlideProps> = ({ onPressNext }) => {
               Missing the wake window leads to overtired meltdowns—and tracking
               it all by hand is exhausting.
             </Text>
-            <Text className={`${mutedTextClassName} text-xl`}>
-              One more thing to remember when you already have enough on your
-              plate.
-            </Text>
           </View>
           {onPressNext ? (
             <TimerOutlineButton

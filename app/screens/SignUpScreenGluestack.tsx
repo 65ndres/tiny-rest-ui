@@ -84,8 +84,12 @@ const SignUpScreenGluestack: React.FC = () => {
     const result = await signup(email, password, passwordConfirmation);
 
     if (result.success) {
-      setIsLoading(false);
-      navigation.navigate('SignUpCode', { email: result.email });
+      if (result.needsVerification) {
+        setIsLoading(false);
+        navigation.navigate('SignUpCode', { email: result.email });
+        return;
+      }
+      // Session already set — root layout advances to onboarding.
       return;
     }
 

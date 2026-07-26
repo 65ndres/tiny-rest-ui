@@ -44,6 +44,7 @@ export interface SignupErrorResponse {
 
 export type SignupResult =
   | { success: true; needsVerification: true; email: string }
+  | { success: true; needsVerification: false }
   | { success: false; errors: string[] };
 
 export type VerifySignupResult =
@@ -178,14 +179,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ): Promise<SignupResult> => {
     try {
       const response = await axios.post<{
-        message: string;
-        email: string;
-        needs_verification: boolean;
+        message?: string;
+        email?: string;
+        needs_verification?: boolean;
+        token?: string;
+        user?: {
+          id: number;
+          email: string;
+          onboarding_completed?: boolean;
+          subscription_type?: string;
+        };
       }>(`${API_URL}/auth/signup`, {
         email,
         password,
         password_confirmation: passwordConfirmation,
       });
+
+      // Production: email confirmation required. Non-production: API returns a session token.
+      if (response.data.token && response.data.user) {
+        await applySession(response.data.token, response.data.user);
+        return { success: true, needsVerification: false };
+      }
+
       return {
         success: true,
         needsVerification: true,

@@ -297,7 +297,11 @@ const NapTimelineScreen: React.FC = () => {
   );
 
   return (
-    <ScreenComponent contentFlex style={styles.screen}>
+    <ScreenComponent
+      contentFlex
+      constrainToPhoneViewport={false}
+      style={styles.screen}
+    >
       <View style={styles.container}>
         {isLoading || isDeleting ? (
           <View style={styles.loadingOverlay}>

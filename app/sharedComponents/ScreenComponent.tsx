@@ -16,8 +16,7 @@ import {
 import { getAppWindow } from '@/constants/appViewport';
 import AppScreenFooter from './AppScreenFooter';
 
-/** Content column capped at iPhone 16 Pro Max width (background stays full-bleed). */
-const contentWidth = getAppWindow().width * SCREEN_CONTENT_WIDTH_RATIO;
+const cappedContentWidth = getAppWindow().width * SCREEN_CONTENT_WIDTH_RATIO;
 
 interface ScreenComponentProps {
   children?: React.ReactNode;
@@ -25,6 +24,11 @@ interface ScreenComponentProps {
   contentFlex?: boolean;
   footerLogoOffset?: number;
   showFooter?: boolean;
+  /**
+   * When false, content uses the full device width (not capped to iPhone 16 Pro Max).
+   * Used by screens that should remain layout-dynamic (e.g. Timeline).
+   */
+  constrainToPhoneViewport?: boolean;
 }
 
 const ScreenComponent: React.FC<ScreenComponentProps> = ({
@@ -33,6 +37,7 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({
   contentFlex = false,
   footerLogoOffset,
   showFooter = true,
+  constrainToPhoneViewport = true,
 }) => {
   const processChildren = (children: React.ReactNode): React.ReactNode => {
     if (children == null || typeof children === 'boolean') {
@@ -78,9 +83,26 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({
     return children;
   };
 
+  const columnStyle: ViewStyle = constrainToPhoneViewport
+    ? {
+        width: cappedContentWidth,
+        maxWidth: cappedContentWidth,
+        alignSelf: 'center',
+      }
+    : {
+        width: '100%',
+        maxWidth: '100%',
+        alignSelf: 'stretch',
+      };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={[styles.screenContainer, style]}>
+    <SafeAreaView
+      style={[
+        styles.safeArea,
+        !constrainToPhoneViewport ? styles.safeAreaStretch : null,
+      ]}
+    >
+      <View style={[styles.screenContainer, columnStyle, style]}>
         <View style={{ height: SCREEN_TOP_HEIGHT }} />
         <View
           style={
@@ -108,15 +130,15 @@ const styles = StyleSheet.create({
   } as ViewStyle,
   screenContainer: {
     flex: 1,
-    width: contentWidth,
-    maxWidth: contentWidth,
-    alignSelf: 'center',
   } as ViewStyle,
   safeArea: {
     flex: 1,
     width: '100%',
     backgroundColor: 'transparent',
     alignItems: 'center',
+  } as ViewStyle,
+  safeAreaStretch: {
+    alignItems: 'stretch',
   } as ViewStyle,
 });
 

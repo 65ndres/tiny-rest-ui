@@ -5,7 +5,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Input, Text } from '@rneui/themed';
 import { useFonts } from 'expo-font';
 import React, { useCallback, useRef, useState } from 'react';
-import { Alert, Animated, Dimensions, Image, StyleSheet, View, type ImageStyle, type TextStyle, type ViewStyle } from 'react-native';
+import { Alert, Animated, Image, StyleSheet, View, type ImageStyle, type TextStyle, type ViewStyle } from 'react-native';
+import { scaleFromPhoneBaseline } from '@/constants/appViewport';
 import { useAuth } from '../context/AuthContext';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 
@@ -17,11 +18,7 @@ type RootStackParamList = {
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-const REFERENCE_HEIGHT = 812;
-const REFERENCE_WIDTH = 375;
-const scale = Math.min(screenHeight / REFERENCE_HEIGHT, screenWidth / REFERENCE_WIDTH);
-const s = (value: number) => value * scale;
+const s = scaleFromPhoneBaseline;
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();

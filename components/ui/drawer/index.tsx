@@ -5,7 +5,6 @@ import {
   Pressable,
   View,
   ScrollView,
-  Dimensions,
   ViewStyle,
 } from 'react-native';
 import {
@@ -21,6 +20,7 @@ import {
 } from '@gluestack-ui/utils/nativewind-utils';
 import { cssInterop } from 'nativewind';
 import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
+import { getAppWindow } from '@/constants/appViewport';
 
 type IAnimatedPressableProps = React.ComponentProps<typeof Pressable> &
   MotionComponentProps<typeof Pressable, ViewStyle, unknown, unknown, unknown>;
@@ -30,8 +30,7 @@ const AnimatedPressable = createMotionAnimatedComponent(
 ) as React.ComponentType<IAnimatedPressableProps>;
 
 const SCOPE = 'MODAL';
-const screenWidth = Dimensions.get('window').width;
-const screenHeight = Dimensions.get('window').height;
+const { width: screenWidth, height: screenHeight } = getAppWindow();
 const sizes: { [key: string]: number } = {
   sm: 0.25,
   md: 0.5,

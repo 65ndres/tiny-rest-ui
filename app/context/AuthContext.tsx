@@ -6,6 +6,7 @@ import { useNavigation } from 'expo-router';
 import { jwtDecode } from 'jwt-decode';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { API_URL } from '../../constants/Config';
+import { clearLocalOnboardingStep } from '@/app/utils/onboardingProgress';
 import {
   setWidgetAuthenticated,
   setWidgetLoggedOut,
@@ -266,6 +267,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const completeOnboarding = async (): Promise<void> => {
     await AsyncStorage.setItem(ONBOARDING_COMPLETED_KEY, 'true');
+    await clearLocalOnboardingStep();
     setUser((prev) => (prev ? { ...prev, onboarding_completed: true } : null));
   };
 
@@ -296,6 +298,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       try {
         await AsyncStorage.removeItem(ONBOARDING_COMPLETED_KEY);
+      } catch {
+        // ignore
+      }
+      try {
+        await clearLocalOnboardingStep();
       } catch {
         // ignore
       }

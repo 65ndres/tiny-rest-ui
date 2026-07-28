@@ -7,7 +7,6 @@ import { useFonts } from 'expo-font';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   Animated,
-  Dimensions,
   Image,
   StyleSheet,
   TextStyle,
@@ -15,6 +14,7 @@ import {
   ViewStyle
 } from 'react-native';
 import 'react-native-reanimated';
+import { getAppWindow } from '@/constants/appViewport';
 import { API_URL } from '../../constants/Config';
 import { useAuth } from '../context/AuthContext';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
@@ -29,7 +29,7 @@ type RootStackParamList = {
   };
 };
 
-const width = Dimensions.get("window").width;
+const width = getAppWindow().width;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RouteProp = {
   key: string;

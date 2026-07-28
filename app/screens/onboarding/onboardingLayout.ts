@@ -1,10 +1,13 @@
-import { Dimensions, StyleSheet, type TextStyle, type ViewStyle } from 'react-native';
+import { StyleSheet, type TextStyle, type ViewStyle } from 'react-native';
+import { getAppWindow } from '@/constants/appViewport';
 
-export const onboardingHeight = Dimensions.get('window').height;
-export const onboardingWidth = Dimensions.get('window').width;
-const REFERENCE_HEIGHT = 812;
+const { width: appWidth, height: appHeight } = getAppWindow();
 
-export const vh = (value: number) => (onboardingHeight / REFERENCE_HEIGHT) * value;
+export const onboardingHeight = appHeight;
+export const onboardingWidth = appWidth;
+
+/** Design values are authored against a 812pt baseline; height is capped at Pro Max. */
+export const vh = (value: number) => (onboardingHeight / 812) * value;
 
 export const slideStyles = StyleSheet.create({
   title: {
@@ -46,22 +49,16 @@ export const slideStyles = StyleSheet.create({
 export const onboardingSlideLayoutStyles = StyleSheet.create({
   root: {
     flex: 1,
-    // paddingTop: vh(8),
-    // paddingBottom: vh(28),
-    // paddingHorizontal: vh(16),
   } as ViewStyle,
   main: {
     flex: 1,
     justifyContent: 'flex-start',
   } as ViewStyle,
-  bodySpacing: {
-    // marginTop: vh(12),
-  },
+  bodySpacing: {},
 });
 
 export const onboardingSampleStyles = StyleSheet.create({
   container: {
-    // marginTop: vh(30),
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'stretch',
@@ -93,7 +90,7 @@ export const onboardingBenefitListStyles = StyleSheet.create({
   } as TextStyle,
   benefitText: {
     flex: 1,
-  } as TextStyle,
+  } as ViewStyle,
   boldLabel: {
     fontWeight: '800',
   } as TextStyle,
@@ -111,7 +108,6 @@ export const slideNextButtonStyles = StyleSheet.create({
   container: {
     marginHorizontal: vh(8),
     marginTop: vh(16),
-    // width: '100%',
     alignSelf: 'stretch',
   } as ViewStyle,
   title: {

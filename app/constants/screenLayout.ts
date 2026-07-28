@@ -35,8 +35,8 @@ export const mutedTextClassName = 'text-white/75 text-base';
 
 /** Home routine timeline (Hatch-inspired). */
 export const homeScrollContentClassName =
-  'flex-grow items-start px-6 pb-4 pt-4 mt-2';
-export const homeContentStackClassName = 'w-full max-w-[360px] items-start';
+  'flex-grow items-center px-6 pb-4 pt-4 mt-2';
+export const homeContentStackClassName = 'w-full max-w-[360px] items-stretch self-center';
 export const homePageTitleClassName = 'text-white text-3xl font-bold';
 export const homeHintClassName = 'text-white/75 text-sm';
 export const homeSectionLabelClassName =

@@ -1,11 +1,12 @@
 import Feather from '@expo/vector-icons/Feather';
 import React, { useRef, useState } from 'react';
-import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
+import { getAppWindow } from '@/constants/appViewport';
 import { BROWSE_CATEGORIES } from '../../constants/sampleItems';
 import SampleModule from '../SampleModule/SampleModule';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = getAppWindow();
 
 const categoriesToList = BROWSE_CATEGORIES.map((c) => ({ label: c, value: c }));
 

@@ -16,7 +16,7 @@ import OnboardingSlideShell from './OnboardingSlideShell';
 type TrustSlideProps = {
   babyName: string;
   dailyNapCount: number | null;
-  onPressNext?: () => void;
+  onPressNext?: () => void | Promise<void>;
 };
 
 const REVIEWS = [
@@ -139,7 +139,7 @@ const TrustSlide: React.FC<TrustSlideProps> = ({
             <TimerOutlineButton
               label="Next"
               iconName="arrow-forward-sharp"
-              onPress={onPressNext}
+              onPress={() => void onPressNext?.()}
               variant="solid"
               size="xl"
               className="mt-6"

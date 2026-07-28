@@ -5,7 +5,6 @@ import { useFonts } from 'expo-font';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   Animated,
-  Dimensions,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
@@ -14,13 +13,14 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
+import { getAppWindow } from '@/constants/appViewport';
 import { getSavedItems } from '../lib/sampleContent';
 import type { SampleItem } from '../types/sampleItem';
 import SampleModule from './SampleModule/SampleModule';
 import BackButton from './SampleModule/BackButton';
 import ScreenComponent from './sharedComponents/ScreenComponent';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = getAppWindow();
 
 type RootStackParamList = {
   Home: undefined;

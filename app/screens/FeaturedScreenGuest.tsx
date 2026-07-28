@@ -1,16 +1,14 @@
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
+import { getAppWindow, scaleFromPhoneBaseline } from '@/constants/appViewport';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useRef } from 'react';
-import { Animated, Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 import SampleModule from '../SampleModule/SampleModule';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-const REFERENCE_HEIGHT = 812;
-const REFERENCE_WIDTH = 375;
-const scale = Math.min(screenHeight / REFERENCE_HEIGHT, screenWidth / REFERENCE_WIDTH);
-const s = (value: number) => value * scale;
+const { width: screenWidth } = getAppWindow();
+const s = scaleFromPhoneBaseline;
 const quoteContentMaxWidth = Math.min(s(340), screenWidth);
 
 type AuthStackParamList = {

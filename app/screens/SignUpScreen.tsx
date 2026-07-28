@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
-  Dimensions,
   Image,
   ImageStyle,
   StyleSheet,
@@ -18,6 +17,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import 'react-native-reanimated';
+import { scaleFromPhoneBaseline } from '@/constants/appViewport';
 import { useAuth } from '../context/AuthContext';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 
@@ -29,11 +29,7 @@ type AuthStackParamList = {
 
 type NavigationProp = NativeStackNavigationProp<AuthStackParamList>;
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-const REFERENCE_HEIGHT = 812;
-const REFERENCE_WIDTH = 375;
-const scale = Math.min(screenHeight / REFERENCE_HEIGHT, screenWidth / REFERENCE_WIDTH);
-const s = (value: number) => value * scale;
+const s = scaleFromPhoneBaseline;
 
 const SignUpScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();

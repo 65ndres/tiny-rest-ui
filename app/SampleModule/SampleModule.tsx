@@ -4,9 +4,10 @@ import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { ICarouselInstance } from 'react-native-reanimated-carousel';
 import Carousel from 'react-native-reanimated-carousel';
+import { getAppWindow } from '@/constants/appViewport';
 import {
   getFeaturedItems,
   getSavedItems,
@@ -37,7 +38,7 @@ type RootDrawerParamList = {
 
 type NavigationProp = DrawerNavigationProp<RootDrawerParamList>;
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = getAppWindow();
 const carouselHeight = Math.min(height * 0.4, width * 1.15);
 
 const SampleModule: React.FC<SampleModuleProps> = ({

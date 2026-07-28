@@ -17,7 +17,7 @@ const NAP_OPTIONS = [1, 2, 3, 4, 5] as const;
 type NapCountSlideProps = {
   dailyNapCount: number | null;
   onDailyNapCountChange: (count: number) => void;
-  onPressNext?: () => void;
+  onPressNext?: () => void | Promise<void>;
 };
 
 const formatNapCount = (count: number): string =>

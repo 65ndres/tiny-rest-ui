@@ -4,7 +4,7 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemL
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Dimensions, Image, ImageBackground, ImageStyle, StatusBar, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { ActivityIndicator, Animated, Image, ImageBackground, ImageStyle, StatusBar, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { AudioPlaybackProvider } from "./context/AudioPlaybackContext";
@@ -37,12 +37,13 @@ import AddFeedingScreen from './screens/AddFeedingScreen';
 import SoundsScreen from './screens/SoundsScreen';
 import BackButton from './SampleModule/BackButton';
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
+import { getAppWindow } from '@/constants/appViewport';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import '@/global.css';
 
 // Set the animation options. This is optional.
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = getAppWindow();
 
 type RootDrawerParamList = {
   Home: undefined;

@@ -11,7 +11,7 @@ import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
 import OnboardingSlideShell from './OnboardingSlideShell';
 
 type WelcomeSlideProps = {
-  onPressNext?: () => void;
+  onPressNext?: () => void | Promise<void>;
 };
 
 const WelcomeSlide: React.FC<WelcomeSlideProps> = ({ onPressNext }) => {
@@ -39,7 +39,7 @@ const WelcomeSlide: React.FC<WelcomeSlideProps> = ({ onPressNext }) => {
             <TimerOutlineButton
               label="Next"
               iconName="arrow-forward-sharp"
-              onPress={onPressNext}
+              onPress={() => void onPressNext?.()}
               variant="solid"
               size="xl"
               className="mt-2"

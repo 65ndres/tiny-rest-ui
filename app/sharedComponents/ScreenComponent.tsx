@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Dimensions,
   StyleSheet,
   Text,
   View,
@@ -14,9 +13,11 @@ import {
   SCREEN_FOOTER_HEIGHT,
   SCREEN_TOP_HEIGHT,
 } from '@/app/constants/screenLayout';
+import { getAppWindow } from '@/constants/appViewport';
 import AppScreenFooter from './AppScreenFooter';
 
-const width = Dimensions.get('window').width;
+/** Content column capped at iPhone 16 Pro Max width (background stays full-bleed). */
+const contentWidth = getAppWindow().width * SCREEN_CONTENT_WIDTH_RATIO;
 
 interface ScreenComponentProps {
   children?: React.ReactNode;
@@ -107,10 +108,13 @@ const styles = StyleSheet.create({
   } as ViewStyle,
   screenContainer: {
     flex: 1,
-    width: width * SCREEN_CONTENT_WIDTH_RATIO,
+    width: contentWidth,
+    maxWidth: contentWidth,
+    alignSelf: 'center',
   } as ViewStyle,
   safeArea: {
     flex: 1,
+    width: '100%',
     backgroundColor: 'transparent',
     alignItems: 'center',
   } as ViewStyle,

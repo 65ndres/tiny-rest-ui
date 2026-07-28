@@ -10,7 +10,6 @@ import { useFonts } from 'expo-font';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   Animated,
-  Dimensions,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -22,11 +21,12 @@ import {
 } from 'react-native';
 import 'react-native-reanimated';
 
+import { getAppWindow } from '@/constants/appViewport';
 import { API_URL } from '../../constants/Config';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 import BackButton from '../SampleModule/BackButton';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = getAppWindow();
 
 type RootStackParamList = {
   Home: undefined;

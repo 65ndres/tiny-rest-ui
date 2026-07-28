@@ -7,3 +7,9 @@ export { default as ProSlide } from './ProSlide';
 export { default as SubscriptionChoiceSlide } from './SubscriptionChoiceSlide';
 export { default as TrustSlide } from './TrustSlide';
 export { default as WelcomeSlide } from './WelcomeSlide';
+export {
+  ONBOARDING_STEPS,
+  isOnboardingStep,
+  resumePageIndex,
+  type OnboardingStep,
+} from './onboardingSteps';

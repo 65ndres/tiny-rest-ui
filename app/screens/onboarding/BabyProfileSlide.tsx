@@ -20,7 +20,7 @@ type BabyProfileSlideProps = {
   babyBirthdate: string | null;
   onBabyNameChange: (name: string) => void;
   onBabyBirthdateChange: (date: string | null) => void;
-  onPressNext?: () => void;
+  onPressNext?: () => void | Promise<void>;
 };
 
 const formatBirthdate = (value: string | null): string => {

@@ -1,9 +1,10 @@
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
+import { getAppWindow } from '@/constants/appViewport';
 import React from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 
-const { height } = Dimensions.get('window');
+const { height } = getAppWindow();
 
 const PRIVACY_POLICY_TEXT = `
 Last Updated: May 9, 2026

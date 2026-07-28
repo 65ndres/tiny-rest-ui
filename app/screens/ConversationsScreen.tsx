@@ -10,7 +10,6 @@ import { useFonts } from 'expo-font';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
-  Dimensions,
   StyleSheet,
   Text,
   TouchableWithoutFeedback,
@@ -20,10 +19,11 @@ import {
 import { ScrollView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
+import { getAppWindow } from '@/constants/appViewport';
 import { API_URL } from '../../constants/Config';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = getAppWindow();
 
 // Define the navigation stack param list
 type RootStackParamList = {

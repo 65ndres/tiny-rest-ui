@@ -1,5 +1,5 @@
-import { Button } from '@rneui/themed';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import {
   Alert,
@@ -15,10 +15,11 @@ import {
 import { API_URL } from '../../../constants/Config';
 import { PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from '../../../constants/legalUrls';
 import { proPlanDisplayName, subscriptionPlanPerks } from '../../../constants/subscriptionPlanPerks';
+import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 import { useAuth } from '../../context/AuthContext';
 import { useRevenueCat } from '../../context/RevenueCatContext';
 import OnboardingSlideShell from './OnboardingSlideShell';
-import { onboardingHeight, onboardingWidth, vh } from './onboardingLayout';
+import { onboardingWidth, vh } from './onboardingLayout';
 
 const planCardStyle = {
   backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -30,6 +31,7 @@ const planCardStyle = {
 } as ViewStyle;
 
 const SubscriptionChoiceSlide: React.FC = () => {
+  const navigation = useNavigation();
   const { refreshUser } = useAuth();
   const {
     getPackages,
@@ -40,6 +42,10 @@ const SubscriptionChoiceSlide: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = React.useState<'basic' | 'pro' | null>(null);
   const scrollViewRef = React.useRef<ScrollView>(null);
   const hasScrolledToEndOnLoadRef = React.useRef(false);
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({ headerTitle: () => null });
+  }, [navigation]);
 
   const monthlyPackage = React.useMemo(() => {
     const packages = getPackages();
@@ -107,7 +113,9 @@ const SubscriptionChoiceSlide: React.FC = () => {
   return (
     <OnboardingSlideShell>
       <View style={styles.subscriptionSlideRoot}>
+        <View style={styles.subscriptionTitleContainer}>
         <Text style={styles.subscriptionTitle}>Select your plan</Text>
+        </View>
         <ScrollView
           ref={scrollViewRef}
           style={styles.scroll}
@@ -186,27 +194,30 @@ const SubscriptionChoiceSlide: React.FC = () => {
                 Terms of Use
               </Text>
             </Text>
-            <Button
-              title={
+            <TimerOutlineButton
+              label={
                 selectedPlan === null
                   ? 'Continue'
                   : selectedPlan === 'basic'
                     ? 'Continue with Basic'
                     : `Continue with ${proPlanDisplayName}`
               }
-              buttonStyle={styles.primaryButton}
-              containerStyle={styles.buttonContainer}
-              titleStyle={styles.primaryButtonTitle}
               onPress={() => {
-                if (selectedPlan === 'basic') handleBasic();
-                else if (selectedPlan === 'pro') handlePro();
+                if (selectedPlan === 'basic') void handleBasic();
+                else if (selectedPlan === 'pro') void handlePro();
               }}
               disabled={
                 selectedPlan === null ||
                 (selectedPlan === 'basic' && isSubscribing) ||
                 (selectedPlan === 'pro' && (isSubscribing || !monthlyPackage))
               }
-              loading={(selectedPlan === 'basic' || selectedPlan === 'pro') && isSubscribing}
+              isLoading={
+                (selectedPlan === 'basic' || selectedPlan === 'pro') && isSubscribing
+              }
+              variant="solid"
+              size="xl"
+              className="mt-2"
+              accessibilityLabel="Continue"
             />
           </View>
         </ScrollView>
@@ -253,16 +264,25 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
+  subscriptionTitleContainer: {
+    display: 'flex',
+    // flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    // paddingBottom: vh(0),
+  },
   subscriptionTitle: {
     color: '#FFFFFF',
     fontSize: vh(24),
     fontWeight: '700',
     textAlign: 'center',
-    paddingBottom: vh(10),
+
+    // paddingBottom: vh(0),
   } as TextStyle,
   subscriptionSlideContent: {
     gap: vh(20),
-    paddingBottom: vh(140),
+    paddingBottom: vh(20),
     flexGrow: 1,
   } as ViewStyle,
   planCard: {} as ViewStyle,
@@ -316,23 +336,6 @@ const styles = StyleSheet.create({
     marginVertical: vh(4),
     opacity: 1,
     textAlign: 'left',
-  } as TextStyle,
-  primaryButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: vh(2),
-    borderColor: '#FFFFFF',
-    borderRadius: vh(30),
-    paddingVertical: onboardingHeight * 0.014,
-  } as ViewStyle,
-  buttonContainer: {
-    marginHorizontal: 0,
-    marginTop: vh(8),
-    width: '100%',
-  } as ViewStyle,
-  primaryButtonTitle: {
-    fontWeight: 'bold',
-    color: '#ac8861ff',
-    fontSize: vh(16),
   } as TextStyle,
 });
 

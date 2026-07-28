@@ -1,8 +1,9 @@
+import { getAppWindow } from '@/constants/appViewport';
 import React from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 
-const { height } = Dimensions.get('window');
+const { height } = getAppWindow();
 
 const TERMS_OF_USE_TEXT = `LICENSED APPLICATION END USER LICENSE AGREEMENT
 

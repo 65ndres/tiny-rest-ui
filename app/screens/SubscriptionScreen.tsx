@@ -13,7 +13,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
-  Dimensions,
   Linking,
   ScrollView,
   StyleSheet,
@@ -24,15 +23,13 @@ import {
 } from 'react-native';
 import { PurchasesPackage } from 'react-native-purchases';
 import 'react-native-reanimated';
+import { getAppWindow, scaleFromPhoneBaseline } from '@/constants/appViewport';
 import { useAuth } from '../context/AuthContext';
 import { ENTITLEMENT_IDENTIFIER, useRevenueCat } from '../context/RevenueCatContext';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-const REFERENCE_HEIGHT = 812;
-const REFERENCE_WIDTH = 375;
-const scale = Math.min(screenHeight / REFERENCE_HEIGHT, screenWidth / REFERENCE_WIDTH);
-const s = (value: number) => value * scale;
+const { width: screenWidth } = getAppWindow();
+const s = scaleFromPhoneBaseline;
 
 /** Matches phone-proportioned content width on iPad (same pattern as LandingScreen). */
 const contentMaxWidth = Math.min(s(340), screenWidth);

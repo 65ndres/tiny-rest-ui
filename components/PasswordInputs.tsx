@@ -1,12 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Dimensions, StyleSheet, Text, TextInput, View, type TextStyle, type ViewStyle } from 'react-native';
+import { StyleSheet, Text, TextInput, View, type TextStyle, type ViewStyle } from 'react-native';
+import { scaleFromPhoneBaseline } from '@/constants/appViewport';
 
-const { width, height } = Dimensions.get('window');
-const REFERENCE_HEIGHT = 812;
-const REFERENCE_WIDTH = 375;
-const scale = Math.min(height / REFERENCE_HEIGHT, width / REFERENCE_WIDTH);
-const s = (value: number) => value * scale;
+const s = scaleFromPhoneBaseline;
 
 interface PasswordInputsProps {
   newPassword: string;

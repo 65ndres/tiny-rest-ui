@@ -14,6 +14,7 @@ import {
   createLocalTimerSession,
   formatClockTime,
   isTimerSaveEnabled,
+  isValidTimerStartTime,
   loadTimerHistoryFromCache,
   normalizePickedTimerDate,
   normalizeTimerSessionTimes,
@@ -21,6 +22,7 @@ import {
   resolveTimerPickerValue,
   resumeTimerSession,
   saveTimerHistoryToCache,
+  START_TIME_FUTURE_MESSAGE,
   stopTimerSession,
   type TimerSession,
 } from '@/app/utils/timerHistory';
@@ -174,27 +176,20 @@ const TimerScreenGuest: React.FC = () => {
   }, [clearTimerInterval]);
 
   const handleReset = () => {
-    if (isRunning) {
-      resetAll();
-      return;
-    }
-
-    if (startTime && endTime) {
-      resetAll();
-      return;
-    }
-
-    if (startTime || endTime || elapsedMs > 0) {
-      resetAll();
-    }
+    if (!startTime || !endTime) return;
+    resetAll();
   };
 
-  const canReset =
-    isRunning || !!startTime || !!endTime || elapsedMs > 0;
+  const canReset = Boolean(startTime && endTime);
 
   const handleSubmit = async () => {
     if (!startTime || !endTime) {
       Alert.alert('Error', 'Start and end times are required.');
+      return;
+    }
+
+    if (!isValidTimerStartTime(startTime)) {
+      Alert.alert('Error', START_TIME_FUTURE_MESSAGE);
       return;
     }
 
@@ -319,6 +314,7 @@ const TimerScreenGuest: React.FC = () => {
         value={pickerValue}
         onChange={handlePickerDateChange}
         onClose={closePicker}
+        maximumDate={activePicker === 'start' ? pickerNow : undefined}
       />
     </ScreenScrollLayout>
   );

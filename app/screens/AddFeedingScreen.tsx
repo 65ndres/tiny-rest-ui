@@ -34,9 +34,11 @@ import {
   formatClockTime,
   getTimerApiErrorMessage,
   getLastNursingSide,
+  isValidTimerStartTime,
   normalizePickedTimerDate,
   normalizeTimerSessionTimes,
   NURSING_RUN_TYPES,
+  START_TIME_FUTURE_MESSAGE,
   submitTimerRun,
   type BottleMetadata,
   type TimerRunType,
@@ -93,12 +95,14 @@ const AddFeedingScreen: React.FC = () => {
   const [elapsedMs, setElapsedMs] = useState(0);
   const [hasStoppedSession, setHasStoppedSession] = useState(false);
   const [activePicker, setActivePicker] = useState<PickerTarget | null>(null);
+  const [pickerNow, setPickerNow] = useState(() => new Date());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [lastSide, setLastSide] = useState<NursingSide | null>(null);
 
   const [bottleStartTime, setBottleStartTime] = useState(() => new Date());
   const [bottlePickerOpen, setBottlePickerOpen] = useState(false);
+  const [bottlePickerNow, setBottlePickerNow] = useState(() => new Date());
   const [bottleMetadata, setBottleMetadata] = useState<BottleMetadata>({
     unit: 'oz',
     amount: 0,
@@ -243,6 +247,7 @@ const AddFeedingScreen: React.FC = () => {
 
   const openPicker = (target: PickerTarget) => {
     if (isRunning) return;
+    setPickerNow(new Date());
     setActivePicker(target);
   };
 
@@ -497,6 +502,11 @@ const AddFeedingScreen: React.FC = () => {
       return;
     }
 
+    if (!isValidTimerStartTime(startTime)) {
+      Alert.alert('Error', START_TIME_FUTURE_MESSAGE);
+      return;
+    }
+
     if (endTime.getTime() <= startTime.getTime()) {
       Alert.alert('Error', 'End time must be after start time.');
       return;
@@ -552,6 +562,11 @@ const AddFeedingScreen: React.FC = () => {
   };
 
   const handleBottleSave = async () => {
+    if (!isValidTimerStartTime(bottleStartTime)) {
+      Alert.alert('Error', START_TIME_FUTURE_MESSAGE);
+      return;
+    }
+
     setIsSavingBottle(true);
     try {
       const token = await AsyncStorage.getItem('token');
@@ -684,7 +699,10 @@ const AddFeedingScreen: React.FC = () => {
             ) : (
               <BottleFeedingForm
                 startTimeLabel={formatStartTimeLabel(bottleStartTime)}
-                onPressStartTime={() => setBottlePickerOpen(true)}
+                onPressStartTime={() => {
+                  setBottlePickerNow(new Date());
+                  setBottlePickerOpen(true);
+                }}
                 metadata={bottleMetadata}
                 onMetadataChange={setBottleMetadata}
                 onSave={() => void handleBottleSave()}
@@ -709,6 +727,7 @@ const AddFeedingScreen: React.FC = () => {
         value={pickerValue}
         onChange={handlePickerDateChange}
         onClose={closePicker}
+        maximumDate={activePicker === 'start' ? pickerNow : undefined}
       />
 
       <TimerDateTimePickerDrawer
@@ -717,6 +736,7 @@ const AddFeedingScreen: React.FC = () => {
         value={bottleStartTime}
         onChange={setBottleStartTime}
         onClose={() => setBottlePickerOpen(false)}
+        maximumDate={bottlePickerNow}
       />
     </>
   );

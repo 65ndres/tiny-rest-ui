@@ -386,6 +386,15 @@ export const isValidTimerEndTime = (params: {
   return endMs > startMs;
 };
 
+export const START_TIME_FUTURE_MESSAGE = 'Start time cannot be in the future.';
+const START_TIME_SKEW_MS = 60_000;
+
+/** Matches backend: start may be up to ~60s ahead for clock skew / "now" presses. */
+export const isValidTimerStartTime = (
+  start: Date,
+  now: Date = new Date()
+): boolean => start.getTime() <= now.getTime() + START_TIME_SKEW_MS;
+
 /** Save is clickable only when both Started at and Ended at are set and the timer is idle. */
 export const isTimerSaveEnabled = (params: {
   startTime: Date | null;
@@ -457,6 +466,16 @@ export const resumeTimerSession = (
 
 const END_TIME_AFTER_START_MESSAGE = 'End time must be after start time.';
 
+const normalizeKnownTimerApiMessage = (message: string): string => {
+  if (/end time must be after start time/i.test(message)) {
+    return END_TIME_AFTER_START_MESSAGE;
+  }
+  if (/start time cannot be in the future/i.test(message)) {
+    return START_TIME_FUTURE_MESSAGE;
+  }
+  return message;
+};
+
 export const getTimerApiErrorMessage = (
   error: unknown,
   fallback: string
@@ -475,18 +494,12 @@ export const getTimerApiErrorMessage = (
       .filter((item): item is string => typeof item === 'string')
       .join(' ');
     if (joined.length > 0) {
-      if (/end time must be after start time/i.test(joined)) {
-        return END_TIME_AFTER_START_MESSAGE;
-      }
-      return joined;
+      return normalizeKnownTimerApiMessage(joined);
     }
   }
 
   if (typeof data?.error === 'string' && data.error.length > 0) {
-    if (/end time must be after start time/i.test(data.error)) {
-      return END_TIME_AFTER_START_MESSAGE;
-    }
-    return data.error;
+    return normalizeKnownTimerApiMessage(data.error);
   }
 
   return fallback;

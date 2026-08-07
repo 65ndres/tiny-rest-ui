@@ -21,10 +21,12 @@ import {
   beginTimerSession,
   getTimerApiErrorMessage,
   isTimerSaveEnabled,
+  isValidTimerStartTime,
   normalizePickedTimerDate,
   normalizeTimerSessionTimes,
   resolveTimerPickerValue,
   resumeTimerSession,
+  START_TIME_FUTURE_MESSAGE,
   stopTimerSession,
   submitTimerRun,
   type TimerSession,
@@ -338,13 +340,7 @@ const TimerScreen: React.FC = () => {
   }, [clearTimerInterval]);
 
   const handleReset = () => {
-    const shouldReset =
-      isRunning ||
-      (!!startTime && !!endTime) ||
-      !!startTime ||
-      !!endTime ||
-      elapsedMs > 0;
-    if (!shouldReset) return;
+    if (!startTime || !endTime) return;
 
     const runId = activeTimerRunIdRef.current;
     // Invalidate any in-flight loadHistory so it can't restore this run.
@@ -391,12 +387,16 @@ const TimerScreen: React.FC = () => {
     })();
   };
 
-  const canReset =
-    isRunning || !!startTime || !!endTime || elapsedMs > 0;
+  const canReset = Boolean(startTime && endTime);
 
   const handleSubmit = async () => {
     if (!startTime || !endTime) {
       Alert.alert('Error', 'Start and end times are required.');
+      return;
+    }
+
+    if (!isValidTimerStartTime(startTime)) {
+      Alert.alert('Error', START_TIME_FUTURE_MESSAGE);
       return;
     }
 
@@ -552,6 +552,7 @@ const TimerScreen: React.FC = () => {
         value={pickerValue}
         onChange={handlePickerDateChange}
         onClose={closePicker}
+        maximumDate={activePicker === 'start' ? pickerNow : undefined}
       />
     </ScreenScrollLayout>
   );

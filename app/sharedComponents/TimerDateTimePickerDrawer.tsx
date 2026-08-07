@@ -24,6 +24,8 @@ type TimerDateTimePickerDrawerProps = {
   onChange: (date: Date) => void;
   onClose: () => void;
   mode?: 'date' | 'datetime' | 'time';
+  /** When set (e.g. Started at), blocks selecting dates after this instant. */
+  maximumDate?: Date;
 };
 
 const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
@@ -33,6 +35,7 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
   onChange,
   onClose,
   mode = 'datetime',
+  maximumDate,
 }) => {
   const resolvedMode =
     mode === 'datetime' && Platform.OS !== 'ios' ? 'time' : mode;
@@ -89,7 +92,9 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
                 themeVariant="light"
                 textColor={TIMER_SOLID_BUTTON_CONTENT_COLOR}
                 style={styles.picker}
-                maximumDate={mode === 'date' ? new Date() : undefined}
+                maximumDate={
+                  maximumDate ?? (mode === 'date' ? new Date() : undefined)
+                }
               />
             </View>
 

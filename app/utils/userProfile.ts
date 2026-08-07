@@ -20,6 +20,8 @@ export type UserProfileUpdate = Partial<{
   baby_name: string | null;
   baby_birthdate: string | null;
   daily_nap_count: number;
+  password: string;
+  password_confirmation: string;
 }>;
 
 const authHeaders = (token: string) => ({
@@ -48,3 +50,27 @@ export const updateUserProfile = async (
   );
   return response.data;
 };
+
+export type ChangePasswordAndSignOutDeps = {
+  token: string;
+  password: string;
+  updateUserProfile: (
+    token: string,
+    updates: UserProfileUpdate
+  ) => Promise<unknown>;
+  logout: () => Promise<void>;
+};
+
+/**
+ * Persist a new password, then sign out so the user must sign in again.
+ * Does not call logout if the password update fails.
+ */
+export async function changePasswordAndSignOut(
+  deps: ChangePasswordAndSignOutDeps
+): Promise<void> {
+  await deps.updateUserProfile(deps.token, {
+    password: deps.password,
+    password_confirmation: deps.password,
+  });
+  await deps.logout();
+}

@@ -4,10 +4,15 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, TextInput, View } from 'react-native';
+import { EyeIcon, EyeOffIcon, Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import { API_URL } from '@/constants/Config';
-import { fetchUserProfile, updateUserProfile } from '@/app/utils/userProfile';
+import {
+  changePasswordAndSignOut,
+  fetchUserProfile,
+  updateUserProfile,
+} from '@/app/utils/userProfile';
 import {
   timerContentStackClassName,
   timerOutlineButtonClassName,
@@ -53,17 +58,14 @@ const ProfileFieldRow: React.FC<ProfileFieldRowProps> = ({
 const UserProfileScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const { logout } = useAuth();
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-  const [firstNameError, setFirstNameError] = useState('');
-  const [lastNameError, setLastNameError] = useState('');
   const [newPasswordError, setNewPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
@@ -74,9 +76,6 @@ const UserProfileScreen: React.FC = () => {
       if (!token) return;
 
       const profile = await fetchUserProfile(token);
-      setFirstName(profile.first_name || '');
-      setLastName(profile.last_name || '');
-      setUsername(profile.username || '');
       setEmail(profile.email || '');
     } catch (error) {
       console.error('Failed to fetch profile:', error);
@@ -93,62 +92,56 @@ const UserProfileScreen: React.FC = () => {
   );
 
   const updateProfile = async () => {
-    setFirstNameError('');
-    setLastNameError('');
     setNewPasswordError('');
     setConfirmPasswordError('');
-
-    let hasError = false;
-    if (!firstName.trim()) {
-      setFirstNameError('First name is required');
-      hasError = true;
-    }
-    if (!lastName.trim()) {
-      setLastNameError('Last name is required');
-      hasError = true;
-    }
 
     const hasOldPassword = oldPassword.trim().length > 0;
     const hasNewPasswordFilled = newPassword.trim().length > 0;
 
-    if (hasOldPassword || hasNewPasswordFilled) {
-      if (oldPassword !== newPassword) {
-        setNewPasswordError('Passwords do not match');
-        setConfirmPasswordError('Passwords do not match');
-        hasError = true;
-      }
+    if (!hasOldPassword && !hasNewPasswordFilled) {
+      Alert.alert('Nothing to save', 'Enter a new password to update your account.');
+      return;
     }
 
-    if (hasError) {
+    if (oldPassword !== newPassword) {
+      setNewPasswordError('Passwords do not match');
+      setConfirmPasswordError('Passwords do not match');
       return;
     }
 
     try {
       setIsLoading(true);
       const token = await AsyncStorage.getItem('token');
-
-      await updateUserProfile(token, {
-        first_name: firstName,
-        last_name: lastName,
-        email: email.toLowerCase(),
-      });
-
-      if (oldPassword.trim() && newPassword.trim()) {
-        await axios.post(
-          `${API_URL}/user`,
-          { new_password: newPassword },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+      if (!token) {
+        Alert.alert('Error', 'Failed to update profile');
+        return;
       }
 
-      Alert.alert('Success', 'Profile updated successfully');
+      await changePasswordAndSignOut({
+        token,
+        password: newPassword,
+        updateUserProfile,
+        logout,
+      });
 
       setOldPassword('');
       setNewPassword('');
+
+      Alert.alert(
+        'Password updated',
+        'Your password was changed. Please sign in again.',
+        [{ text: 'OK' }],
+        { cancelable: false }
+      );
     } catch (error: unknown) {
       console.error('Failed to update profile:', error);
-      const err = error as { response?: { data?: { message?: string } } };
-      const errorMessage = err.response?.data?.message || 'Failed to update profile';
+      const err = error as {
+        response?: { data?: { message?: string; errors?: string[] } };
+      };
+      const errorMessage =
+        err.response?.data?.errors?.join('\n') ||
+        err.response?.data?.message ||
+        'Failed to update profile';
       Alert.alert('Error', errorMessage);
     } finally {
       setIsLoading(false);
@@ -201,57 +194,9 @@ const UserProfileScreen: React.FC = () => {
         ) : (
           <>
             <TimerSectionCard>
-              <Text className={timerSectionLabelClassName}>Profile</Text>
+  
 
-              <ProfileFieldRow label="First name:" isFirst>
-                <TextInput
-                  value={firstName}
-                  onChangeText={(text) => {
-                    setFirstName(text);
-                    if (firstNameError) setFirstNameError('');
-                  }}
-                  placeholder="Enter first name"
-                  placeholderTextColor="rgba(255,255,255,0.5)"
-                  editable={!fieldsDisabled}
-                  accessibilityLabel="First name"
-                  className={inputClassName}
-                  cursorColor="#ffffff"
-                  selectionColor="white"
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                />
-              </ProfileFieldRow>
-              {firstNameError ? (
-                <Text className="text-error-400 text-sm mt-1">{firstNameError}</Text>
-              ) : null}
-
-              <ProfileFieldRow label="Last name:">
-                <TextInput
-                  value={lastName}
-                  onChangeText={(text) => {
-                    setLastName(text);
-                    if (lastNameError) setLastNameError('');
-                  }}
-                  placeholder="Enter last name"
-                  placeholderTextColor="rgba(255,255,255,0.5)"
-                  editable={!fieldsDisabled}
-                  accessibilityLabel="Last name"
-                  className={inputClassName}
-                  cursorColor="#ffffff"
-                  selectionColor="white"
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                />
-              </ProfileFieldRow>
-              {lastNameError ? (
-                <Text className="text-error-400 text-sm mt-1">{lastNameError}</Text>
-              ) : null}
-
-              <ProfileFieldRow label="Username:">
-                <Text className={valueClassName}>{username || '—'}</Text>
-              </ProfileFieldRow>
-
-              <ProfileFieldRow label="Email:">
+              <ProfileFieldRow label="Email:" isFirst>
                 <Text className={valueClassName}>{email || '—'}</Text>
               </ProfileFieldRow>
 
@@ -277,10 +222,23 @@ const UserProfileScreen: React.FC = () => {
                   className={inputClassName}
                   cursorColor="#ffffff"
                   selectionColor="white"
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
+                <Pressable
+                  onPress={() => setShowPassword((prev) => !prev)}
+                  disabled={fieldsDisabled}
+                  accessibilityRole="button"
+                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                  className="ml-2 p-1"
+                >
+                  <Icon
+                    as={showPassword ? EyeIcon : EyeOffIcon}
+                    className="text-white"
+                    size="md"
+                  />
+                </Pressable>
               </ProfileFieldRow>
               {newPasswordError ? (
                 <Text className="text-error-400 text-sm mt-1">{newPasswordError}</Text>
@@ -303,10 +261,27 @@ const UserProfileScreen: React.FC = () => {
                   className={inputClassName}
                   cursorColor="#ffffff"
                   selectionColor="white"
-                  secureTextEntry
+                  secureTextEntry={!showConfirmPassword}
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
+                <Pressable
+                  onPress={() => setShowConfirmPassword((prev) => !prev)}
+                  disabled={fieldsDisabled}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    showConfirmPassword
+                      ? 'Hide confirm password'
+                      : 'Show confirm password'
+                  }
+                  className="ml-2 p-1"
+                >
+                  <Icon
+                    as={showConfirmPassword ? EyeIcon : EyeOffIcon}
+                    className="text-white"
+                    size="md"
+                  />
+                </Pressable>
               </ProfileFieldRow>
               {confirmPasswordError ? (
                 <Text className="text-error-400 text-sm mt-1">{confirmPasswordError}</Text>

@@ -19,6 +19,7 @@ import {
   fetchHistoryPanelTimerRuns,
   formatClockTime,
   getTimerApiErrorMessage,
+  isTimerSaveEnabled,
   normalizePickedTimerDate,
   normalizeTimerSessionTimes,
   submitTimerRun,
@@ -475,7 +476,12 @@ const TimerScreen: React.FC = () => {
         ? endTime ?? new Date()
         : new Date();
 
-  const isSubmitEnabled = Boolean(startTime && endTime) && !isRunning;
+  const isSubmitEnabled = isTimerSaveEnabled({
+    startTime,
+    endTime,
+    isRunning,
+    isSubmitting,
+  });
 
   const playButtonLabel =
     !isRunning && startTime && hasStoppedSession ? 'Resume' : 'Start';
@@ -524,7 +530,7 @@ const TimerScreen: React.FC = () => {
             label="Save"
             iconName="save-sharp"
             onPress={() => void handleSubmit()}
-            disabled={!isSubmitEnabled || isSubmitting || isStarting}
+            disabled={!isSubmitEnabled || isStarting}
             isLoading={isSubmitting}
             className="mt-3"
             size="xl"

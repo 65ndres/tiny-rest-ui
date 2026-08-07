@@ -12,6 +12,7 @@ import {
 import {
   createLocalTimerSession,
   formatClockTime,
+  isTimerSaveEnabled,
   loadTimerHistoryFromCache,
   normalizePickedTimerDate,
   normalizeTimerSessionTimes,
@@ -232,7 +233,12 @@ const TimerScreenGuest: React.FC = () => {
         ? endTime ?? new Date()
         : new Date();
 
-  const isSubmitEnabled = Boolean(startTime && endTime) && !isRunning;
+  const isSubmitEnabled = isTimerSaveEnabled({
+    startTime,
+    endTime,
+    isRunning,
+    isSubmitting,
+  });
 
   const playButtonLabel =
     !isRunning && startTime && hasStoppedSession ? 'Resume' : 'Start';
@@ -280,7 +286,7 @@ const TimerScreenGuest: React.FC = () => {
             label="Save"
             iconName="save-sharp"
             onPress={() => void handleSubmit()}
-            disabled={!isSubmitEnabled || isSubmitting}
+            disabled={!isSubmitEnabled}
             isLoading={isSubmitting}
             className="mt-3"
             size="xl"

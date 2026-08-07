@@ -386,6 +386,17 @@ export const isValidTimerEndTime = (params: {
   return endMs > startMs;
 };
 
+/** Save is clickable only when both Started at and Ended at are set and the timer is idle. */
+export const isTimerSaveEnabled = (params: {
+  startTime: Date | null;
+  endTime: Date | null;
+  isRunning: boolean;
+  isSubmitting?: boolean;
+}): boolean =>
+  Boolean(params.startTime && params.endTime) &&
+  !params.isRunning &&
+  !params.isSubmitting;
+
 const END_TIME_AFTER_START_MESSAGE = 'End time must be after start time.';
 
 export const getTimerApiErrorMessage = (

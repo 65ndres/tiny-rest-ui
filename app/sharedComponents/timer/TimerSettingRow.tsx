@@ -13,6 +13,8 @@ type TimerSettingRowProps = {
   accessibilityLabel: string;
   isFirst?: boolean;
   size?: 'md' | 'lg';
+  /** Secondary line under the label (e.g. "optional"). */
+  hint?: string;
 };
 
 const TimerSettingRow: React.FC<TimerSettingRowProps> = ({
@@ -24,11 +26,12 @@ const TimerSettingRow: React.FC<TimerSettingRowProps> = ({
   accessibilityLabel,
   isFirst = false,
   size = 'md',
+  hint,
 }) => {
   const isLg = size === 'lg';
   const labelClassName = isLg
-    ? 'text-white text-xl font-semibold flex-1 mr-2'
-    : 'text-white text-lg font-semibold flex-1 mr-2';
+    ? 'text-white text-xl font-semibold'
+    : 'text-white text-lg font-semibold';
   const valueClassName = isLg
     ? 'text-white text-lg font-semibold underline mr-1'
     : 'text-white text-base font-semibold underline mr-1';
@@ -41,7 +44,12 @@ const TimerSettingRow: React.FC<TimerSettingRowProps> = ({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
     >
-      <Text className={labelClassName}>{label}</Text>
+      <View className="flex-1 mr-2">
+        <Text className={labelClassName}>{label}</Text>
+        {hint ? (
+          <Text className="text-white/75 text-sm">{hint}</Text>
+        ) : null}
+      </View>
       <View className="flex-row items-center">
         <Text className={valueClassName}>{value || placeholder}</Text>
         <Ionicons

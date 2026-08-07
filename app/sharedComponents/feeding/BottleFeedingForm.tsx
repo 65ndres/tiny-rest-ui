@@ -81,6 +81,7 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
       />
       <TimerSettingRow
         label="Type:"
+        hint="optional"
         value={metadata.feeding_type ?? ''}
         placeholder="Set type"
         onPress={pickType}
@@ -89,6 +90,7 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
       />
       <TimerSettingRow
         label="Unit:"
+        hint="optional"
         value={unit}
         placeholder="Select unit"
         onPress={pickUnit}

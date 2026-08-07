@@ -18,6 +18,9 @@
       "bundleIdentifier": "com.afre92.tinyrest",
       "buildNumber": "7",
       "appleTeamId": "NQ6AG8RHP3",
+      "infoPlist": {
+        "UIBackgroundModes": ["audio"]
+      },
       "entitlements": {
         "com.apple.security.application-groups": [
           "group.com.afre92.tinyrest"
@@ -42,12 +45,7 @@
       "expo-font",
       "@bacons/apple-targets",
       "@react-native-community/datetimepicker",
-      [
-        "expo-audio",
-        {
-          "enableBackgroundPlayback": true
-        }
-      ]
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true

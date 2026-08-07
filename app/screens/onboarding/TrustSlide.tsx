@@ -77,7 +77,7 @@ const TrustSlide: React.FC<TrustSlideProps> = ({
               lineHeight: 40,
             }}
           >
-            We&apos;re here
+            Now relax, we are here to help you.
           </Text>
           <Text
             style={{
@@ -87,18 +87,23 @@ const TrustSlide: React.FC<TrustSlideProps> = ({
               lineHeight: 40,
             }}
           >
-            to help
           </Text>
-          <View style={{ marginVertical: 24 }}>
+          <View style={{ marginVertical: 5 }}>
             <Text className={`${mutedTextClassName} text-xl mb-4`}>
-              Together, we&apos;ll help {displayName} take {napPhrase} with ease.
+              Together, we&apos;ll help{' '}
+              <Text className="text-white text-xl font-bold">{displayName}</Text>
+              {' '}take{' '}
+              <Text className="text-white text-xl font-bold">{napPhrase}</Text>
+              {' '}with ease.
             </Text>
-            <Text className={`${mutedTextClassName} text-xl`}>
-              Join other parents who don&apos;t need to guess the next nap time.
-            </Text>
+
           </View>
 
           <View className='border-b border-white/30 pb-4'></View>
+
+          <Text className={`${mutedTextClassName} text-xl mt-6 text-center font-bold`}>
+              Join other parents who don&apos;t need to guess the next nap time!
+            </Text>
 
           <View className=" items-center" >
             <Carousel
@@ -112,12 +117,15 @@ const TrustSlide: React.FC<TrustSlideProps> = ({
               // snapEnabled
               onSnapToItem={setActiveReviewIndex}
               renderItem={({ item }) => (
-                <View className="flex-1 py-4 justify-center px-9">
-                  <Stars count={item.rating} />
-                  <Text className={`${mutedTextClassName} text-base mb-2`}>
+                <View className="py-6 text-center" style={{ paddingHorizontal: 60 }}>
+                  
+                  <Text className={`${mutedTextClassName} text-base mb-2 text-center`}>
                     "{item.quote}"
                   </Text>
-                  <Text className="text-white text-sm font-semibold">
+                  <View className="flex-row justify-center">
+                    <Stars count={item.rating} />
+                  </View>
+                  <Text className="text-white text-sm font-semibold text-center">
                     {item.author}
                   </Text>
                 </View>
@@ -137,13 +145,13 @@ const TrustSlide: React.FC<TrustSlideProps> = ({
 
           {onPressNext ? (
             <TimerOutlineButton
-              label="Next"
+              label="Choose a plan"
               iconName="arrow-forward-sharp"
               onPress={() => void onPressNext?.()}
               variant="solid"
               size="xl"
               className="mt-6"
-              accessibilityLabel="Next"
+              accessibilityLabel="Choose a plan"
             />
           ) : null}
         </TimerSectionCard>

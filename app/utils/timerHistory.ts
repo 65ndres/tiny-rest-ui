@@ -131,6 +131,33 @@ export const fetchTimerRunsInRange = async (
   return sessions;
 };
 
+/** Inclusive calendar-day lookback for sleep/feeding history panels. */
+export const HISTORY_PANEL_LOOKBACK_DAYS = 10;
+
+export const getLastNDaysRange = (
+  days: number,
+  referenceDate: Date = new Date()
+): { from: string; to: string } => {
+  const to = new Date(referenceDate);
+  to.setHours(0, 0, 0, 0);
+  const from = new Date(to);
+  from.setDate(from.getDate() - Math.max(days - 1, 0));
+  return {
+    from: formatDateParam(from),
+    to: formatDateParam(to),
+  };
+};
+
+/** Submitted runs for history panels — limited to the last N days. */
+export const fetchHistoryPanelTimerRuns = async (
+  token: string,
+  options?: FetchTimerRunsOptions
+): Promise<TimerSession[]> => {
+  const { from, to } = getLastNDaysRange(HISTORY_PANEL_LOOKBACK_DAYS);
+  const sessions = await fetchTimerRunsInRange(token, from, to, options);
+  return sortNewestFirst(sessions);
+};
+
 export const TIMELINE_FIRST_DAY = 1;
 
 export const formatDateParam = (date: Date): string => {
@@ -236,7 +263,7 @@ export const sessionToTimelineEvent = (
     id: session.id,
     start: session.start_time,
     end: session.end_time,
-    title: formatDuration(session.duration_ms),
+    title: formatLabeledDuration(session.duration_ms),
     summary: isNursing
       ? session.run_type === 'nursing_left'
         ? 'Nursing · Left'
@@ -324,6 +351,10 @@ export const createTimerRun = async (
   return response.data.timer_run;
 };
 
+/**
+ * Bottle feedings are instant events: the API allows end_time == start_time
+ * (duration 0). Sleep and nursing require end_time strictly after start_time.
+ */
 export const createBottleFeeding = async (
   token: string,
   payload: { start_time: string; metadata?: BottleMetadata }
@@ -340,6 +371,56 @@ export const createBottleFeeding = async (
   );
 
   return response.data.timer_run;
+};
+
+/** Matches backend TimerRun rule: bottle may equal; all others need end after start. */
+export const isValidTimerEndTime = (params: {
+  startMs: number;
+  endMs: number;
+  runType?: TimerRunType;
+}): boolean => {
+  const { startMs, endMs, runType } = params;
+  if (runType === 'bottle') {
+    return endMs >= startMs;
+  }
+  return endMs > startMs;
+};
+
+const END_TIME_AFTER_START_MESSAGE = 'End time must be after start time.';
+
+export const getTimerApiErrorMessage = (
+  error: unknown,
+  fallback: string
+): string => {
+  if (!axios.isAxiosError(error)) {
+    return fallback;
+  }
+
+  const data = error.response?.data as
+    | { errors?: unknown; error?: unknown }
+    | undefined;
+
+  const errors = data?.errors;
+  if (Array.isArray(errors)) {
+    const joined = errors
+      .filter((item): item is string => typeof item === 'string')
+      .join(' ');
+    if (joined.length > 0) {
+      if (/end time must be after start time/i.test(joined)) {
+        return END_TIME_AFTER_START_MESSAGE;
+      }
+      return joined;
+    }
+  }
+
+  if (typeof data?.error === 'string' && data.error.length > 0) {
+    if (/end time must be after start time/i.test(data.error)) {
+      return END_TIME_AFTER_START_MESSAGE;
+    }
+    return data.error;
+  }
+
+  return fallback;
 };
 
 export const fetchActiveTimerRun = async (
@@ -537,13 +618,19 @@ export const deleteTimerRun = async (
   }
 };
 
-const dateTimeFormat: Intl.DateTimeFormatOptions = {
-  dateStyle: 'medium',
-  timeStyle: 'short',
+/** Locale-aware clock time; omits hour12 so the device chooses 12h/24h. */
+const localeClockTimeFormat: Intl.DateTimeFormatOptions = {
+  hour: 'numeric',
+  minute: '2-digit',
 };
 
-const clockTimeFormat: Intl.DateTimeFormatOptions = {
-  timeStyle: 'short',
+/** Locale-aware date + time for history metadata rows. */
+const localeDateTimeFormat: Intl.DateTimeFormatOptions = {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
 };
 
 const startOfLocalDay = (date: Date): Date => {
@@ -646,12 +733,20 @@ export const formatSessionClockTime = (iso: string): string => {
   if (Number.isNaN(date.getTime())) {
     return 'Invalid time';
   }
-  return date.toLocaleString(undefined, clockTimeFormat);
+  return date.toLocaleTimeString(undefined, localeClockTimeFormat);
+};
+
+export const formatSessionDateTime = (iso: string): string => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return 'Invalid time';
+  }
+  return date.toLocaleString(undefined, localeDateTimeFormat);
 };
 
 export const formatClockTime = (date: Date | null): string => {
   if (!date) return '';
-  return date.toLocaleString(undefined, clockTimeFormat);
+  return date.toLocaleTimeString(undefined, localeClockTimeFormat);
 };
 
 export type TimerSessionDayGroup = {
@@ -707,18 +802,17 @@ export const formatDuration = (ms: number): string => {
   return `${hours}:${minutes}:${seconds}`;
 };
 
-const readableClockTimeFormat: Intl.DateTimeFormatOptions = {
-  hour: 'numeric',
-  minute: '2-digit',
+/** Human-readable duration for timeline / history, e.g. `3h : 0m : 34s`. */
+export const formatLabeledDuration = (ms: number): string => {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${hours}h : ${minutes}m : ${seconds}s`;
 };
 
-export const formatReadableClockTime = (iso: string): string => {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) {
-    return 'Invalid time';
-  }
-  return date.toLocaleTimeString(undefined, readableClockTimeFormat);
-};
+export const formatReadableClockTime = (iso: string): string =>
+  formatSessionClockTime(iso);
 
 export const formatSessionTimeRange = (
   start: string,
@@ -783,13 +877,8 @@ export const formatFeedingHistoryLine = (session: TimerSession): string => {
   return joinHistoryParts([primary, timeAndDuration]);
 };
 
-export const formatSessionTime = (iso: string): string => {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) {
-    return 'Invalid time';
-  }
-  return date.toLocaleString(undefined, dateTimeFormat);
-};
+export const formatSessionTime = (iso: string): string =>
+  formatSessionDateTime(iso);
 
 const sortNewestFirst = (sessions: TimerSession[]): TimerSession[] => {
   return [...sessions].sort((a, b) => {

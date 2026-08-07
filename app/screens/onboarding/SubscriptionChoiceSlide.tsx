@@ -40,9 +40,6 @@ const SubscriptionChoiceSlide: React.FC = () => {
   } = useRevenueCat();
   const [isSubscribing, setIsSubscribing] = React.useState(false);
   const [selectedPlan, setSelectedPlan] = React.useState<'basic' | 'pro' | null>(null);
-  const scrollViewRef = React.useRef<ScrollView>(null);
-  const hasScrolledToEndOnLoadRef = React.useRef(false);
-
   React.useLayoutEffect(() => {
     navigation.setOptions({ headerTitle: () => null });
   }, [navigation]);
@@ -92,14 +89,6 @@ const SubscriptionChoiceSlide: React.FC = () => {
     setSelectedPlan(plan);
   };
 
-  const handlePlansContentSizeChange = React.useCallback(() => {
-    if (hasScrolledToEndOnLoadRef.current) return;
-    hasScrolledToEndOnLoadRef.current = true;
-    requestAnimationFrame(() => {
-      scrollViewRef.current?.scrollToEnd({ animated: false });
-    });
-  }, []);
-
   if (revenueCatLoading) {
     return (
       <OnboardingSlideShell>
@@ -113,16 +102,13 @@ const SubscriptionChoiceSlide: React.FC = () => {
   return (
     <OnboardingSlideShell>
       <View style={styles.subscriptionSlideRoot}>
-        <View style={styles.subscriptionTitleContainer}>
-        <Text style={styles.subscriptionTitle}>Select your plan</Text>
-        </View>
         <ScrollView
-          ref={scrollViewRef}
           style={styles.scroll}
           contentContainerStyle={styles.subscriptionSlideContent}
           showsVerticalScrollIndicator={false}
-          onContentSizeChange={handlePlansContentSizeChange}
         >
+          <Text style={styles.subscriptionTitle}>Select your plan</Text>
+
           <Pressable
             onPress={() => handleSelectPlan('basic')}
             style={[
@@ -244,7 +230,7 @@ const styles = StyleSheet.create({
     width: '100%',
   } as ViewStyle,
   ctaBlock: {
-    width: '100%',
+    width: onboardingWidth * 0.8,
     paddingTop: vh(4),
   } as ViewStyle,
   legalFinePrint: {
@@ -264,28 +250,23 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
-  subscriptionTitleContainer: {
-    display: 'flex',
-    // flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    // paddingBottom: vh(0),
-  },
   subscriptionTitle: {
     color: '#FFFFFF',
     fontSize: vh(24),
     fontWeight: '700',
     textAlign: 'center',
-
-    // paddingBottom: vh(0),
+    width: onboardingWidth * 0.8,
   } as TextStyle,
   subscriptionSlideContent: {
-    gap: vh(20),
-    paddingBottom: vh(20),
     flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: vh(20),
+    paddingVertical: vh(20),
   } as ViewStyle,
-  planCard: {} as ViewStyle,
+  planCard: {
+    alignSelf: 'center',
+  } as ViewStyle,
   planCardSelected: {
     borderWidth: vh(2),
     borderColor: '#FFFFFF',

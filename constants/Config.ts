@@ -12,11 +12,11 @@ export const isDevelopment = __DEV__ || Constants.executionEnvironment === 'stan
 export const isExpoGo = Constants.executionEnvironment === 'storeClient';
 
 // API Configuration
-const DEVELOPMENT_API_URL = 'http://127.0.0.1:3000/api/v1'; //'https://97f8-173-239-254-51.ngrok-free.app/api/v1';
-const PRODUCTION_API_URL = 'http://127.0.0.1:3000/api/v1';
+const DEVELOPMENT_API_URL = 'https://51b4-173-239-254-61.ngrok-free.app/api/v1'; //'https://97f8-173-239-254-51.ngrok-free.app/api/v1';
+const PRODUCTION_API_URL = 'https://51b4-173-239-254-61.ngrok-free.app/api/v1'//'https://www.tiny-rest-app.com/api/v1';
 
 // Export the appropriate API URL based on environment
-export const API_URL = isExpoGo ? DEVELOPMENT_API_URL : PRODUCTION_API_URL;
+export const API_URL = "https://www.tiny-rest-app.com/api/v1" //isExpoGo ? DEVELOPMENT_API_URL : PRODUCTION_API_URL;
 
 // Additional configuration
 export const Config = {

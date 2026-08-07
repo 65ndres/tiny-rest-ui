@@ -29,9 +29,10 @@ import {
   createTimerRun,
   deleteTimerRun,
   fetchActiveTimerRun,
-  fetchTimerRuns,
+  fetchHistoryPanelTimerRuns,
   filterFeedingSessions,
   formatClockTime,
+  getTimerApiErrorMessage,
   getLastNursingSide,
   normalizePickedTimerDate,
   normalizeTimerSessionTimes,
@@ -218,7 +219,7 @@ const AddFeedingScreen: React.FC = () => {
 
       const [activeRun, allRuns] = await Promise.all([
         fetchActiveTimerRun(token),
-        fetchTimerRuns(token),
+        fetchHistoryPanelTimerRuns(token),
       ]);
 
       // Ignore stale responses (e.g. a fetch that started before reset).
@@ -540,8 +541,11 @@ const AddFeedingScreen: React.FC = () => {
       resetNursing();
       void refreshWidgetState(token);
       void loadFeedingHistory();
-    } catch {
-      Alert.alert('Error', 'Could not save nursing session.');
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        getTimerApiErrorMessage(error, 'Could not save nursing session.')
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -563,8 +567,11 @@ const AddFeedingScreen: React.FC = () => {
 
       Alert.alert('Success', 'Bottle feeding saved.');
       navigation.goBack();
-    } catch {
-      Alert.alert('Error', 'Could not save bottle feeding.');
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        getTimerApiErrorMessage(error, 'Could not save bottle feeding.')
+      );
     } finally {
       setIsSavingBottle(false);
     }

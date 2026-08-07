@@ -57,7 +57,6 @@ const Home: React.FC = () => {
     },
     [isProUser, navigation, presentPaywall]
   );
-
   const loadHomeData = useCallback(async () => {
     setIsLoading(true);
     try {

@@ -14,6 +14,7 @@ import { getAppWindow } from '@/constants/appViewport';
 
 const TILE_GAP = 12;
 const NUM_COLUMNS = 2;
+const SIDE_PADDING = 24;
 const VOLUME_OVERLAY_HEIGHT = 68;
 
 const SoundsScreen: React.FC = () => {
@@ -21,7 +22,8 @@ const SoundsScreen: React.FC = () => {
     useAudioPlayback();
 
   const tileSize = useMemo(() => {
-    const contentWidth = getAppWindow().width * SCREEN_CONTENT_WIDTH_RATIO;
+    const contentWidth =
+      getAppWindow().width * SCREEN_CONTENT_WIDTH_RATIO - SIDE_PADDING * 2;
     return Math.floor(
       (contentWidth - TILE_GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS
     );
@@ -68,6 +70,7 @@ const styles = StyleSheet.create({
   },
   tileGrid: {
     paddingTop: 16,
+    paddingHorizontal: SIDE_PADDING,
     paddingBottom: VOLUME_OVERLAY_HEIGHT + 16,
   },
 });

@@ -16,8 +16,9 @@ import {
   confirmReplaceActiveTimer,
   deleteTimerRun,
   fetchActiveTimerRun,
-  fetchTimerRuns,
+  fetchHistoryPanelTimerRuns,
   formatClockTime,
+  getTimerApiErrorMessage,
   normalizePickedTimerDate,
   normalizeTimerSessionTimes,
   submitTimerRun,
@@ -116,7 +117,7 @@ const TimerScreen: React.FC = () => {
 
       const [activeRun, sleepingRuns] = await Promise.all([
         fetchActiveTimerRun(token),
-        fetchTimerRuns(token, { run_type: 'sleeping' }),
+        fetchHistoryPanelTimerRuns(token, { run_type: 'sleeping' }),
       ]);
 
       // Ignore stale responses (e.g. a fetch that started before reset).
@@ -454,8 +455,14 @@ const TimerScreen: React.FC = () => {
       resetAll();
       void refreshWidgetState(token);
       void loadHistory();
-    } catch {
-      Alert.alert('Error', 'Could not submit timer. Please try again.');
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        getTimerApiErrorMessage(
+          error,
+          'Could not submit timer. Please try again.'
+        )
+      );
     } finally {
       setIsSubmitting(false);
     }

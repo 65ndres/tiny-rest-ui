@@ -124,12 +124,12 @@ const SubscriptionScreen: React.FC = () => {
     try {
       setIsSubscribing(true);
       await presentPaywall();
-      console.log('response handleUpgrade() PACA');
-      
+      await refreshCustomerInfo();
+      await fetchProfile();
+      await refreshUser();
     } catch (error) {
       console.error('Error presenting paywall:', error);
     } finally {
-      await refreshUser();
       setIsSubscribing(false);
     }
   };
@@ -141,7 +141,8 @@ const SubscriptionScreen: React.FC = () => {
       const success = await purchasePackage(packageToPurchase);
       if (success) {
         await refreshCustomerInfo();
-        // navigation.navigate('Home'); I need to make the call the the api to ensure I save the succesfull purchase
+        await fetchProfile();
+        await refreshUser();
       }
     } catch (error) {
       console.error('Error purchasing package:', error);
@@ -157,6 +158,8 @@ const SubscriptionScreen: React.FC = () => {
       const success = await restorePurchases();
       if (success) {
         await refreshCustomerInfo();
+        await fetchProfile();
+        await refreshUser();
       }
     } catch (error) {
       console.error('Error restoring purchases:', error);

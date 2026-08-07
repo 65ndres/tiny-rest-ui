@@ -17,10 +17,11 @@ import { VStack } from '@/components/ui/vstack';
 import { homeRoutineCardClassName } from '@/app/constants/screenLayout';
 import {
   deleteTimerRun,
-  formatDuration,
+  formatLabeledDuration,
   formatFeedingSessionDetails,
   formatFeedingSessionTitle,
   formatSessionClockTime,
+  formatSessionDateTime,
   groupSessionsByDay,
   removeTimerSessionFromCache,
   type TimerSession,
@@ -86,14 +87,14 @@ const buildSessionRows = (
       rows.push({
         iconName: 'time',
         label: 'Duration',
-        value: formatDuration(session.duration_ms),
+        value: formatLabeledDuration(session.duration_ms),
       });
     }
   } else {
     rows.push({
       iconName: 'time',
       label: 'Duration',
-      value: formatDuration(session.duration_ms),
+      value: formatLabeledDuration(session.duration_ms),
     });
   }
 
@@ -114,8 +115,9 @@ const buildSessionRows = (
   rows.push({
     iconName: 'checkmark-circle',
     label: 'Created',
-    value: formatSessionClockTime(createdAt),
+    value: formatSessionDateTime(createdAt),
   });
+
 
   return rows;
 };

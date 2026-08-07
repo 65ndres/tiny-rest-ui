@@ -2,7 +2,7 @@ export const SCREEN_TOP_HEIGHT = '10%';
 export const SCREEN_CONTENT_HEIGHT = '80%';
 export const SCREEN_FOOTER_HEIGHT = '10%';
 /** Matches ScreenComponent screenContainer width ratio. */
-export const SCREEN_CONTENT_WIDTH_RATIO = 0.84;
+export const SCREEN_CONTENT_WIDTH_RATIO = 1;
 
 export const scrollViewClassName = 'flex-1 w-full';
 export const scrollContentClassName =

@@ -1,6 +1,7 @@
 // app/context/RevenueCatContext.tsx
 import { API_URL, isDevelopment } from '@/constants/Config';
 import { PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from '@/constants/legalUrls';
+import { syncProSubscriptionToApp as syncProSubscription } from '@/app/utils/subscriptionSync';
 import axios from 'axios';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Alert, Platform } from 'react-native';
@@ -50,7 +51,7 @@ interface RevenueCatContextType {
 const RevenueCatContext = createContext<RevenueCatContextType | undefined>(undefined);
 
 export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
   const [offerings, setOfferings] = useState<PurchasesOffering | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -165,18 +166,45 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     updateUserId();
   }, [user?.id, refreshCustomerInfo]);
 
+  const createUserSubscription = useCallback(async (info: CustomerInfo) => {
+    await axios.post(`${API_URL}/subscription/create_pro_subscription`, {
+      customerInfo: info,
+    });
+  }, []);
+
+  const syncProSubscriptionToApp = useCallback(
+    async (info: CustomerInfo) => {
+      await syncProSubscription({
+        createProSubscription: () => createUserSubscription(info),
+        refreshUser,
+        onCreateError: (error) => {
+          console.error('Error updating user subscription:', error);
+          Alert.alert(
+            'Sync Error',
+            'Purchase succeeded, but we could not update your account. Please restore purchases or try again.'
+          );
+        },
+        onRefreshError: (error) => {
+          console.error('Error refreshing user after subscription:', error);
+        },
+      });
+    },
+    [createUserSubscription, refreshUser]
+  );
+
   // Purchase a package
   const purchasePackage = useCallback(async (packageToPurchase: PurchasesPackage): Promise<boolean> => {
     try {
-      const { customerInfo } = await Purchases.purchasePackage(packageToPurchase);
-      setCustomerInfo(customerInfo);
+      const { customerInfo: purchasedInfo } = await Purchases.purchasePackage(packageToPurchase);
+      setCustomerInfo(purchasedInfo);
       
       // Check if purchase granted Pro entitlement
-      const hasPro = customerInfo.entitlements.active[ENTITLEMENT_IDENTIFIER] !== undefined;
+      const hasPro = purchasedInfo.entitlements.active[ENTITLEMENT_IDENTIFIER] !== undefined;
       setIsPro(hasPro);
       
       if (hasPro) {
-        Alert.alert('Success', 'Welcome to Promsas Pro! Your subscription is now active.');
+        await syncProSubscriptionToApp(purchasedInfo);
+        Alert.alert('Success', 'Welcome to TinyRest Pro! Your subscription is now active.');
         return true;
       } else {
         Alert.alert('Warning', 'Purchase completed but Pro entitlement not found.');
@@ -198,7 +226,7 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       );
       return false;
     }
-  }, []);
+  }, [syncProSubscriptionToApp]);
 
   // Restore purchases
   const restorePurchases = useCallback(async (): Promise<boolean> => {
@@ -210,6 +238,7 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setIsPro(hasPro);
       
       if (hasPro) {
+        await syncProSubscriptionToApp(info);
         Alert.alert('Success', 'Your purchases have been restored!');
         return true;
       } else {
@@ -222,20 +251,8 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       Alert.alert('Restore Failed', purchasesError.message || 'Failed to restore purchases.');
       return false;
     }
-  }, []);
+  }, [syncProSubscriptionToApp]);
 
-  const createUserSubscription = useCallback(async (customerInfo: CustomerInfo) => {
-    try {
-      // console.log('customerInfo PACA');
-      await axios.post(`${API_URL}/subscription/create_pro_subscription`, {
-        customerInfo,
-      });
-    } catch (error) {
-        console.error('Error updating user subscription:', error);
-      }
-    },
-    []
-  );
   // Present RevenueCat Paywall
   const presentPaywall = useCallback(async () => {
     try {
@@ -252,24 +269,17 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       });
 
       // Refresh customer info after paywall closes so state is up to date
-      await refreshCustomerInfo();
+      const latestCustomerInfo = await refreshCustomerInfo();
 
-      if (paywallResult === PAYWALL_RESULT.PURCHASED || paywallResult === PAYWALL_RESULT.RESTORED) {
-        Alert.alert('Success', 'Welcome to Promsas Pro!');
-        
-        const customerInfo = await Purchases.getCustomerInfo();
-        await createUserSubscription(customerInfo);
-
-        // console.log('customerInfo', customerInfo);
-        // console.log('paywallResult', paywallResult);
+      if (
+        paywallResult === PAYWALL_RESULT.PURCHASED ||
+        paywallResult === PAYWALL_RESULT.RESTORED
+      ) {
+        await syncProSubscriptionToApp(latestCustomerInfo);
+        Alert.alert('Success', 'Welcome to TinyRest Pro!');
       }
     } catch (error) {
       const purchasesError = error as PurchasesError;
-
-      // User cancelled - don't show error
-      // if (purchasesError?.userCancelled) {
-      //   return;
-      // }
 
       console.error('Error presenting paywall:', purchasesError);
       Alert.alert(
@@ -277,7 +287,7 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         purchasesError?.message || 'Failed to present paywall. Please try again.'
       );
     }
-  }, [offerings, refreshCustomerInfo]);
+  }, [offerings, refreshCustomerInfo, syncProSubscriptionToApp]);
 
   // Present Customer Center
   const presentCustomerCenter = useCallback(async () => {

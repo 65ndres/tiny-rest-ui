@@ -14,6 +14,7 @@ import {
   createLocalTimerSession,
   formatClockTime,
   isTimerSaveEnabled,
+  isUsableTimerPickerDate,
   isValidTimerStartTime,
   loadTimerHistoryFromCache,
   normalizePickedTimerDate,
@@ -44,6 +45,7 @@ const TimerScreenGuest: React.FC = () => {
   const [hasStoppedSession, setHasStoppedSession] = useState(false);
   const [activePicker, setActivePicker] = useState<PickerTarget | null>(null);
   const [pickerNow, setPickerNow] = useState(() => new Date());
+  const [pickerOpenGeneration, setPickerOpenGeneration] = useState(0);
   const [pickerMountKey, setPickerMountKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [history, setHistory] = useState<TimerSession[]>([]);
@@ -111,6 +113,7 @@ const TimerScreenGuest: React.FC = () => {
     if (target === 'start' && isRunning) return;
     if (target === 'end' && isRunning) return;
     setPickerNow(new Date());
+    setPickerOpenGeneration((generation) => generation + 1);
     setActivePicker(target);
   };
 
@@ -124,11 +127,17 @@ const TimerScreenGuest: React.FC = () => {
 
     if (activePicker === 'start') {
       const normalized = normalizePickedTimerDate(selectedDate, today);
+      if (!isUsableTimerPickerDate(normalized)) {
+        return;
+      }
       setStartTime(normalized);
       startTimeRef.current = normalized;
     } else if (activePicker === 'end') {
       const base = startTime ?? today;
       const normalized = normalizePickedTimerDate(selectedDate, base);
+      if (!isUsableTimerPickerDate(normalized)) {
+        return;
+      }
       setEndTime(normalized);
     }
   };
@@ -308,13 +317,14 @@ const TimerScreenGuest: React.FC = () => {
       </VStack>
 
       <TimerDateTimePickerDrawer
-        key={`timer-picker-${pickerMountKey}-${activePicker}`}
+        key={`timer-picker-${pickerMountKey}`}
         isOpen={activePicker !== null}
         title={activePicker === 'end' ? 'End time' : 'Start time'}
         value={pickerValue}
         onChange={handlePickerDateChange}
         onClose={closePicker}
         maximumDate={activePicker === 'start' ? pickerNow : undefined}
+        openGeneration={pickerOpenGeneration}
       />
     </ScreenScrollLayout>
   );

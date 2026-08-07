@@ -21,6 +21,7 @@ import {
   beginTimerSession,
   getTimerApiErrorMessage,
   isTimerSaveEnabled,
+  isUsableTimerPickerDate,
   isValidTimerStartTime,
   normalizePickedTimerDate,
   normalizeTimerSessionTimes,
@@ -56,6 +57,7 @@ const TimerScreen: React.FC = () => {
   const [hasStoppedSession, setHasStoppedSession] = useState(false);
   const [activePicker, setActivePicker] = useState<PickerTarget | null>(null);
   const [pickerNow, setPickerNow] = useState(() => new Date());
+  const [pickerOpenGeneration, setPickerOpenGeneration] = useState(0);
   const [pickerMountKey, setPickerMountKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
@@ -193,6 +195,7 @@ const TimerScreen: React.FC = () => {
     if (target === 'start' && isRunning) return;
     if (target === 'end' && isRunning) return;
     setPickerNow(new Date());
+    setPickerOpenGeneration((generation) => generation + 1);
     setActivePicker(target);
   };
 
@@ -209,11 +212,17 @@ const TimerScreen: React.FC = () => {
 
     if (activePicker === 'start') {
       nextStart = normalizePickedTimerDate(selectedDate, today);
+      if (!isUsableTimerPickerDate(nextStart)) {
+        return;
+      }
       setStartTime(nextStart);
       startTimeRef.current = nextStart;
     } else if (activePicker === 'end') {
       const base = startTime ?? today;
       nextEnd = normalizePickedTimerDate(selectedDate, base);
+      if (!isUsableTimerPickerDate(nextEnd)) {
+        return;
+      }
       setEndTime(nextEnd);
     }
 
@@ -546,13 +555,14 @@ const TimerScreen: React.FC = () => {
       </VStack>
 
       <TimerDateTimePickerDrawer
-        key={`timer-picker-${pickerMountKey}-${activePicker}`}
+        key={`timer-picker-${pickerMountKey}`}
         isOpen={activePicker !== null}
         title={activePicker === 'end' ? 'End time' : 'Start time'}
         value={pickerValue}
         onChange={handlePickerDateChange}
         onClose={closePicker}
         maximumDate={activePicker === 'start' ? pickerNow : undefined}
+        openGeneration={pickerOpenGeneration}
       />
     </ScreenScrollLayout>
   );

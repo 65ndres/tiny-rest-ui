@@ -1,7 +1,7 @@
 import DateTimePicker, {
   type DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, ImageBackground, Platform, StyleSheet, View } from 'react-native';
 import {
   Drawer,
@@ -13,9 +13,21 @@ import {
 import { Heading } from '@/components/ui/heading';
 import { TIMER_SOLID_BUTTON_CONTENT_COLOR } from '@/app/constants/screenLayout';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
+import {
+  isUsableTimerPickerDate,
+  resolveTimerPickerValue,
+} from '@/app/utils/timerHistory';
 
 const DATE_PICKER_BG = require('../../assets/images/bg-date-picker.png');
 const SPARKLE_ICON = require('../../assets/images/sparkle.png');
+
+/**
+ * iOS spinner needs BOTH min and max. Min-only (or missing max after a
+ * previous max-bound picker) can land the wheels on Dec 31 / epoch.
+ * @see https://github.com/react-native-datetimepicker/datetimepicker/issues/962
+ */
+const DEFAULT_MINIMUM_DATE = new Date(2000, 0, 1);
+const DEFAULT_MAXIMUM_DATE = new Date(2100, 0, 1);
 
 type TimerDateTimePickerDrawerProps = {
   isOpen: boolean;
@@ -26,6 +38,9 @@ type TimerDateTimePickerDrawerProps = {
   mode?: 'date' | 'datetime' | 'time';
   /** When set (e.g. Started at), blocks selecting dates after this instant. */
   maximumDate?: Date;
+  minimumDate?: Date;
+  /** Bump on each open so the native spinner remounts on today when the field is empty. */
+  openGeneration?: number;
 };
 
 const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
@@ -36,28 +51,61 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
   onClose,
   mode = 'datetime',
   maximumDate,
+  minimumDate = DEFAULT_MINIMUM_DATE,
+  openGeneration = 0,
 }) => {
+  const safeValue = resolveTimerPickerValue(value, new Date());
+  const [draftDate, setDraftDate] = useState(safeValue);
+
+  const resolvedMaximumDate =
+    maximumDate ?? (mode === 'date' ? new Date() : DEFAULT_MAXIMUM_DATE);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setDraftDate(resolveTimerPickerValue(value, new Date()));
+  }, [isOpen, value, openGeneration]);
+
   const resolvedMode =
     mode === 'datetime' && Platform.OS !== 'ios' ? 'time' : mode;
 
-  const handlePickerChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+  const handlePickerChange = (
+    event: DateTimePickerEvent,
+    selectedDate?: Date
+  ) => {
     if (Platform.OS === 'android') {
       if (event.type === 'dismissed') {
         onClose();
         return;
       }
 
-      if (selectedDate) {
+      if (selectedDate && isUsableTimerPickerDate(selectedDate)) {
         onChange(selectedDate);
+      } else if (selectedDate) {
+        onChange(resolveTimerPickerValue(null, new Date()));
       }
       onClose();
       return;
     }
 
-    if (selectedDate) {
-      onChange(selectedDate);
+    // iOS often fires onChange on mount with epoch/Dec 31 junk — ignore it so
+    // draft (and Done) stay on today when the field is empty.
+    if (!selectedDate || !isUsableTimerPickerDate(selectedDate)) {
+      return;
     }
+    setDraftDate(selectedDate);
   };
+
+  const handleDone = () => {
+    const committed = isUsableTimerPickerDate(draftDate)
+      ? draftDate
+      : resolveTimerPickerValue(null, new Date());
+    onChange(committed);
+    onClose();
+  };
+
+  const pickerDisplayValue = isUsableTimerPickerDate(draftDate)
+    ? draftDate
+    : safeValue;
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} anchor="bottom" size="lg">
@@ -68,41 +116,41 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
           resizeMode="cover"
           style={styles.background}
         >
-
-
           <View style={styles.centeredContent}>
-          <DrawerHeader className="px-6 pt-6" style={{paddingTop: "0%"}}>
-            <Heading size="lg" className="text-white font-bold">
-              {title}
-            </Heading>
-            <DrawerCloseButton className="p-1">
-              <Image
-                source={SPARKLE_ICON}
-                style={styles.closeIcon}
-                accessibilityLabel="Close"
-              />
-            </DrawerCloseButton>
-          </DrawerHeader>
+            <DrawerHeader className="px-6 pt-6" style={{ paddingTop: '0%' }}>
+              <Heading size="lg" className="text-white font-bold">
+                {title}
+              </Heading>
+              <DrawerCloseButton className="p-1">
+                <Image
+                  source={SPARKLE_ICON}
+                  style={styles.closeIcon}
+                  accessibilityLabel="Close"
+                />
+              </DrawerCloseButton>
+            </DrawerHeader>
             <View style={styles.pickerScale}>
-              <DateTimePicker
-                value={value}
-                mode={resolvedMode}
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={handlePickerChange}
-                themeVariant="light"
-                textColor={TIMER_SOLID_BUTTON_CONTENT_COLOR}
-                style={styles.picker}
-                maximumDate={
-                  maximumDate ?? (mode === 'date' ? new Date() : undefined)
-                }
-              />
+              {isOpen ? (
+                <DateTimePicker
+                  key={`dtp-${openGeneration}`}
+                  value={pickerDisplayValue}
+                  mode={resolvedMode}
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={handlePickerChange}
+                  themeVariant="light"
+                  textColor={TIMER_SOLID_BUTTON_CONTENT_COLOR}
+                  style={styles.picker}
+                  minimumDate={minimumDate}
+                  maximumDate={resolvedMaximumDate}
+                />
+              ) : null}
             </View>
 
             {Platform.OS === 'ios' ? (
               <View style={styles.doneButton}>
                 <TimerOutlineButton
                   label="Done"
-                  onPress={onClose}
+                  onPress={handleDone}
                   variant="solid"
                   size="xl"
                 />
@@ -123,7 +171,6 @@ const styles = StyleSheet.create({
   centeredContent: {
     flex: 1,
     width: '100%',
-    // alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
     paddingBottom: 32,

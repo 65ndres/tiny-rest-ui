@@ -724,19 +724,21 @@ const startOfLocalDay = (date: Date): Date => {
 export const isEpochAnchoredDate = (date: Date): boolean =>
   date.getFullYear() < 2000;
 
+/** True when a picker result is safe to store (not invalid / Dec 31 epoch junk). */
+export const isUsableTimerPickerDate = (date: Date | null | undefined): boolean =>
+  !!date &&
+  !Number.isNaN(date.getTime()) &&
+  !isEpochAnchoredDate(date);
+
 /**
  * Value for the date/time spinner only. Empty/invalid/epoch field values
- * fall back to `now` so Reset matches first-load (fields stay empty).
+ * fall back to `now` so Reset / empty Ended at match first-load (fields stay empty).
  */
 export const resolveTimerPickerValue = (
   fieldValue: Date | null,
   now: Date = new Date()
 ): Date => {
-  if (
-    !fieldValue ||
-    Number.isNaN(fieldValue.getTime()) ||
-    isEpochAnchoredDate(fieldValue)
-  ) {
+  if (!isUsableTimerPickerDate(fieldValue)) {
     return now;
   }
   return fieldValue;

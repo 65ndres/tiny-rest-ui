@@ -397,6 +397,64 @@ export const isTimerSaveEnabled = (params: {
   !params.isRunning &&
   !params.isSubmitting;
 
+export type TimerPlaySessionState = {
+  startTime: Date;
+  endTime: null;
+  isRunning: true;
+  elapsedMs: number;
+  hasStoppedSession: false;
+};
+
+export type TimerStopSessionState = {
+  endTime: Date;
+  isRunning: false;
+  elapsedMs: number;
+  hasStoppedSession: true;
+};
+
+/**
+ * Local state after pressing Start (TimerScreen / TimerScreenGuest).
+ * Uses existing startTime when set (e.g. from picker); otherwise `now`.
+ */
+export const beginTimerSession = (
+  startTime: Date | null,
+  now: Date = new Date()
+): TimerPlaySessionState => {
+  const nextStart = startTime ?? now;
+  return {
+    startTime: nextStart,
+    endTime: null,
+    isRunning: true,
+    elapsedMs: Math.max(0, now.getTime() - nextStart.getTime()),
+    hasStoppedSession: false,
+  };
+};
+
+/**
+ * Local state after pressing Stop.
+ * Sets Ended at to `now` and freezes elapsed from startTime.
+ */
+export const stopTimerSession = (
+  startTime: Date | null,
+  now: Date = new Date()
+): TimerStopSessionState => ({
+  endTime: now,
+  isRunning: false,
+  elapsedMs: startTime
+    ? Math.max(0, now.getTime() - startTime.getTime())
+    : 0,
+  hasStoppedSession: true,
+});
+
+/**
+ * Local state after pressing Resume (Start after a stopped session).
+ * Keeps the original startTime, clears end, and runs again.
+ */
+export const resumeTimerSession = (
+  startTime: Date,
+  now: Date = new Date()
+): TimerPlaySessionState => beginTimerSession(startTime, now);
+
 const END_TIME_AFTER_START_MESSAGE = 'End time must be after start time.';
 
 export const getTimerApiErrorMessage = (
@@ -652,6 +710,24 @@ const startOfLocalDay = (date: Date): Date => {
 
 export const isEpochAnchoredDate = (date: Date): boolean =>
   date.getFullYear() < 2000;
+
+/**
+ * Value for the date/time spinner only. Empty/invalid/epoch field values
+ * fall back to `now` so Reset matches first-load (fields stay empty).
+ */
+export const resolveTimerPickerValue = (
+  fieldValue: Date | null,
+  now: Date = new Date()
+): Date => {
+  if (
+    !fieldValue ||
+    Number.isNaN(fieldValue.getTime()) ||
+    isEpochAnchoredDate(fieldValue)
+  ) {
+    return now;
+  }
+  return fieldValue;
+};
 
 export const applyPickerTimeToBaseDate = (
   picked: Date,

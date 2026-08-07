@@ -18,10 +18,14 @@ import {
   fetchActiveTimerRun,
   fetchHistoryPanelTimerRuns,
   formatClockTime,
+  beginTimerSession,
   getTimerApiErrorMessage,
   isTimerSaveEnabled,
   normalizePickedTimerDate,
   normalizeTimerSessionTimes,
+  resolveTimerPickerValue,
+  resumeTimerSession,
+  stopTimerSession,
   submitTimerRun,
   type TimerSession,
 } from '@/app/utils/timerHistory';
@@ -49,6 +53,8 @@ const TimerScreen: React.FC = () => {
   const [elapsedMs, setElapsedMs] = useState(0);
   const [hasStoppedSession, setHasStoppedSession] = useState(false);
   const [activePicker, setActivePicker] = useState<PickerTarget | null>(null);
+  const [pickerNow, setPickerNow] = useState(() => new Date());
+  const [pickerMountKey, setPickerMountKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [history, setHistory] = useState<TimerSession[]>([]);
@@ -184,6 +190,7 @@ const TimerScreen: React.FC = () => {
   const openPicker = (target: PickerTarget) => {
     if (target === 'start' && isRunning) return;
     if (target === 'end' && isRunning) return;
+    setPickerNow(new Date());
     setActivePicker(target);
   };
 
@@ -231,27 +238,30 @@ const TimerScreen: React.FC = () => {
     setElapsedMs(0);
   }, [clearTimerInterval]);
 
+  const applyPlaySession = (nextStart: Date | null, resume = false) => {
+    const session =
+      resume && nextStart
+        ? resumeTimerSession(nextStart)
+        : beginTimerSession(nextStart);
+    setStartTime(session.startTime);
+    startTimeRef.current = session.startTime;
+    setEndTime(session.endTime);
+    setHasStoppedSession(session.hasStoppedSession);
+    setIsRunning(session.isRunning);
+    setElapsedMs(session.elapsedMs);
+    syncLocalTimerToWidget({
+      startTime: session.startTime,
+      isRunning: true,
+      runType: 'sleeping',
+    });
+    return session.startTime;
+  };
+
   const handlePlay = async () => {
+    const shouldResume = hasStoppedSession && !!startTime;
+
     if (activeTimerRunIdRef.current) {
-      const now = new Date();
-      let nextStart = startTime;
-
-      if (!nextStart) {
-        nextStart = now;
-        setStartTime(now);
-        startTimeRef.current = now;
-      }
-
-      setEndTime(null);
-      setHasStoppedSession(false);
-      setElapsedMs(0);
-      setIsRunning(true);
-      setElapsedMs(Date.now() - nextStart.getTime());
-      syncLocalTimerToWidget({
-        startTime: nextStart,
-        isRunning: true,
-        runType: 'sleeping',
-      });
+      applyPlaySession(startTime, shouldResume);
       return;
     }
 
@@ -268,25 +278,7 @@ const TimerScreen: React.FC = () => {
         return;
       }
 
-      const now = new Date();
-      let nextStart = startTime;
-
-      if (!nextStart) {
-        nextStart = now;
-        setStartTime(now);
-        startTimeRef.current = now;
-      }
-
-      setEndTime(null);
-      setHasStoppedSession(false);
-      setElapsedMs(0);
-      setIsRunning(true);
-      setElapsedMs(Date.now() - nextStart.getTime());
-      syncLocalTimerToWidget({
-        startTime: nextStart,
-        isRunning: true,
-        runType: 'sleeping',
-      });
+      const nextStart = applyPlaySession(startTime, shouldResume);
 
       const timerRun = await createTimerRun(token, nextStart.toISOString(), {
         run_type: 'sleeping',
@@ -306,23 +298,18 @@ const TimerScreen: React.FC = () => {
   };
 
   const handleStop = () => {
-    const now = new Date();
     clearTimerInterval();
-    setIsRunning(false);
-    setEndTime(now);
-
     const start = startTimeRef.current;
-    const elapsed = start ? now.getTime() - start.getTime() : 0;
-    if (start) {
-      setElapsedMs(elapsed);
-    }
-
-    setHasStoppedSession(true);
+    const session = stopTimerSession(start);
+    setIsRunning(session.isRunning);
+    setEndTime(session.endTime);
+    setElapsedMs(session.elapsedMs);
+    setHasStoppedSession(session.hasStoppedSession);
 
     if (start) {
       syncLocalTimerToWidget({
         startTime: start,
-        endTime: now,
+        endTime: session.endTime,
         isRunning: false,
         runType: 'sleeping',
       });
@@ -347,6 +334,7 @@ const TimerScreen: React.FC = () => {
     setElapsedMs(0);
     setHasStoppedSession(false);
     activeTimerRunIdRef.current = null;
+    setPickerMountKey((key) => key + 1);
   }, [clearTimerInterval]);
 
   const handleReset = () => {
@@ -469,12 +457,10 @@ const TimerScreen: React.FC = () => {
     }
   };
 
-  const pickerValue =
-    activePicker === 'start'
-      ? startTime ?? new Date()
-      : activePicker === 'end'
-        ? endTime ?? new Date()
-        : new Date();
+  const pickerValue = resolveTimerPickerValue(
+    activePicker === 'end' ? endTime : startTime,
+    pickerNow
+  );
 
   const isSubmitEnabled = isTimerSaveEnabled({
     startTime,
@@ -560,6 +546,7 @@ const TimerScreen: React.FC = () => {
       </VStack>
 
       <TimerDateTimePickerDrawer
+        key={`timer-picker-${pickerMountKey}-${activePicker}`}
         isOpen={activePicker !== null}
         title={activePicker === 'end' ? 'End time' : 'Start time'}
         value={pickerValue}

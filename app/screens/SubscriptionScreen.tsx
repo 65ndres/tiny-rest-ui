@@ -6,7 +6,6 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
-import { Button } from '@rneui/themed';
 import axios from 'axios';
 import { useFonts } from 'expo-font';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -23,16 +22,15 @@ import {
 } from 'react-native';
 import { PurchasesPackage } from 'react-native-purchases';
 import 'react-native-reanimated';
-import { getAppWindow, scaleFromPhoneBaseline } from '@/constants/appViewport';
+import {
+  isProSubscriptionTier,
+  subscriptionProCtaLabel,
+  upgradeFromSubscriptionScreen,
+} from '@/app/utils/subscriptionUpgrade';
 import { useAuth } from '../context/AuthContext';
 import { ENTITLEMENT_IDENTIFIER, useRevenueCat } from '../context/RevenueCatContext';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
-
-const { width: screenWidth } = getAppWindow();
-const s = scaleFromPhoneBaseline;
-
-/** Matches phone-proportioned content width on iPad (same pattern as LandingScreen). */
-const contentMaxWidth = Math.min(s(340), screenWidth);
+import TimerOutlineButton from '../sharedComponents/timer/TimerOutlineButton';
 
 type RootDrawerParamList = {
   Home: undefined;
@@ -123,10 +121,12 @@ const SubscriptionScreen: React.FC = () => {
   const handleUpgrade = async () => {
     try {
       setIsSubscribing(true);
-      await presentPaywall();
-      await refreshCustomerInfo();
-      await fetchProfile();
-      await refreshUser();
+      await upgradeFromSubscriptionScreen({
+        presentPaywall,
+        refreshCustomerInfo,
+        fetchProfile,
+        refreshUser,
+      });
     } catch (error) {
       console.error('Error presenting paywall:', error);
     } finally {
@@ -247,9 +247,12 @@ const SubscriptionScreen: React.FC = () => {
   const expirationDate = getExpirationDate();
   const subscriptionPeriod = getSubscriptionPeriod();
   const isBasicServerTier = serverSubscriptionType === 'basic';
-  const isProTier =
-    isPro || serverSubscriptionType?.toLowerCase() === 'pro';
+  const isProTier = isProSubscriptionTier({
+    isPro,
+    serverSubscriptionType,
+  });
   const showProFeatureList = isBasicServerTier || !isPro;
+  const proCtaLabel = subscriptionProCtaLabel({ isBasicServerTier });
 
   if (revenueCatLoading) {
     return (
@@ -306,20 +309,19 @@ const SubscriptionScreen: React.FC = () => {
 
                 <View style={styles.actionButtonContainer}>
                   {isBasicServerTier ? (
-                    <Button
-                      title="Selected"
+                    <TimerOutlineButton
+                      label="Selected"
+                      onPress={() => {}}
                       disabled
-                      buttonStyle={styles.selectedPlanButton}
-                      containerStyle={styles.planButtonContainer}
-                      titleStyle={styles.selectedPlanButtonTitle}
+                      variant="solid"
+                      size="xl"
                     />
                   ) : (
-                    <Button
-                      title="Subscribe to Basic"
-                      buttonStyle={styles.primaryPlanButton}
-                      containerStyle={styles.planButtonContainer}
-                      titleStyle={styles.primaryPlanButtonTitle}
+                    <TimerOutlineButton
+                      label="Subscribe to Basic"
                       onPress={handleBasicSubscribe}
+                      variant="solid"
+                      size="xl"
                     />
                   )}
                 </View>
@@ -388,22 +390,20 @@ const SubscriptionScreen: React.FC = () => {
               {/* Action Buttons */}
               <View style={styles.actionButtonContainer}>
                 {!isProTier ? (
-                  <Button
-                    title={isBasicServerTier ? 'Upgrade to pro' : 'Subscribe to Pro'}
-                    buttonStyle={styles.primaryPlanButton}
-                    containerStyle={styles.planButtonContainer}
-                    titleStyle={styles.primaryPlanButtonTitle}
+                  <TimerOutlineButton
+                    label={proCtaLabel}
                     onPress={handleUpgrade}
                     disabled={isSubscribing || !monthlyPackage}
-                    loading={isSubscribing}
+                    isLoading={isSubscribing}
+                    variant="solid"
+                    size="xl"
                   />
                 ) : (
-                  <Button
-                    title="Manage Subscription"
-                    buttonStyle={styles.managePlanButton}
-                    containerStyle={styles.planButtonContainer}
-                    titleStyle={styles.managePlanButtonTitle}
+                  <TimerOutlineButton
+                    label="Manage Subscription"
                     onPress={handleManageSubscription}
+                    variant="solid"
+                    size="xl"
                   />
                 )}
               </View>
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
     flex: 1,
   } as ViewStyle,
   topSpacer: {
-    paddingTop: s(45),
+    paddingTop: 45,
   } as ViewStyle,
   scrollWrap: {
     flex: 1,
@@ -459,53 +459,26 @@ const styles = StyleSheet.create({
   } as ViewStyle,
   loadingText: {
     color: 'white',
-    fontSize: s(18),
+    fontSize: 18,
     fontWeight: '300',
-    marginTop: s(10),
+    marginTop: 10,
   } as TextStyle,
   scrollContainer: {
     flexGrow: 1,
-    paddingBottom: s(18),
-    paddingHorizontal: s(0),
+    paddingBottom: 18,
+    paddingHorizontal: 40,
   } as ViewStyle,
   contentColumn: {
     width: '100%',
-    maxWidth: contentMaxWidth,
     alignSelf: 'center',
   } as ViewStyle,
   plansContainer: {
-    gap: s(20),
+    gap: 20,
   } as ViewStyle,
-  primaryPlanButton: {
-    backgroundColor: 'white',
-    borderWidth: s(2),
-    borderColor: 'white',
-    borderRadius: s(30),
-  } as ViewStyle,
-  managePlanButton: {
-    backgroundColor: 'transparent',
-    borderWidth: s(2),
-    borderColor: 'white',
-    borderRadius: s(30),
-  } as ViewStyle,
-  planButtonContainer: {
-    marginHorizontal: s(14),
-    marginVertical: s(8),
-  } as ViewStyle,
-  primaryPlanButtonTitle: {
-    fontWeight: 'bold',
-    color: '#ac8861ff',
-    fontSize: s(16),
-  } as TextStyle,
-  managePlanButtonTitle: {
-    fontWeight: 'bold',
-    color: 'white',
-    fontSize: s(16),
-  } as TextStyle,
   planCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: s(15),
-    padding: s(20),
+    borderRadius: 15,
+    padding: 20,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
   } as ViewStyle,
@@ -513,125 +486,110 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: s(15),
+    marginBottom: 15,
   } as ViewStyle,
   planName: {
     color: 'white',
-    fontSize: s(24),
+    fontSize: 24,
     fontWeight: '600',
   } as TextStyle,
   activeBadge: {
     backgroundColor: '#4CAF50',
-    paddingHorizontal: s(12),
-    paddingVertical: s(4),
-    borderRadius: s(12),
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
   } as ViewStyle,
   activeBadgeText: {
     color: 'white',
-    fontSize: s(12),
+    fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
   } as TextStyle,
   inactiveBadge: {
     backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    paddingHorizontal: s(12),
-    paddingVertical: s(4),
-    borderRadius: s(12),
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
   } as ViewStyle,
   inactiveBadgeText: {
     color: 'white',
-    fontSize: s(12),
+    fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
   } as TextStyle,
   planPriceContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    marginBottom: s(10),
+    marginBottom: 10,
   } as ViewStyle,
   planPrice: {
     color: 'white',
-    fontSize: s(32),
+    fontSize: 32,
     fontWeight: '700',
   } as TextStyle,
   planInterval: {
     color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: s(18),
+    fontSize: 18,
     fontWeight: '400',
-    marginLeft: s(4),
+    marginLeft: 4,
   } as TextStyle,
   subscriptionDetails: {
-    marginTop: s(15),
-    marginBottom: s(10),
-    paddingTop: s(15),
+    marginTop: 15,
+    marginBottom: 10,
+    paddingTop: 15,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.2)',
   } as ViewStyle,
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: s(8),
+    marginVertical: 8,
   } as ViewStyle,
   detailLabel: {
     color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: s(14),
+    fontSize: 14,
     fontWeight: '300',
   } as TextStyle,
   detailValue: {
     color: 'white',
-    fontSize: s(14),
+    fontSize: 14,
     fontWeight: '500',
   } as TextStyle,
   featuresContainer: {
-    marginTop: s(15),
-    marginBottom: s(10),
-    paddingTop: s(15),
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.2)',
+    marginBottom: 10,
   } as ViewStyle,
   featuresTitle: {
     color: 'white',
-    fontSize: s(16),
+    fontSize: 22,
     fontWeight: '600',
-    marginBottom: s(10),
+    marginBottom: 10,
   } as TextStyle,
   featureItem: {
     color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: s(14),
+    fontSize: 18,
     fontWeight: '300',
-    marginVertical: s(4),
+    marginVertical: 4,
   } as TextStyle,
   actionButtonContainer: {
-    marginTop: s(10),
+    marginTop: 10,
   } as ViewStyle,
-  selectedPlanButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
-    borderWidth: s(2),
-    borderColor: 'rgba(255, 255, 255, 0.35)',
-    borderRadius: s(30),
-  } as ViewStyle,
-  selectedPlanButtonTitle: {
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.85)',
-    fontSize: s(16),
-  } as TextStyle,
   infoContainer: {
-    marginTop: s(10),
-    padding: s(15),
+    marginTop: 10,
+    padding: 15,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: s(10),
+    borderRadius: 10,
   } as ViewStyle,
   infoText: {
     color: 'rgba(255, 255, 255, 0.6)',
-    fontSize: s(12),
+    fontSize: 12,
     fontWeight: '300',
-    lineHeight: s(18),
-    marginVertical: s(4),
+    lineHeight: 18,
+    marginVertical: 4,
     textAlign: 'center',
   } as TextStyle,
   legalLink: {
     color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: s(12),
+    fontSize: 12,
     fontWeight: '500',
     textDecorationLine: 'underline',
   } as TextStyle,

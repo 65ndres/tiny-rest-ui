@@ -310,20 +310,51 @@ const AuthenticatedNavigator: React.FC = () => {
       <Drawer.Screen
         name="Profile"
         component={UserProfileScreen}
-        options={{ drawerLabel: 'PROFILE',
-          headerLeft: () => <BackButton text="" /> ,
-          headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>PROFILE</Text>,
-         }}
+        options={({ navigation }) => ({
+          drawerLabel: 'PROFILE',
+          headerLeft: () => (
+            <BackButton
+              text=""
+              onPress={() => navigation.navigate('Home')}
+            />
+          ),
+          headerTitle: () => (
+            <Text
+              style={{
+                color: 'white',
+                fontSize: height * 0.025,
+                fontWeight: '400',
+              }}
+            >
+              PROFILE
+            </Text>
+          ),
+        })}
       />
       <Drawer.Screen
         name="Subscription"
         component={SubscriptionScreen}
-        options={{ 
+        options={({ navigation }) => ({
           drawerLabel: () => null, // Hide from drawer
           drawerItemStyle: { display: 'none' },
-          headerLeft: () => <BackButton text="" />,
-          headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>SUBSCRIPTION</Text>,
-        }}
+          headerLeft: () => (
+            <BackButton
+              text=""
+              onPress={() => navigation.navigate('Profile')}
+            />
+          ),
+          headerTitle: () => (
+            <Text
+              style={{
+                color: 'white',
+                fontSize: height * 0.025,
+                fontWeight: '400',
+              }}
+            >
+              SUBSCRIPTION
+            </Text>
+          ),
+        })}
       />
     </Drawer.Navigator>
     </>

@@ -12,6 +12,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { AppState, type AppStateStatus } from 'react-native';
 import { getSoundTrackById } from '@/app/constants/soundCatalog';
 
 /** Seconds before track end to start overlapping the next loop. */
@@ -31,6 +32,11 @@ const AudioPlaybackContext = createContext<AudioPlaybackContextValue | null>(
   null
 );
 
+const isSeamlessTrackPlaying = (trackId: string | null): boolean => {
+  if (!trackId) return false;
+  return Boolean(getSoundTrackById(trackId)?.seamlessLoop);
+};
+
 export const AudioPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -41,6 +47,7 @@ export const AudioPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   const monitorRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fadeRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const activeTrackIdRef = useRef<string | null>(null);
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -70,29 +77,50 @@ export const AudioPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-    void setAudioModeAsync({
-      playsInSilentMode: true,
-      shouldPlayInBackground: true,
-      // Allow both loop players to overlap during crossfade
-      interruptionMode: 'mixWithOthers',
-    });
+    let cancelled = false;
+    let playerA: AudioPlayer | null = null;
+    let playerB: AudioPlayer | null = null;
 
-    const playerA = createAudioPlayer(null, { updateInterval: 100 });
-    const playerB = createAudioPlayer(null, { updateInterval: 100 });
-    playerA.volume = 0;
-    playerB.volume = 0;
-    playerA.loop = false;
-    playerB.loop = false;
-    playersRef.current = [playerA, playerB];
+    const setup = async () => {
+      try {
+        await setAudioModeAsync({
+          playsInSilentMode: true,
+          shouldPlayInBackground: true,
+          // Exclusive focus so iOS keeps Now Playing / lock-screen audio alive
+          interruptionMode: 'doNotMix',
+        });
+      } catch (error) {
+        console.error('Failed to set audio mode for background playback:', error);
+      }
+
+      if (cancelled) return;
+
+      playerA = createAudioPlayer(null, {
+        updateInterval: 100,
+        keepAudioSessionActive: true,
+      });
+      playerB = createAudioPlayer(null, {
+        updateInterval: 100,
+        keepAudioSessionActive: true,
+      });
+      playerA.volume = 0;
+      playerB.volume = 0;
+      playerA.loop = false;
+      playerB.loop = false;
+      playersRef.current = [playerA, playerB];
+    };
+
+    void setup();
 
     return () => {
+      cancelled = true;
       clearMonitor();
       clearFade();
       crossfadingRef.current = false;
-      playerA.clearLockScreenControls();
-      playerB.clearLockScreenControls();
-      playerA.remove();
-      playerB.remove();
+      playerA?.clearLockScreenControls();
+      playerB?.clearLockScreenControls();
+      playerA?.remove();
+      playerB?.remove();
       playersRef.current = null;
     };
   }, [clearFade, clearMonitor]);
@@ -156,6 +184,55 @@ export const AudioPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
     }, MONITOR_INTERVAL_MS);
   }, [beginCrossfade, clearMonitor]);
 
+  const enableNativeLoopForBackground = useCallback(() => {
+    const players = playersRef.current;
+    if (!players || !isSeamlessTrackPlaying(activeTrackIdRef.current)) return;
+
+    clearMonitor();
+    clearFade();
+    crossfadingRef.current = false;
+
+    const active = players[activeIndexRef.current];
+    const inactive = players[activeIndexRef.current === 0 ? 1 : 0];
+    active.loop = true;
+    inactive.loop = false;
+    inactive.pause();
+    inactive.volume = 0;
+  }, [clearFade, clearMonitor]);
+
+  const restoreSeamlessCrossfade = useCallback(() => {
+    const players = playersRef.current;
+    if (!players || !isSeamlessTrackPlaying(activeTrackIdRef.current)) return;
+
+    const active = players[activeIndexRef.current];
+    if (!active.playing) return;
+
+    active.loop = false;
+    players[activeIndexRef.current === 0 ? 1 : 0].loop = false;
+    startMonitor();
+  }, [startMonitor]);
+
+  useEffect(() => {
+    const onAppStateChange = (nextState: AppStateStatus) => {
+      const wasBackgrounded =
+        appStateRef.current === 'active' &&
+        (nextState === 'background' || nextState === 'inactive');
+      const returnedToForeground =
+        appStateRef.current !== 'active' && nextState === 'active';
+
+      appStateRef.current = nextState;
+
+      if (wasBackgrounded) {
+        enableNativeLoopForBackground();
+      } else if (returnedToForeground) {
+        restoreSeamlessCrossfade();
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', onAppStateChange);
+    return () => subscription.remove();
+  }, [enableNativeLoopForBackground, restoreSeamlessCrossfade]);
+
   const stopPlayback = useCallback(() => {
     clearMonitor();
     clearFade();
@@ -182,6 +259,7 @@ export const AudioPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const [playerA, playerB] = players;
       const targetVolume = volumeRef.current;
+      const isBackgrounded = appStateRef.current !== 'active';
 
       activeIndexRef.current = 0;
       activeTrackIdRef.current = trackId;
@@ -189,7 +267,9 @@ export const AudioPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsPlaying(true);
 
       if (track.seamlessLoop) {
-        playerA.loop = false;
+        // While locked/backgrounded, rely on native loop (JS timers freeze).
+        const useNativeLoop = isBackgrounded;
+        playerA.loop = useNativeLoop;
         playerB.loop = false;
         playerA.replace(track.source);
         playerB.replace(track.source);
@@ -197,7 +277,9 @@ export const AudioPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
         playerB.volume = 0;
         void playerA.seekTo(0);
         playerA.play();
-        startMonitor();
+        if (!useNativeLoop) {
+          startMonitor();
+        }
       } else {
         playerA.loop = true;
         playerB.loop = false;
@@ -208,12 +290,10 @@ export const AudioPlaybackProvider: React.FC<{ children: React.ReactNode }> = ({
         playerA.play();
       }
 
-      setTimeout(() => {
-        playerA.setActiveForLockScreen(true, {
-          title: track.title,
-          artist: 'TinyRest',
-        });
-      }, 500);
+      playerA.setActiveForLockScreen(true, {
+        title: track.title,
+        artist: 'TinyRest',
+      });
     },
     [clearFade, clearMonitor, pauseAll, startMonitor]
   );

@@ -99,7 +99,10 @@ const Home: React.FC = () => {
       contentContainerClassName={homeScrollContentClassName}
     >
       <VStack space="md" className={homeContentStackClassName}>
-        <VStack className={glassCardCenteredClassName}>
+        <VStack
+          className={`${glassCardCenteredClassName} justify-center`}
+          style={{ height: 120 }}
+        >
           {isLoading ? (
             <ActivityIndicator color="white" size="large" />
           ) : (
@@ -108,9 +111,9 @@ const Home: React.FC = () => {
               <Text className="text-white text-5xl font-mono tracking-wider mt-2">
                 {heroValue}
               </Text>
-              {heroSubtitle ? (
-                <Text className={`${homeHintClassName} mt-2`}>{heroSubtitle}</Text>
-              ) : null}
+              <Text className={`${homeHintClassName} mt-2 min-h-5`}>
+                {heroSubtitle ?? ' '}
+              </Text>
             </>
           )}
         </VStack>

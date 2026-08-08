@@ -3,7 +3,7 @@ export type SoundTrack = {
   title: string;
   source?: number;
   coverImage: number;
-  /** Dual-player crossfade loop (Night Rain / White Noise). */
+  /** Optional marker; all tracks use dual-player crossfade while foregrounded. */
   seamlessLoop?: boolean;
 };
 

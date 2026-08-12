@@ -2,7 +2,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemList } from '@react-navigation/drawer';
 import { DrawerActions, useNavigation } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Image, ImageBackground, ImageStyle, StatusBar, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -495,6 +495,12 @@ const OnboardingRootLayout: React.FC = () => {
             headerTitleStyle: { color: 'white', fontSize: height * 0.025, fontWeight: '400' },
             cardStyle: { backgroundColor: 'transparent', flex: 1 },
             headerTintColor: 'white',
+            animationEnabled: true,
+            cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter,
+            transitionSpec: {
+              open: { animation: 'timing', config: { duration: 220 } },
+              close: { animation: 'timing', config: { duration: 180 } },
+            },
           }}
         >
           <OnboardingStack.Screen

@@ -6,7 +6,7 @@ type OnboardingSlideShellProps = {
 };
 
 const OnboardingSlideShell: React.FC<OnboardingSlideShellProps> = ({ children }) => (
-  <ScreenComponent >{children}</ScreenComponent>
+  <ScreenComponent enableFocusFade={false}>{children}</ScreenComponent>
 );
 
 export default OnboardingSlideShell;

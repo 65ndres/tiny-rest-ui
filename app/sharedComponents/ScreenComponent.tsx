@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import {
+  Animated,
   StyleSheet,
   Text,
   View,
   ViewStyle,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -17,6 +19,7 @@ import { getAppWindow } from '@/constants/appViewport';
 import AppScreenFooter from './AppScreenFooter';
 
 const cappedContentWidth = getAppWindow().width * SCREEN_CONTENT_WIDTH_RATIO;
+const FOCUS_FADE_IN_MS = 220;
 
 interface ScreenComponentProps {
   children?: React.ReactNode;
@@ -29,6 +32,8 @@ interface ScreenComponentProps {
    * Used by screens that should remain layout-dynamic (e.g. Timeline).
    */
   constrainToPhoneViewport?: boolean;
+  /** When false, skips the focus fade-in (for screens with custom transitions). */
+  enableFocusFade?: boolean;
 }
 
 const ScreenComponent: React.FC<ScreenComponentProps> = ({
@@ -38,7 +43,27 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({
   footerLogoOffset,
   showFooter = true,
   constrainToPhoneViewport = true,
+  enableFocusFade = true,
 }) => {
+  const opacity = useRef(new Animated.Value(enableFocusFade ? 0 : 1)).current;
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!enableFocusFade) return;
+
+      opacity.setValue(0);
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: FOCUS_FADE_IN_MS,
+        useNativeDriver: true,
+      }).start();
+
+      return () => {
+        opacity.setValue(0);
+      };
+    }, [enableFocusFade, opacity])
+  );
+
   const processChildren = (children: React.ReactNode): React.ReactNode => {
     if (children == null || typeof children === 'boolean') {
       return null;
@@ -102,7 +127,9 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({
         !constrainToPhoneViewport ? styles.safeAreaStretch : null,
       ]}
     >
-      <View style={[styles.screenContainer, columnStyle, style]}>
+      <Animated.View
+        style={[styles.screenContainer, columnStyle, style, { opacity }]}
+      >
         <View style={{ height: SCREEN_TOP_HEIGHT }} />
         <View
           style={
@@ -118,7 +145,7 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({
             <AppScreenFooter logoOffset={footerLogoOffset} />
           </View>
         ) : null}
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 };

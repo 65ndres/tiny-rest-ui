@@ -134,17 +134,29 @@ export const fetchTimerRunsInRange = async (
 /** Inclusive calendar-day lookback for sleep/feeding history panels. */
 export const HISTORY_PANEL_LOOKBACK_DAYS = 10;
 
+/**
+ * Local-calendar lookback as ISO-8601 instants for the API.
+ *
+ * Date-only `YYYY-MM-DD` params are interpreted as UTC day boundaries on the
+ * server, which drops evening local sessions (e.g. after 8pm EDT). Sending
+ * ISO timestamps with `T` preserves the device's local day window:
+ * `[startOf(fromDay), startOf(toDay + 1))`.
+ */
 export const getLastNDaysRange = (
   days: number,
   referenceDate: Date = new Date()
 ): { from: string; to: string } => {
-  const to = new Date(referenceDate);
-  to.setHours(0, 0, 0, 0);
-  const from = new Date(to);
-  from.setDate(from.getDate() - Math.max(days - 1, 0));
+  const startOfToDay = new Date(referenceDate);
+  startOfToDay.setHours(0, 0, 0, 0);
+  const startOfFromDay = new Date(startOfToDay);
+  startOfFromDay.setDate(
+    startOfFromDay.getDate() - Math.max(days - 1, 0)
+  );
+  const endExclusive = new Date(startOfToDay);
+  endExclusive.setDate(endExclusive.getDate() + 1);
   return {
-    from: formatDateParam(from),
-    to: formatDateParam(to),
+    from: startOfFromDay.toISOString(),
+    to: endExclusive.toISOString(),
   };
 };
 

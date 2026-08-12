@@ -1,5 +1,3 @@
-import { APP_DISPLAY_NAME } from '@/constants/appBranding';
-import { useColorScheme } from '@/hooks/useColorScheme';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
@@ -17,28 +15,35 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ViewStyle
+  ViewStyle,
 } from 'react-native';
 import 'react-native-reanimated';
 
+import {
+  GLASS_BACKGROUND_COLOR,
+  TIMER_SOLID_BUTTON_CONTENT_COLOR,
+} from '@/app/constants/screenLayout';
 import { getAppWindow } from '@/constants/appViewport';
 import { API_URL } from '../../constants/Config';
-import ScreenComponent from '../sharedComponents/ScreenComponent';
 import BackButton from '../SampleModule/BackButton';
+import ScreenComponent from '../sharedComponents/ScreenComponent';
 
-const { width: screenWidth, height: screenHeight } = getAppWindow();
+const { width: screenWidth } = getAppWindow();
+
+const SENT_ACCENT = TIMER_SOLID_BUTTON_CONTENT_COLOR;
+const SENT_ACCENT_DISABLED = 'rgba(99, 72, 139, 0.4)';
 
 type RootStackParamList = {
   Home: undefined;
   Conversations: undefined;
   NewConversation: undefined;
   Conversation: {
-    other_user_id?: number,
-    conversation_id?: number,
-    item_id?: number,
+    other_user_id?: number;
+    conversation_id?: number;
+    item_id?: number;
   };
   Support: {
-    conversation_id?: number,
+    conversation_id?: number;
   };
 };
 
@@ -64,7 +69,6 @@ interface ConversationData {
 const SupportScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteProp>();
-  const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -76,16 +80,15 @@ const SupportScreen: React.FC = () => {
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [inputText, setInputText] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const contentFadeAnim = useRef(new Animated.Value(0)).current; // Fade animation for main content
-  const messagesFadeAnim = useRef(new Animated.Value(0)).current; // Fade animation for messages list
+  const contentFadeAnim = useRef(new Animated.Value(0)).current;
+  const messagesFadeAnim = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<FlatList>(null);
-  
+
   const fetchConversationData = useCallback(async () => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem('token');
-      
+
       const conversationResponse = await axios.get(
         `${API_URL}/conversations/admin_conversation`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -150,7 +153,7 @@ const SupportScreen: React.FC = () => {
 
     try {
       const token = await AsyncStorage.getItem('token');
-      
+
       const response = await axios.post(
         `${API_URL}/conversations/${conversationData.id}/messages`,
         { body: inputText.trim() },
@@ -159,7 +162,7 @@ const SupportScreen: React.FC = () => {
 
       if (response.status === 200 || response.status === 201) {
         fetchConversationData();
-        setInputText("");
+        setInputText('');
       }
     } catch (e) {
       console.error('Send message failed', e);
@@ -169,10 +172,7 @@ const SupportScreen: React.FC = () => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <BackButton 
-          text="" 
-          onPress={() => navigation.goBack()}
-        />
+        <BackButton text="" onPress={() => navigation.goBack()} />
       ),
     });
   }, [navigation]);
@@ -196,9 +196,9 @@ const SupportScreen: React.FC = () => {
             {item.body}
           </Text>
           <Text style={[styles.messageTime, isSent && styles.sentMessageTime]}>
-            {new Date(item.created_at).toLocaleTimeString([], { 
-              hour: '2-digit', 
-              minute: '2-digit' 
+            {new Date(item.created_at).toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
             })}
           </Text>
         </View>
@@ -210,10 +210,9 @@ const SupportScreen: React.FC = () => {
     return null;
   }
 
-  const otherUserName = "Support";
   if (loading) {
     return (
-      <ScreenComponent>
+      <ScreenComponent contentFlex>
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Loading conversation...</Text>
         </View>
@@ -222,90 +221,79 @@ const SupportScreen: React.FC = () => {
   }
 
   return (
-    <ScreenComponent>
-      <Animated.View style={{opacity: contentFadeAnim }}>
-        <View style={{overflow: 'hidden'}}>
-          <View style={styles.topHeader}>
-            <View style={styles.headerContent}>
-              <Text style={styles.quoteText}>With</Text>
-              <Text style={styles.otherUserName}>{otherUserName}</Text>
-            </View>
+    <ScreenComponent contentFlex>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+      >
+        <Animated.View style={[styles.flex, { opacity: contentFadeAnim }]}>
+          <View style={styles.messagesWrapper}>
+            {messages.length > 0 ? (
+              <Animated.View
+                style={[styles.messagesContainer, { opacity: messagesFadeAnim }]}
+              >
+                <FlatList
+                  ref={flatListRef}
+                  data={messages}
+                  renderItem={renderMessage}
+                  keyExtractor={(item) => item.id.toString()}
+                  contentContainerStyle={styles.messagesList}
+                  style={styles.flex}
+                  inverted={false}
+                  onContentSizeChange={() =>
+                    flatListRef.current?.scrollToEnd({ animated: true })
+                  }
+                />
+              </Animated.View>
+            ) : null}
           </View>
-          <View style={styles.messagesArea}>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === 'ios' ? 'position' : 'height'}
-              keyboardVerticalOffset={Platform.OS === 'ios' ? 200 : 0}
-            >
-              <View style={{height: '100%'}}>
-                <View style={styles.messagesWrapper}>
-                  <View style={styles.container}>
-                    {messages.length > 0 &&
-                    <Animated.View style={[styles.messagesContainer, { opacity: messagesFadeAnim }]}>
-                      <FlatList
-                        ref={flatListRef}
-                        data={messages}
-                        renderItem={renderMessage}
-                        keyExtractor={(item) => item.id.toString()}
-                        contentContainerStyle={styles.messagesList}
-                        inverted={false}
-                        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-                      />
-                    </Animated.View>
-                    }
-                  </View>
-                </View>
 
-                <View style={styles.inputWrapper}>
-                  <View style={styles.inputContainer}>
-                    <View style={styles.inputRow}>
-                      <View style={styles.inputFieldContainer}>
-                        <Input
-                          placeholder="Type your message..."
-                          value={inputText}
-                          onChangeText={handleInputChange}
-                          placeholderTextColor={'white'}
-                          inputStyle={styles.inputText}
-                          inputContainerStyle={styles.inputContainerStyle}
-                          cursorColor={"#ffffff"}
-                          selectionColor={'white'}
-                          multiline={true}
-                        />
-                      </View>
-                      <View style={styles.sendButtonContainer}>
-                        <TouchableOpacity
-                          onPress={handleSendMessage}
-                          style={[
-                            styles.sendIconButton,
-                            !inputText.trim() && styles.sendIconButtonDisabled
-                          ]}
-                          activeOpacity={0.7}
-                          disabled={!inputText.trim()}
-                        >
-                          <Ionicons 
-                            name="send" 
-                            size={screenWidth * 0.075} 
-                            color={inputText.trim() ? "#ac8861ff" : "rgba(172, 134, 97, 0.4)"} 
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-                </View>
+          <View style={styles.inputWrapper}>
+            <View style={styles.inputRow}>
+              <View style={styles.inputFieldContainer}>
+                <Input
+                  placeholder="Type your message..."
+                  value={inputText}
+                  onChangeText={handleInputChange}
+                  placeholderTextColor="white"
+                  inputStyle={styles.inputText}
+                  inputContainerStyle={styles.inputContainerStyle}
+                  cursorColor="#ffffff"
+                  selectionColor="white"
+                  multiline={true}
+                />
               </View>
-            </KeyboardAvoidingView>
-          </View>
-          <View style={styles.bottomArea}>
-            <View style={styles.appNameContainer}>
-              <Text style={styles.appNameText}>{APP_DISPLAY_NAME}</Text>
+              <View style={styles.sendButtonContainer}>
+                <TouchableOpacity
+                  onPress={handleSendMessage}
+                  style={[
+                    styles.sendIconButton,
+                    !inputText.trim() && styles.sendIconButtonDisabled,
+                  ]}
+                  activeOpacity={0.7}
+                  disabled={!inputText.trim()}
+                >
+                  <Ionicons
+                    name="send"
+                    size={screenWidth * 0.075}
+                    color={inputText.trim() ? SENT_ACCENT : SENT_ACCENT_DISABLED}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Animated.View>
+        </Animated.View>
+      </KeyboardAvoidingView>
     </ScreenComponent>
   );
 };
 
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+    minHeight: 0,
+  } as ViewStyle,
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -315,47 +303,24 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: screenWidth * 0.042,
   },
-  topHeader: {
-    height: screenHeight * 0.15,
-  } as ViewStyle,
-  headerContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: screenHeight * 0.074,
-    marginTop: 20,
-  } as ViewStyle,
-  quoteText: {
-    color: 'white',
-    fontSize: screenWidth * 0.052,
-    fontWeight: '300',
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  otherUserName: {
-    color: 'white',
-    fontSize: screenWidth * 0.052,
-    fontWeight: '600',
-  },
-  messagesArea: {
-    overflow: 'hidden',
-    height: screenHeight * 0.7,
-  } as ViewStyle,
   messagesWrapper: {
     flex: 1,
+    minHeight: 0,
     justifyContent: 'flex-end',
-  } as ViewStyle,
-  container: {
-    justifyContent: 'flex-end',
+    paddingHorizontal: 35,
   } as ViewStyle,
   messagesContainer: {
-    paddingTop: screenHeight * 0.012,
+    flex: 1,
+    minHeight: 0,
+    paddingTop: 12,
   } as ViewStyle,
   messagesList: {
-    paddingBottom: screenHeight * 0.012,
+    flexGrow: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 12,
   },
   messageContainer: {
-    marginVertical: screenHeight * 0.005,
+    marginVertical: 4,
   } as ViewStyle,
   sentMessageContainer: {
     alignItems: 'flex-end',
@@ -366,23 +331,23 @@ const styles = StyleSheet.create({
   messageBubble: {
     maxWidth: '75%',
     padding: screenWidth * 0.032,
-    borderRadius: screenWidth * 0.048,
+    borderRadius: 15,
   } as ViewStyle,
   sentMessageBubble: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderBottomRightRadius: screenWidth * 0.011,
+    borderBottomRightRadius: 4,
   } as ViewStyle,
   receivedMessageBubble: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    borderBottomLeftRadius: screenWidth * 0.011,
+    backgroundColor: GLASS_BACKGROUND_COLOR,
+    borderBottomLeftRadius: 4,
   } as ViewStyle,
   messageText: {
     color: 'white',
     fontSize: screenWidth * 0.05,
-    marginBottom: screenHeight * 0.005,
+    marginBottom: 4,
   },
   sentMessageText: {
-    color: '#ac8861ff',
+    color: SENT_ACCENT,
   },
   messageTime: {
     color: 'rgba(255, 255, 255, 0.6)',
@@ -390,22 +355,18 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   sentMessageTime: {
-    color: '#ac8861ff',
+    color: SENT_ACCENT,
   },
-  bottomArea: {
-    height: screenHeight * 0.1,
-    paddingTop: 30
-  } as ViewStyle,
   inputWrapper: {
-  } as ViewStyle,
-  inputContainer: {
-    paddingVertical: screenHeight * 0.01,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
   } as ViewStyle,
   inputRow: {
     flexDirection: 'row',
+    alignItems: 'center',
   } as ViewStyle,
   inputFieldContainer: {
-    width: '85%',
+    flex: 1,
   } as ViewStyle,
   inputText: {
     color: 'white',
@@ -415,9 +376,9 @@ const styles = StyleSheet.create({
     borderBottomColor: 'white',
   } as ViewStyle,
   sendButtonContainer: {
-    width: '15%',
     justifyContent: 'center',
     alignItems: 'flex-end',
+    paddingRight: 8,
   } as ViewStyle,
   sendIconButton: {
     backgroundColor: 'white',
@@ -429,18 +390,6 @@ const styles = StyleSheet.create({
   sendIconButtonDisabled: {
     opacity: 0.5,
   } as ViewStyle,
-  appNameContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    paddingBottom: screenHeight * 0.012,
-  } as ViewStyle,
-  appNameText: {
-    color: 'white',
-    fontSize: screenWidth * 0.035,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
 });
 
 export default SupportScreen;
-

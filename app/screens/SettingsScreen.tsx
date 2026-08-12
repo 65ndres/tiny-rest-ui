@@ -8,6 +8,14 @@ import {
   fetchUserProfile,
   updateUserProfile,
 } from '@/app/utils/userProfile';
+import {
+  dateToMinutes,
+  DEFAULT_DAY_END_MINUTES,
+  DEFAULT_DAY_START_MINUTES,
+  minutesToDate,
+  minutesToDisplayTime,
+  normalizeDayMinutes,
+} from '@/app/utils/dayWindow';
 import { normalizeDailyNapCount } from '@/app/utils/nextNapPrediction';
 import {
   timerContentStackClassName,
@@ -53,10 +61,23 @@ const toIsoDate = (date: Date): string => {
 const SettingsScreen: React.FC = () => {
   const [babyName, setBabyName] = useState('');
   const [nameError, setNameError] = useState('');
+  const [dayWindowError, setDayWindowError] = useState('');
   const [dailyNapCount, setDailyNapCount] = useState(3);
   const [babyBirthdate, setBabyBirthdate] = useState<string | null>(null);
+  const [dayStartMinutes, setDayStartMinutes] = useState(
+    DEFAULT_DAY_START_MINUTES
+  );
+  const [dayEndMinutes, setDayEndMinutes] = useState(DEFAULT_DAY_END_MINUTES);
   const [birthdatePickerValue, setBirthdatePickerValue] = useState(new Date());
+  const [dayStartPickerValue, setDayStartPickerValue] = useState(() =>
+    minutesToDate(DEFAULT_DAY_START_MINUTES)
+  );
+  const [dayEndPickerValue, setDayEndPickerValue] = useState(() =>
+    minutesToDate(DEFAULT_DAY_END_MINUTES)
+  );
   const [isBirthdatePickerOpen, setIsBirthdatePickerOpen] = useState(false);
+  const [isDayStartPickerOpen, setIsDayStartPickerOpen] = useState(false);
+  const [isDayEndPickerOpen, setIsDayEndPickerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -69,9 +90,22 @@ const SettingsScreen: React.FC = () => {
       const profile = await fetchUserProfile(token);
       setBabyName(profile.baby_name || '');
       setNameError('');
+      setDayWindowError('');
       setDailyNapCount(normalizeDailyNapCount(profile.daily_nap_count));
       setBabyBirthdate(profile.baby_birthdate);
       setBirthdatePickerValue(toDateInput(profile.baby_birthdate));
+      const start = normalizeDayMinutes(
+        profile.day_start_minutes,
+        DEFAULT_DAY_START_MINUTES
+      );
+      const end = normalizeDayMinutes(
+        profile.day_end_minutes,
+        DEFAULT_DAY_END_MINUTES
+      );
+      setDayStartMinutes(start);
+      setDayEndMinutes(end);
+      setDayStartPickerValue(minutesToDate(start));
+      setDayEndPickerValue(minutesToDate(end));
     } catch {
       Alert.alert('Error', 'Could not load settings.');
     } finally {
@@ -103,7 +137,14 @@ const SettingsScreen: React.FC = () => {
       return;
     }
 
+    if (dayStartMinutes >= dayEndMinutes) {
+      setDayWindowError('Day end must be after day start.');
+      Alert.alert('Error', 'Day end must be after day start.');
+      return;
+    }
+
     setNameError('');
+    setDayWindowError('');
     setIsSaving(true);
     try {
       const token = await AsyncStorage.getItem('token');
@@ -116,6 +157,8 @@ const SettingsScreen: React.FC = () => {
         baby_name: trimmedName,
         baby_birthdate: babyBirthdate,
         daily_nap_count: dailyNapCount,
+        day_start_minutes: dayStartMinutes,
+        day_end_minutes: dayEndMinutes,
       });
       Alert.alert('Success', 'Settings saved.');
     } catch {
@@ -186,6 +229,39 @@ const SettingsScreen: React.FC = () => {
                 size="lg"
               />
 
+              <Text className={`${timerSectionLabelClassName} mt-6`}>
+                Day vs night
+              </Text>
+              <TimerSettingRow
+                label="Start:"
+                value={minutesToDisplayTime(dayStartMinutes)}
+                placeholder="Select time"
+                onPress={() => {
+                  setDayStartPickerValue(minutesToDate(dayStartMinutes));
+                  setIsDayStartPickerOpen(true);
+                }}
+                disabled={isSaving}
+                accessibilityLabel="Set day start time"
+                size="lg"
+              />
+              <TimerSettingRow
+                label="End:"
+                value={minutesToDisplayTime(dayEndMinutes)}
+                placeholder="Select time"
+                onPress={() => {
+                  setDayEndPickerValue(minutesToDate(dayEndMinutes));
+                  setIsDayEndPickerOpen(true);
+                }}
+                disabled={isSaving}
+                accessibilityLabel="Set day end time"
+                size="lg"
+              />
+              {dayWindowError ? (
+                <Text className="text-error-400 text-sm mt-1">
+                  {dayWindowError}
+                </Text>
+              ) : null}
+
               <TimerOutlineButton
                 label="Save"
                 iconName="save-sharp"
@@ -211,6 +287,32 @@ const SettingsScreen: React.FC = () => {
           setBabyBirthdate(toIsoDate(date));
         }}
         onClose={() => setIsBirthdatePickerOpen(false)}
+      />
+
+      <TimerDateTimePickerDrawer
+        isOpen={isDayStartPickerOpen}
+        title="Day start"
+        value={dayStartPickerValue}
+        mode="time"
+        onChange={(date) => {
+          setDayStartPickerValue(date);
+          setDayStartMinutes(dateToMinutes(date));
+          if (dayWindowError) setDayWindowError('');
+        }}
+        onClose={() => setIsDayStartPickerOpen(false)}
+      />
+
+      <TimerDateTimePickerDrawer
+        isOpen={isDayEndPickerOpen}
+        title="Day end"
+        value={dayEndPickerValue}
+        mode="time"
+        onChange={(date) => {
+          setDayEndPickerValue(date);
+          setDayEndMinutes(dateToMinutes(date));
+          if (dayWindowError) setDayWindowError('');
+        }}
+        onClose={() => setIsDayEndPickerOpen(false)}
       />
     </ScreenScrollLayout>
   );

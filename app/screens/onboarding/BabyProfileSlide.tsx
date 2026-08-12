@@ -6,8 +6,16 @@ import { VStack } from '@/components/ui/vstack';
 import {
   mutedTextClassName,
   timerContentStackClassName,
+  timerSectionLabelClassName,
   timerSettingRowClassName,
 } from '@/app/constants/screenLayout';
+import {
+  dateToMinutes,
+  DEFAULT_DAY_END_MINUTES,
+  DEFAULT_DAY_START_MINUTES,
+  minutesToDate,
+  minutesToDisplayTime,
+} from '@/app/utils/dayWindow';
 import { updateUserProfile } from '@/app/utils/userProfile';
 import TimerDateTimePickerDrawer from '@/app/sharedComponents/TimerDateTimePickerDrawer';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
@@ -56,11 +64,24 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
 }) => {
   const [nameError, setNameError] = useState('');
   const [birthdateError, setBirthdateError] = useState('');
+  const [dayWindowError, setDayWindowError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isBirthdatePickerOpen, setIsBirthdatePickerOpen] = useState(false);
   const [birthdatePickerValue, setBirthdatePickerValue] = useState(() =>
     toDateInput(babyBirthdate)
   );
+  const [dayStartMinutes, setDayStartMinutes] = useState(
+    DEFAULT_DAY_START_MINUTES
+  );
+  const [dayEndMinutes, setDayEndMinutes] = useState(DEFAULT_DAY_END_MINUTES);
+  const [dayStartPickerValue, setDayStartPickerValue] = useState(() =>
+    minutesToDate(DEFAULT_DAY_START_MINUTES)
+  );
+  const [dayEndPickerValue, setDayEndPickerValue] = useState(() =>
+    minutesToDate(DEFAULT_DAY_END_MINUTES)
+  );
+  const [isDayStartPickerOpen, setIsDayStartPickerOpen] = useState(false);
+  const [isDayEndPickerOpen, setIsDayEndPickerOpen] = useState(false);
 
   const handleNext = async () => {
     const trimmedName = babyName.trim();
@@ -80,6 +101,13 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
       setBirthdateError('');
     }
 
+    if (dayStartMinutes >= dayEndMinutes) {
+      setDayWindowError('Day end must be after day start.');
+      hasError = true;
+    } else {
+      setDayWindowError('');
+    }
+
     if (hasError) return;
 
     setIsSaving(true);
@@ -93,6 +121,8 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
       await updateUserProfile(token, {
         baby_name: trimmedName,
         baby_birthdate: babyBirthdate,
+        day_start_minutes: dayStartMinutes,
+        day_end_minutes: dayEndMinutes,
       });
       onPressNext?.();
     } catch {
@@ -169,6 +199,39 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
             </Text>
           ) : null}
 
+          <Text className={`${timerSectionLabelClassName} mt-6`}>
+            Day vs night
+          </Text>
+          <TimerSettingRow
+            label="Start:"
+            value={minutesToDisplayTime(dayStartMinutes)}
+            placeholder="Select time"
+            onPress={() => {
+              setDayStartPickerValue(minutesToDate(dayStartMinutes));
+              setIsDayStartPickerOpen(true);
+            }}
+            disabled={isSaving}
+            accessibilityLabel="Set day start time"
+            size="lg"
+          />
+          <TimerSettingRow
+            label="End:"
+            value={minutesToDisplayTime(dayEndMinutes)}
+            placeholder="Select time"
+            onPress={() => {
+              setDayEndPickerValue(minutesToDate(dayEndMinutes));
+              setIsDayEndPickerOpen(true);
+            }}
+            disabled={isSaving}
+            accessibilityLabel="Set day end time"
+            size="lg"
+          />
+          {dayWindowError ? (
+            <Text className="text-error-400 text-lg font-semibold mt-1">
+              {dayWindowError}
+            </Text>
+          ) : null}
+
           {onPressNext ? (
             <TimerOutlineButton
               label="Next"
@@ -196,6 +259,32 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
           if (birthdateError) setBirthdateError('');
         }}
         onClose={() => setIsBirthdatePickerOpen(false)}
+      />
+
+      <TimerDateTimePickerDrawer
+        isOpen={isDayStartPickerOpen}
+        title="Day start"
+        value={dayStartPickerValue}
+        mode="time"
+        onChange={(date) => {
+          setDayStartPickerValue(date);
+          setDayStartMinutes(dateToMinutes(date));
+          if (dayWindowError) setDayWindowError('');
+        }}
+        onClose={() => setIsDayStartPickerOpen(false)}
+      />
+
+      <TimerDateTimePickerDrawer
+        isOpen={isDayEndPickerOpen}
+        title="Day end"
+        value={dayEndPickerValue}
+        mode="time"
+        onChange={(date) => {
+          setDayEndPickerValue(date);
+          setDayEndMinutes(dateToMinutes(date));
+          if (dayWindowError) setDayWindowError('');
+        }}
+        onClose={() => setIsDayEndPickerOpen(false)}
       />
     </OnboardingSlideShell>
   );

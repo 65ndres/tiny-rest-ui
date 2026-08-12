@@ -1,5 +1,5 @@
 // app/context/RevenueCatContext.tsx
-import { API_URL, isDevelopment } from '@/constants/Config';
+import { API_URL, isProduction } from '@/constants/Config';
 import { PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from '@/constants/legalUrls';
 import { syncProSubscriptionToApp as syncProSubscription } from '@/app/utils/subscriptionSync';
 import axios from 'axios';
@@ -18,16 +18,10 @@ import RevenueCatUI, {
 } from 'react-native-purchases-ui';
 import { useAuth } from './AuthContext';
 
-// RevenueCat Test key (used in development)
-const REVENUECAT_TEST_KEY = 'test_QUpAwigTTupwnYwSsqqTWletcbb';
-
-// Use Test key in development; otherwise use production key from env (must be EXPO_PUBLIC_* for Expo to inject it)
-const REVENUECAT_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY
-  // isDevelopment
-  //   ? REVENUECAT_TEST_KEY
-  //   : (process.env.EXPO_PUBLIC_REVENUECAT_API_KEY ?? REVENUECAT_TEST_KEY);
-
-// console.log("PACAAAAAA", REVENUECAT_API_KEY)
+// EXPO_PUBLIC_* keys are injected at build time; pick DEV vs PROD by environment
+const REVENUECAT_API_KEY = isProduction
+  ? process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_PROD
+  : process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_DEV;
 // Entitlement identifier
 export const ENTITLEMENT_IDENTIFIER = 'Tiny Rest Pro';
 

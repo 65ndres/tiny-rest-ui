@@ -1,5 +1,10 @@
 import axios from 'axios';
 import { API_URL } from '@/constants/Config';
+import {
+  DEFAULT_DAY_END_MINUTES,
+  DEFAULT_DAY_START_MINUTES,
+  normalizeDayMinutes,
+} from '@/app/utils/dayWindow';
 
 export type UserProfile = {
   first_name: string | null;
@@ -10,6 +15,8 @@ export type UserProfile = {
   baby_name: string | null;
   baby_birthdate: string | null;
   daily_nap_count: number;
+  day_start_minutes: number;
+  day_end_minutes: number;
 };
 
 export type UserProfileUpdate = Partial<{
@@ -20,6 +27,8 @@ export type UserProfileUpdate = Partial<{
   baby_name: string | null;
   baby_birthdate: string | null;
   daily_nap_count: number;
+  day_start_minutes: number;
+  day_end_minutes: number;
   password: string;
   password_confirmation: string;
 }>;
@@ -36,6 +45,14 @@ export const fetchUserProfile = async (token: string): Promise<UserProfile> => {
     ...response.data,
     baby_birthdate: response.data.baby_birthdate ?? null,
     daily_nap_count: response.data.daily_nap_count ?? 3,
+    day_start_minutes: normalizeDayMinutes(
+      response.data.day_start_minutes,
+      DEFAULT_DAY_START_MINUTES
+    ),
+    day_end_minutes: normalizeDayMinutes(
+      response.data.day_end_minutes,
+      DEFAULT_DAY_END_MINUTES
+    ),
   };
 };
 

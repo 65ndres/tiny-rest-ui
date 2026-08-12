@@ -34,7 +34,7 @@ import TimerOutlineButton from '../sharedComponents/timer/TimerOutlineButton';
 
 type RootDrawerParamList = {
   Home: undefined;
-  Profile: undefined;
+  Settings: undefined;
   Subscription: undefined;
 };
 

@@ -27,7 +27,7 @@ import TimerSectionCard from '../sharedComponents/timer/TimerSectionCard';
 
 type RootDrawerParamList = {
   Home: undefined;
-  Profile: undefined;
+  Settings: undefined;
   Subscription: undefined;
 };
 

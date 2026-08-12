@@ -83,7 +83,7 @@ export const formatPredictionDisplay = (
       return {
         label: 'next nap',
         value: '--:--',
-        subtitle: 'Set birthdate in Settings',
+        subtitle: 'Set birthdate in Profile',
       };
     case 'next_nap':
     default:

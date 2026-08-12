@@ -160,7 +160,7 @@ const SettingsScreen: React.FC = () => {
         day_start_minutes: dayStartMinutes,
         day_end_minutes: dayEndMinutes,
       });
-      Alert.alert('Success', 'Settings saved.');
+      Alert.alert('Success', 'Profile saved.');
     } catch {
       Alert.alert('Error', 'Could not save settings. Please try again.');
       void loadSettings();

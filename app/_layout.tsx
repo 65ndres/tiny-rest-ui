@@ -248,16 +248,21 @@ const AuthenticatedNavigator: React.FC = () => {
       />
       <Drawer.Screen
         name="Settings"
-        component={SettingsScreen}
-        options={{
+        component={UserProfileScreen}
+        options={({ navigation }) => ({
           drawerLabel: 'SETTINGS',
-          headerLeft: () => <BackButton text="" />,
+          headerLeft: () => (
+            <BackButton
+              text=""
+              onPress={() => navigation.navigate('Home')}
+            />
+          ),
           headerTitle: () => (
             <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
               SETTINGS
             </Text>
           ),
-        }}
+        })}
       />
       <Drawer.Screen
         name="NapTimeline"
@@ -309,15 +314,10 @@ const AuthenticatedNavigator: React.FC = () => {
       />
       <Drawer.Screen
         name="Profile"
-        component={UserProfileScreen}
-        options={({ navigation }) => ({
+        component={SettingsScreen}
+        options={{
           drawerLabel: 'PROFILE',
-          headerLeft: () => (
-            <BackButton
-              text=""
-              onPress={() => navigation.navigate('Home')}
-            />
-          ),
+          headerLeft: () => <BackButton text="" />,
           headerTitle: () => (
             <Text
               style={{
@@ -329,7 +329,7 @@ const AuthenticatedNavigator: React.FC = () => {
               PROFILE
             </Text>
           ),
-        })}
+        }}
       />
       <Drawer.Screen
         name="Subscription"
@@ -340,7 +340,7 @@ const AuthenticatedNavigator: React.FC = () => {
           headerLeft: () => (
             <BackButton
               text=""
-              onPress={() => navigation.navigate('Profile')}
+              onPress={() => navigation.navigate('Settings')}
             />
           ),
           headerTitle: () => (

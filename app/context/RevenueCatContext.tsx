@@ -31,7 +31,7 @@ interface RevenueCatContextType {
   offerings: PurchasesOffering | null;
   isLoading: boolean;
   isPro: boolean;
-  
+
   // Methods
   refreshCustomerInfo: () => Promise<CustomerInfo>;
   purchasePackage: (packageToPurchase: PurchasesPackage) => Promise<boolean>;
@@ -40,6 +40,7 @@ interface RevenueCatContextType {
   presentCustomerCenter: () => Promise<void>;
   getCurrentOffering: () => PurchasesOffering | null;
   getPackages: () => PurchasesPackage[] | null;
+  reloadOfferings: () => Promise<void>;
 }
 
 const RevenueCatContext = createContext<RevenueCatContextType | undefined>(undefined);
@@ -50,33 +51,73 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [offerings, setOfferings] = useState<PurchasesOffering | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isPro, setIsPro] = useState<boolean>(false);
+  const [isConfigured, setIsConfigured] = useState(false);
+
+  const refreshCustomerInfo = useCallback(async () => {
+    try {
+      const info = await Purchases.getCustomerInfo();
+      setCustomerInfo(info);
+
+      const hasPro = info.entitlements.active[ENTITLEMENT_IDENTIFIER] !== undefined;
+      setIsPro(hasPro);
+
+      return info;
+    } catch (error) {
+      console.error('Error refreshing customer info:', error);
+      const purchasesError = error as PurchasesError;
+      throw purchasesError;
+    }
+  }, []);
+
+  const reloadOfferings = useCallback(async () => {
+    try {
+      const offeringsData = await Purchases.getOfferings();
+      if (offeringsData.current !== null) {
+        setOfferings(offeringsData.current);
+      } else {
+        setOfferings(null);
+        console.warn('No current offering available');
+      }
+    } catch (error) {
+      console.error('Error loading offerings:', error);
+      const purchasesError = error as PurchasesError;
+      if (__DEV__) {
+        Alert.alert('Error Loading Offerings', purchasesError.message);
+      }
+      throw purchasesError;
+    }
+  }, []);
 
   // Initialize RevenueCat SDK
   useEffect(() => {
     const initializeRevenueCat = async () => {
       try {
-        // Set log level for debugging (remove in production or set to ERROR)
+        if (!REVENUECAT_API_KEY) {
+          const envName = isProduction
+            ? 'EXPO_PUBLIC_REVENUECAT_API_KEY_PROD'
+            : 'EXPO_PUBLIC_REVENUECAT_API_KEY_DEV';
+          const message = `Missing RevenueCat API key (${envName}). Restart Metro after updating .env.`;
+          console.error(message);
+          if (__DEV__) {
+            Alert.alert('RevenueCat Configuration Error', message);
+          }
+          return;
+        }
+
         if (__DEV__) {
           Purchases.setLogLevel(LOG_LEVEL.DEBUG);
         }
 
-        // Configure RevenueCat with API key
-        if (Platform.OS === 'ios') {
+        if (Platform.OS === 'ios' || Platform.OS === 'android') {
           await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
-        } else if (Platform.OS === 'android') {
-          await Purchases.configure({ apiKey: REVENUECAT_API_KEY });
+          setIsConfigured(true);
         }
 
-        // Set user ID if authenticated
         if (user?.id) {
           await Purchases.logIn(user.id.toString());
         }
 
-        // Load initial customer info and offerings
-        await Promise.all([
-          refreshCustomerInfo(),
-          loadOfferings(),
-        ]);
+        await Promise.all([refreshCustomerInfo(), reloadOfferings()]);
       } catch (error) {
         console.error('Error initializing RevenueCat:', error);
         const purchasesError = error as PurchasesError;
@@ -91,48 +132,15 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       }
     };
 
-    initializeRevenueCat();
-  }, []);
-
-  // Load offerings
-  const loadOfferings = async () => {
-    try {
-      const offeringsData = await Purchases.getOfferings();
-      if (offeringsData.current !== null) {
-        setOfferings(offeringsData.current);
-      } else {
-        console.warn('No current offering available');
-      }
-    } catch (error) {
-      console.error('Error loading offerings:', error);
-      const purchasesError = error as PurchasesError;
-      if (__DEV__) {
-        Alert.alert('Error Loading Offerings', purchasesError.message);
-      }
-    }
-  };
-
-  // Refresh customer info
-  const refreshCustomerInfo = useCallback(async () => {
-    try {
-      const info = await Purchases.getCustomerInfo();
-      setCustomerInfo(info);
-      
-      // Check if user has Pro entitlement
-      const hasPro = info.entitlements.active[ENTITLEMENT_IDENTIFIER] !== undefined;
-      setIsPro(hasPro);
-      
-      return info;
-    } catch (error) {
-      console.error('Error refreshing customer info:', error);
-      const purchasesError = error as PurchasesError;
-      throw purchasesError;
-    }
+    void initializeRevenueCat();
+    // Intentionally run once on mount; user login is handled in a separate effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Sync RevenueCat user with auth: log in when user is set, log out when user is cleared.
-  // This ensures RevenueCat forgets the previous user's subscription state after logout.
   useEffect(() => {
+    if (!isConfigured) return;
+
     const updateUserId = async () => {
       if (user?.id) {
         try {
@@ -142,7 +150,6 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           console.error('Error updating RevenueCat user ID:', error);
         }
       } else {
-        // Only call logOut() when RevenueCat has a logged-in user; otherwise SDK throws "current user is anonymous"
         const appUserId = customerInfo?.originalAppUserId ?? '';
         const isAnonymous = !appUserId || appUserId.startsWith('$RCAnonymousID');
         if (!isAnonymous) {
@@ -157,8 +164,8 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       }
     };
 
-    updateUserId();
-  }, [user?.id, refreshCustomerInfo]);
+    void updateUserId();
+  }, [user?.id, refreshCustomerInfo, isConfigured]);
 
   const createUserSubscription = useCallback(async (info: CustomerInfo) => {
     await axios.post(`${API_URL}/subscription/create_pro_subscription`, {
@@ -186,70 +193,81 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     [createUserSubscription, refreshUser]
   );
 
-  // Purchase a package
-  const purchasePackage = useCallback(async (packageToPurchase: PurchasesPackage): Promise<boolean> => {
-    try {
-      const { customerInfo: purchasedInfo } = await Purchases.purchasePackage(packageToPurchase);
-      setCustomerInfo(purchasedInfo);
-      
-      // Check if purchase granted Pro entitlement
-      const hasPro = purchasedInfo.entitlements.active[ENTITLEMENT_IDENTIFIER] !== undefined;
-      setIsPro(hasPro);
-      
-      if (hasPro) {
-        await syncProSubscriptionToApp(purchasedInfo);
-        Alert.alert('Success', 'Welcome to TinyRest Pro! Your subscription is now active.');
-        return true;
-      } else {
+  const purchasePackage = useCallback(
+    async (packageToPurchase: PurchasesPackage): Promise<boolean> => {
+      try {
+        const { customerInfo: purchasedInfo } =
+          await Purchases.purchasePackage(packageToPurchase);
+        setCustomerInfo(purchasedInfo);
+
+        const hasPro =
+          purchasedInfo.entitlements.active[ENTITLEMENT_IDENTIFIER] !== undefined;
+        setIsPro(hasPro);
+
+        if (hasPro) {
+          await syncProSubscriptionToApp(purchasedInfo);
+          Alert.alert(
+            'Success',
+            'Welcome to TinyRest Pro! Your subscription is now active.'
+          );
+          return true;
+        }
+
         Alert.alert('Warning', 'Purchase completed but Pro entitlement not found.');
         return false;
-      }
-    } catch (error) {
-      const purchasesError = error as PurchasesError;
-      
-      // User cancelled - don't show error
-      if (purchasesError.userCancelled) {
+      } catch (error) {
+        const purchasesError = error as PurchasesError;
+
+        if (purchasesError.userCancelled) {
+          return false;
+        }
+
+        console.error('Error purchasing package:', purchasesError);
+        Alert.alert(
+          'Purchase Failed',
+          purchasesError.message ||
+            'An error occurred during purchase. Please try again.'
+        );
         return false;
       }
-      
-      // Handle other errors
-      console.error('Error purchasing package:', purchasesError);
+    },
+    [syncProSubscriptionToApp]
+  );
+
+  const restorePurchases = useCallback(async (): Promise<boolean> => {
+    try {
+      const info = await Purchases.restorePurchases();
+      setCustomerInfo(info);
+
+      const hasPro = info.entitlements.active[ENTITLEMENT_IDENTIFIER] !== undefined;
+      setIsPro(hasPro);
+
+      if (hasPro) {
+        await syncProSubscriptionToApp(info);
+        Alert.alert('Success', 'Your purchases have been restored!');
+        return true;
+      }
+
+      Alert.alert('No Purchases Found', 'No active purchases were found to restore.');
+      return false;
+    } catch (error) {
+      console.error('Error restoring purchases:', error);
+      const purchasesError = error as PurchasesError;
       Alert.alert(
-        'Purchase Failed',
-        purchasesError.message || 'An error occurred during purchase. Please try again.'
+        'Restore Failed',
+        purchasesError.message || 'Failed to restore purchases.'
       );
       return false;
     }
   }, [syncProSubscriptionToApp]);
 
-  // Restore purchases
-  const restorePurchases = useCallback(async (): Promise<boolean> => {
-    try {
-      const info = await Purchases.restorePurchases();
-      setCustomerInfo(info);
-      
-      const hasPro = info.entitlements.active[ENTITLEMENT_IDENTIFIER] !== undefined;
-      setIsPro(hasPro);
-      
-      if (hasPro) {
-        await syncProSubscriptionToApp(info);
-        Alert.alert('Success', 'Your purchases have been restored!');
-        return true;
-      } else {
-        Alert.alert('No Purchases Found', 'No active purchases were found to restore.');
-        return false;
-      }
-    } catch (error) {
-      console.error('Error restoring purchases:', error);
-      const purchasesError = error as PurchasesError;
-      Alert.alert('Restore Failed', purchasesError.message || 'Failed to restore purchases.');
-      return false;
-    }
-  }, [syncProSubscriptionToApp]);
-
-  // Present RevenueCat Paywall
   const presentPaywall = useCallback(async () => {
     try {
+      if (!REVENUECAT_API_KEY || !isConfigured) {
+        throw new Error(
+          'RevenueCat is not configured. Check your API key and restart the app.'
+        );
+      }
       if (typeof RevenueCatUI?.presentPaywall !== 'function') {
         throw new Error('RevenueCatUI.presentPaywall is not available');
       }
@@ -262,7 +280,6 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         },
       });
 
-      // Refresh customer info after paywall closes so state is up to date
       const latestCustomerInfo = await refreshCustomerInfo();
 
       if (
@@ -281,16 +298,14 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         purchasesError?.message || 'Failed to present paywall. Please try again.'
       );
     }
-  }, [offerings, refreshCustomerInfo, syncProSubscriptionToApp]);
+  }, [offerings, refreshCustomerInfo, syncProSubscriptionToApp, isConfigured]);
 
-  // Present Customer Center
   const presentCustomerCenter = useCallback(async () => {
     try {
       if (typeof RevenueCatUI?.presentCustomerCenter !== 'function') {
         throw new Error('RevenueCatUI.presentCustomerCenter is not available');
       }
       await RevenueCatUI.presentCustomerCenter();
-      // Refresh customer info after customer center interaction
       await refreshCustomerInfo();
     } catch (error) {
       const purchasesError = error as PurchasesError;
@@ -302,12 +317,10 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [refreshCustomerInfo]);
 
-  // Get current offering
   const getCurrentOffering = useCallback((): PurchasesOffering | null => {
     return offerings;
   }, [offerings]);
 
-  // Get packages from current offering
   const getPackages = useCallback((): PurchasesPackage[] | null => {
     return offerings?.availablePackages || null;
   }, [offerings]);
@@ -324,12 +337,11 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     presentCustomerCenter,
     getCurrentOffering,
     getPackages,
+    reloadOfferings,
   };
 
   return (
-    <RevenueCatContext.Provider value={value}>
-      {children}
-    </RevenueCatContext.Provider>
+    <RevenueCatContext.Provider value={value}>{children}</RevenueCatContext.Provider>
   );
 };
 
@@ -342,4 +354,3 @@ export function useRevenueCat(): RevenueCatContextType {
 }
 
 export default RevenueCatProvider;
-

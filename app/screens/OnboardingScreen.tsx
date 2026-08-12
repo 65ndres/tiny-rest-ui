@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React from 'react';
 import {
+  Animated,
   Image,
   ImageBackground,
   StyleSheet,
@@ -34,6 +35,8 @@ const footerLogo = require('../../assets/images/footer-logo.png');
 const LOGO_WIDTH = getAppWindow().width * 0.7;
 
 const TOTAL_PAGES = ONBOARDING_STEPS.length;
+const FADE_OUT_MS = 180;
+const FADE_IN_MS = 220;
 
 const OnboardingScreen: React.FC = () => {
   const [currentPage, setCurrentPage] = React.useState(0);
@@ -41,6 +44,9 @@ const OnboardingScreen: React.FC = () => {
   const [babyName, setBabyName] = React.useState('');
   const [babyBirthdate, setBabyBirthdate] = React.useState<string | null>(null);
   const [dailyNapCount, setDailyNapCount] = React.useState<number | null>(null);
+  const opacity = React.useRef(new Animated.Value(1)).current;
+  const currentPageRef = React.useRef(0);
+  currentPageRef.current = currentPage;
 
   React.useEffect(() => {
     let cancelled = false;
@@ -78,22 +84,47 @@ const OnboardingScreen: React.FC = () => {
     };
   }, []);
 
-  const completeStepAndAdvance = React.useCallback((step: OnboardingStep) => {
-    return async () => {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        if (token) {
-          await saveOnboardingStep(token, step);
-        } else {
-          await setLocalOnboardingStep(step);
-        }
-      } catch {
-        // Local save is best-effort; still advance.
-      }
+  const advanceToPage = React.useCallback(
+    (nextPage: number) => {
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: FADE_OUT_MS,
+        useNativeDriver: true,
+      }).start(({ finished }) => {
+        if (!finished) return;
+        setCurrentPage(nextPage);
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: FADE_IN_MS,
+          useNativeDriver: true,
+        }).start();
+      });
+    },
+    [opacity]
+  );
 
-      setCurrentPage((page) => Math.min(page + 1, TOTAL_PAGES - 1));
-    };
-  }, []);
+  const completeStepAndAdvance = React.useCallback(
+    (step: OnboardingStep) => {
+      return async () => {
+        try {
+          const token = await AsyncStorage.getItem('token');
+          if (token) {
+            await saveOnboardingStep(token, step);
+          } else {
+            await setLocalOnboardingStep(step);
+          }
+        } catch {
+          // Local save is best-effort; still advance.
+        }
+
+        const nextPage = Math.min(currentPageRef.current + 1, TOTAL_PAGES - 1);
+        if (nextPage !== currentPageRef.current) {
+          advanceToPage(nextPage);
+        }
+      };
+    },
+    [advanceToPage]
+  );
 
   const slides = React.useMemo(
     () => [
@@ -146,7 +177,9 @@ const OnboardingScreen: React.FC = () => {
       resizeMode="cover"
       style={[StyleSheet.absoluteFill, { backgroundColor: '#6E9AB1', height: '100%' }]}
     >
-      <View style={styles.slideContainer}>{slides[currentPage]}</View>
+      <Animated.View style={[styles.slideContainer, { opacity }]}>
+        {slides[currentPage]}
+      </Animated.View>
       <View pointerEvents="none" style={[styles.fixedBottom, { bottom: 10 }]}>
         <Image source={footerLogo} style={styles.logo} resizeMode="contain" />
         <View style={styles.dotsBar}>

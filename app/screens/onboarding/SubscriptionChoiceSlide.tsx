@@ -16,6 +16,9 @@ import { API_URL } from '../../../constants/Config';
 import { PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from '../../../constants/legalUrls';
 import { proPlanDisplayName, subscriptionPlanPerks } from '../../../constants/subscriptionPlanPerks';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
+import { upgradeFromSubscriptionScreen } from '@/app/utils/subscriptionUpgrade';
+import { fetchUserProfile } from '@/app/utils/userProfile';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../context/AuthContext';
 import { useRevenueCat } from '../../context/RevenueCatContext';
 import OnboardingSlideShell from './OnboardingSlideShell';
@@ -36,9 +39,12 @@ const SubscriptionChoiceSlide: React.FC = () => {
   const {
     getPackages,
     presentPaywall,
+    refreshCustomerInfo,
+    reloadOfferings,
     isLoading: revenueCatLoading,
   } = useRevenueCat();
   const [isSubscribing, setIsSubscribing] = React.useState(false);
+  const [isReloadingOfferings, setIsReloadingOfferings] = React.useState(false);
   const [selectedPlan, setSelectedPlan] = React.useState<'basic' | 'pro' | null>(null);
   React.useLayoutEffect(() => {
     navigation.setOptions({ headerTitle: () => null });
@@ -56,6 +62,12 @@ const SubscriptionChoiceSlide: React.FC = () => {
     return monthly ?? (packages.length > 0 ? packages[0] : null);
   }, [getPackages]);
 
+  const fetchProfile = React.useCallback(async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) return;
+    await fetchUserProfile(token);
+  }, []);
+
   const handleBasic = async () => {
     try {
       setIsSubscribing(true);
@@ -64,8 +76,9 @@ const SubscriptionChoiceSlide: React.FC = () => {
       await refreshUser();
     } catch (error: unknown) {
       const message =
-        axios.isAxiosError(error) && error.response?.data?.message
-          ? String(error.response.data.message)
+        axios.isAxiosError(error) &&
+        (error.response?.data?.message || error.response?.data?.error)
+          ? String(error.response.data.message || error.response.data.error)
           : 'Could not create basic subscription. Please try again.';
       Alert.alert('Error', message);
     } finally {
@@ -76,12 +89,34 @@ const SubscriptionChoiceSlide: React.FC = () => {
   const handlePro = async () => {
     try {
       setIsSubscribing(true);
-      await presentPaywall();
-      await refreshUser();
-    } catch (error) {
+      await upgradeFromSubscriptionScreen({
+        presentPaywall,
+        refreshCustomerInfo,
+        fetchProfile,
+        refreshUser,
+      });
+    } catch (error: unknown) {
       console.error('Paywall error:', error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to present paywall. Please try again.';
+      Alert.alert('Error', message);
     } finally {
       setIsSubscribing(false);
+    }
+  };
+
+  const handleReloadOfferings = async () => {
+    try {
+      setIsReloadingOfferings(true);
+      await reloadOfferings();
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Could not reload plans.';
+      Alert.alert('Error', message);
+    } finally {
+      setIsReloadingOfferings(false);
     }
   };
 
@@ -164,6 +199,24 @@ const SubscriptionChoiceSlide: React.FC = () => {
             </View>
           </Pressable>
 
+          {!monthlyPackage ? (
+            <View style={styles.offeringsMissingBlock}>
+              <Text style={styles.offeringsMissingText}>
+                Pro plans couldn&apos;t be loaded. Check your connection and try
+                again.
+              </Text>
+              <TimerOutlineButton
+                label="Reload plans"
+                onPress={() => void handleReloadOfferings()}
+                disabled={isReloadingOfferings}
+                isLoading={isReloadingOfferings}
+                variant="outline"
+                size="lg"
+                accessibilityLabel="Reload Pro plans"
+              />
+            </View>
+          ) : null}
+
           <View style={styles.ctaBlock}>
             <Text style={styles.legalFinePrint}>
               <Text
@@ -233,6 +286,18 @@ const styles = StyleSheet.create({
     width: onboardingWidth * 0.8,
     paddingTop: vh(4),
   } as ViewStyle,
+  offeringsMissingBlock: {
+    width: onboardingWidth * 0.8,
+    alignItems: 'center',
+    gap: vh(10),
+  } as ViewStyle,
+  offeringsMissingText: {
+    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: vh(13),
+    fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: vh(18),
+  } as TextStyle,
   legalFinePrint: {
     color: 'rgba(255, 255, 255, 0.65)',
     fontSize: vh(11),
@@ -294,7 +359,6 @@ const styles = StyleSheet.create({
     opacity: 1,
   } as TextStyle,
   featuresContainer: {
-    // alignSelf: 'stretch',
     marginTop: vh(15),
     marginBottom: vh(10),
     paddingTop: vh(15),
@@ -302,7 +366,6 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(255, 255, 255, 0.2)',
   } as ViewStyle,
   featuresTitle: {
-    // alignSelf: 'stretch',
     color: '#FFFFFF',
     fontSize: vh(16),
     fontWeight: '700',
@@ -310,7 +373,6 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   } as TextStyle,
   featureItem: {
-    // alignSelf: 'stretch',
     color: '#FFFFFF',
     fontSize: vh(14),
     fontWeight: '600',

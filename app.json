@@ -2,7 +2,7 @@
   "expo": {
     "name": "TinyRest",
     "slug": "tiny-rest",
-    "version": "7.0",
+    "version": "10.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "tinyrest",
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.afre92.tinyrest",
-      "buildNumber": "7",
+      "buildNumber": "1",
       "appleTeamId": "NQ6AG8RHP3",
       "infoPlist": {
         "UIBackgroundModes": ["audio"]

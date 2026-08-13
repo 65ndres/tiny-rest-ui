@@ -21,7 +21,6 @@ import { refreshWidgetState } from '@/app/utils/widgetStorage';
 import { useAuth } from './context/AuthContext';
 import { useRevenueCat } from './context/RevenueCatContext';
 import HomeRoutineCard from './sharedComponents/home/HomeRoutineCard';
-import HomeTipCard from './sharedComponents/home/HomeTipCard';
 import ScreenScrollLayout from './sharedComponents/ScreenScrollLayout';
 
 type RootDrawerParamList = {
@@ -120,41 +119,39 @@ const Home: React.FC = () => {
 
         <View style={{ paddingBottom: 40 }}></View>
 
-        <HomeTipCard />
+        <HomeRoutineCard
+          title="Add sleep"
+          subtitle="Log a nap session"
+          iconName="moon-sharp"
+          onPress={() => navigation.navigate('Timer')}
+          accessibilityLabel="Add sleep"
+        />
 
-          <HomeRoutineCard
-            title="Add sleep"
-            subtitle="Log a nap session"
-            iconName="moon-sharp"
-            onPress={() => navigation.navigate('Timer')}
-            accessibilityLabel="Add sleep"
-          />
+        <HomeRoutineCard
+          title="Add feeding"
+          subtitle="Bottle or nursing session"
+          iconName="water-sharp"
+          onPress={() => navigateOrPaywall('AddFeeding')}
+          accessibilityLabel="Add feeding"
+          dimmed={!isProUser}
+        />
 
-          <HomeRoutineCard
-            title="Add feeding"
-            subtitle="Bottle or nursing session"
-            iconName="water-sharp"
-            onPress={() => navigateOrPaywall('AddFeeding')}
-            accessibilityLabel="Add feeding"
-            dimmed={!isProUser}
-          />
-
-          <HomeRoutineCard
-            title="View timeline"
-            subtitle="See today's schedule"
-            iconName="calendar-sharp"
-            onPress={() => navigateOrPaywall('NapTimeline')}
-            accessibilityLabel="View timeline"
-            dimmed={!isProUser}
-          />
-          <HomeRoutineCard
-            title="Soothing sounds"
-            subtitle="White noise & lullabies"
-            iconName="musical-notes-sharp"
-            onPress={() => navigateOrPaywall('Sounds')}
-            accessibilityLabel="Soothing sounds"
-            dimmed={!isProUser}
-          />
+        <HomeRoutineCard
+          title="View timeline"
+          subtitle="See today's schedule"
+          iconName="calendar-sharp"
+          onPress={() => navigateOrPaywall('NapTimeline')}
+          accessibilityLabel="View timeline"
+          dimmed={!isProUser}
+        />
+        <HomeRoutineCard
+          title="Soothing sounds"
+          subtitle="White noise & lullabies"
+          iconName="musical-notes-sharp"
+          onPress={() => navigateOrPaywall('Sounds')}
+          accessibilityLabel="Soothing sounds"
+          dimmed={!isProUser}
+        />
       </VStack>
     </ScreenScrollLayout>
   );

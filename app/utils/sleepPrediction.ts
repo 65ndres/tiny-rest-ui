@@ -88,14 +88,14 @@ export const formatPredictionDisplay = (
       };
     case 'needs_birthdate':
       return {
-        label: 'next nap',
+        label: 'next sleep',
         value: '--:--',
         subtitle: 'Set birthdate in Profile',
       };
     case 'next_nap':
     default:
       return {
-        label: 'next nap',
+        label: 'next sleep',
         value: prediction.predicted_at
           ? formatPredictionTime(prediction.predicted_at)
           : '--:--',

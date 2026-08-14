@@ -4,14 +4,11 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import React, { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
   glassCardCenteredClassName,
   homeContentStackClassName,
-  homeHintClassName,
   homeScrollContentClassName,
-  mutedTextClassName,
 } from '@/app/constants/screenLayout';
 import {
   fetchSleepPrediction,
@@ -19,10 +16,13 @@ import {
   isSleepTimerRunning,
   type SleepPrediction,
 } from '@/app/utils/sleepPrediction';
+import { formatExactNapCount } from '@/app/utils/napSchedule';
 import { refreshWidgetState } from '@/app/utils/widgetStorage';
 import { useAuth } from './context/AuthContext';
 import { useRevenueCat } from './context/RevenueCatContext';
-import HomeNapRangeTabs from './sharedComponents/home/HomeNapRangeTabs';
+import HomeNapPredictionCarousel, {
+  type HomeNapPredictionSlide,
+} from './sharedComponents/home/HomeNapPredictionCarousel';
 import HomeRoutineCard from './sharedComponents/home/HomeRoutineCard';
 import ScreenScrollLayout from './sharedComponents/ScreenScrollLayout';
 
@@ -44,6 +44,7 @@ const Home: React.FC = () => {
   const [prediction, setPrediction] = useState<SleepPrediction | null>(null);
   const [activeNapCount, setActiveNapCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [carouselWidth, setCarouselWidth] = useState(0);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -100,19 +101,29 @@ const Home: React.FC = () => {
       ].filter((count): count is number => count != null)
     : [];
   const timerRunning = isSleepTimerRunning(prediction?.status);
-  const displayPrediction = useMemo(() => {
-    if (!prediction) return null;
-    if (timerRunning || prediction.daily_nap_count_alt == null) return prediction;
+  const slides: HomeNapPredictionSlide[] = useMemo(() => {
+    if (!prediction) return [];
 
-    return (
-      prediction.range_predictions?.find(
-        (entry) => entry.daily_nap_count === activeNapCount
-      ) ?? prediction
-    );
-  }, [activeNapCount, prediction, timerRunning]);
-  const display = displayPrediction
-    ? formatPredictionDisplay(displayPrediction)
-    : { label: 'next nap', value: '--:--', subtitle: undefined };
+    const runningDisplay = timerRunning
+      ? formatPredictionDisplay(prediction)
+      : null;
+
+    return napTabCounts.map((count) => {
+      const countPrediction =
+        runningDisplay != null
+          ? prediction
+          : (prediction.range_predictions?.find(
+              (entry) => entry.daily_nap_count === count
+            ) ?? prediction);
+
+      return {
+        count,
+        countLabel: formatExactNapCount(count),
+        display:
+          runningDisplay ?? formatPredictionDisplay(countPrediction),
+      };
+    });
+  }, [napTabCounts, prediction, timerRunning]);
 
   if (!loaded) {
     return null;
@@ -124,24 +135,27 @@ const Home: React.FC = () => {
     >
       <VStack space="md" className={homeContentStackClassName}>
         <VStack className={`${glassCardCenteredClassName} justify-center`}>
-          {isLoading ? (
-            <ActivityIndicator color="white" size="large" />
-          ) : (
-            <>
-              {prediction != null && napTabCounts.length > 0 ? (
-                <HomeNapRangeTabs
-                  counts={napTabCounts}
-                  activeCount={activeNapCount ?? prediction.daily_nap_count}
-                  onChange={setActiveNapCount}
-                  disabled={timerRunning}
-                />
-              ) : null}
-              <Text className={`${mutedTextClassName} text-lg`}>{display.label}</Text>
-              <Text className="text-white text-5xl font-mono tracking-wider mt-2">
-                {display.value}
-              </Text>
-            </>
-          )}
+          <View
+            className="w-full"
+            onLayout={(event) => {
+              const nextWidth = Math.round(event.nativeEvent.layout.width);
+              if (nextWidth > 0 && nextWidth !== carouselWidth) {
+                setCarouselWidth(nextWidth);
+              }
+            }}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="white" size="large" />
+            ) : slides.length > 0 ? (
+              <HomeNapPredictionCarousel
+                slides={slides}
+                activeCount={activeNapCount ?? slides[0].count}
+                onChange={setActiveNapCount}
+                width={carouselWidth}
+                disabled={timerRunning}
+              />
+            ) : null}
+          </View>
         </VStack>
 
         <View style={{ paddingBottom: 10 }}></View>

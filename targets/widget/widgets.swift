@@ -21,7 +21,7 @@ struct WidgetPayload {
 
     static let placeholder = WidgetPayload(
         mode: .prediction,
-        label: "next nap",
+        label: "next sleep",
         value: "--:--",
         subtitle: nil,
         timerType: nil,
@@ -80,7 +80,7 @@ struct WidgetPayload {
 
         return WidgetPayload(
             mode: .prediction,
-            label: defaults.string(forKey: "widget.label") ?? "next nap",
+            label: defaults.string(forKey: "widget.label") ?? "next sleep",
             value: defaults.string(forKey: "widget.value") ?? "--:--",
             subtitle: defaults.string(forKey: "widget.subtitle"),
             timerType: nil,
@@ -260,7 +260,7 @@ struct widget: Widget {
         date: .now,
         payload: WidgetPayload(
             mode: .prediction,
-            label: "next nap",
+            label: "next sleep",
             value: "3:45 PM",
             subtitle: nil,
             timerType: nil,

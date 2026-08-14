@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
@@ -8,31 +8,30 @@ import {
   timerContentStackClassName,
 } from '@/app/constants/screenLayout';
 import { updateUserProfile } from '@/app/utils/userProfile';
+import {
+  NAP_SCHEDULE_OPTIONS,
+  type NapScheduleOption,
+} from '@/app/utils/napSchedule';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
 import OnboardingSlideShell from './OnboardingSlideShell';
 
-const NAP_OPTIONS = [1, 2, 3, 4, 5] as const;
-
 type NapCountSlideProps = {
-  dailyNapCount: number | null;
-  onDailyNapCountChange: (count: number) => void;
+  napSchedule: NapScheduleOption | null;
+  onNapScheduleChange: (option: NapScheduleOption) => void;
   onPressNext?: () => void | Promise<void>;
 };
 
-const formatNapCount = (count: number): string =>
-  count === 1 ? '1 nap' : `${count} naps`;
-
 const NapCountSlide: React.FC<NapCountSlideProps> = ({
-  dailyNapCount,
-  onDailyNapCountChange,
+  napSchedule,
+  onNapScheduleChange,
   onPressNext,
 }) => {
   const [error, setError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   const handleNext = async () => {
-    if (dailyNapCount == null) {
+    if (napSchedule == null) {
       setError('Please select how many naps per day.');
       return;
     }
@@ -47,7 +46,8 @@ const NapCountSlide: React.FC<NapCountSlideProps> = ({
       }
 
       await updateUserProfile(token, {
-        daily_nap_count: dailyNapCount,
+        daily_nap_count: napSchedule.daily_nap_count,
+        daily_nap_count_alt: napSchedule.daily_nap_count_alt,
       });
       onPressNext?.();
     } catch {
@@ -59,70 +59,76 @@ const NapCountSlide: React.FC<NapCountSlideProps> = ({
 
   return (
     <OnboardingSlideShell>
-      <VStack space="md" className={`${timerContentStackClassName} flex-1`}>
-        <TimerSectionCard>
-          <Text
-            style={{
-              fontSize: 34,
-              fontWeight: 'bold',
-              color: '#ffffff',
-              lineHeight: 40,
-            }}
-          >
-            Daily naps
-          </Text>
-          <Text className={`${mutedTextClassName} text-lg mb-6 mt-4`}>
-            How many naps does your baby usually take each day?
-          </Text>
-
-          <View className="w-full gap-3 mb-2">
-            {NAP_OPTIONS.map((count) => {
-              const selected = dailyNapCount === count;
-              return (
-                <Pressable
-                  key={count}
-                  onPress={() => {
-                    onDailyNapCountChange(count);
-                    if (error) setError('');
-                  }}
-                  disabled={isSaving}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  accessibilityLabel={formatNapCount(count)}
-                  className={`w-full rounded-xl border px-4 py-3 ${
-                    selected
-                      ? 'border-white bg-white/20'
-                      : 'border-white/30 bg-white/10'
-                  }`}
-                >
-                  <Text className="text-white text-lg font-semibold text-center">
-                    {formatNapCount(count)}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-          {error ? (
-            <Text className="text-error-400 text-lg font-semibold mt-1">
-              {error}
+      <ScrollView
+        className="flex-1 w-full"
+        contentContainerClassName="flex-grow items-center pb-4"
+        showsVerticalScrollIndicator={false}
+      >
+        <VStack space="md" className={`${timerContentStackClassName} flex-1`}>
+          <TimerSectionCard>
+            <Text
+              style={{
+                fontSize: 34,
+                fontWeight: 'bold',
+                color: '#ffffff',
+                lineHeight: 40,
+              }}
+            >
+              Daily naps
             </Text>
-          ) : null}
+            <Text className={`${mutedTextClassName} text-lg mb-6 mt-4`}>
+              How many naps does your baby usually take each day?
+            </Text>
 
-          {onPressNext ? (
-            <TimerOutlineButton
-              label="Next"
-              iconName="arrow-forward-sharp"
-              onPress={() => void handleNext()}
-              disabled={isSaving}
-              isLoading={isSaving}
-              variant="solid"
-              size="xl"
-              className="mt-6"
-              accessibilityLabel="Next"
-            />
-          ) : null}
-        </TimerSectionCard>
-      </VStack>
+            <View className="w-full gap-3 mb-2">
+              {NAP_SCHEDULE_OPTIONS.map((option) => {
+                const selected = napSchedule?.id === option.id;
+                return (
+                  <Pressable
+                    key={option.id}
+                    onPress={() => {
+                      onNapScheduleChange(option);
+                      if (error) setError('');
+                    }}
+                    disabled={isSaving}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    accessibilityLabel={option.label}
+                    className={`w-full rounded-xl border px-4 py-3 ${
+                      selected
+                        ? 'border-white bg-white/20'
+                        : 'border-white/30 bg-white/10'
+                    }`}
+                  >
+                    <Text className="text-white text-lg font-semibold text-center">
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            {error ? (
+              <Text className="text-error-400 text-lg font-semibold mt-1">
+                {error}
+              </Text>
+            ) : null}
+
+            {onPressNext ? (
+              <TimerOutlineButton
+                label="Next"
+                iconName="arrow-forward-sharp"
+                onPress={() => void handleNext()}
+                disabled={isSaving}
+                isLoading={isSaving}
+                variant="solid"
+                size="xl"
+                className="mt-6"
+                accessibilityLabel="Next"
+              />
+            ) : null}
+          </TimerSectionCard>
+        </VStack>
+      </ScrollView>
     </OnboardingSlideShell>
   );
 };

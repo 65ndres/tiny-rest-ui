@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
@@ -16,10 +16,13 @@ import {
 import {
   fetchSleepPrediction,
   formatPredictionDisplay,
+  isSleepTimerRunning,
+  type SleepPrediction,
 } from '@/app/utils/sleepPrediction';
 import { refreshWidgetState } from '@/app/utils/widgetStorage';
 import { useAuth } from './context/AuthContext';
 import { useRevenueCat } from './context/RevenueCatContext';
+import HomeNapRangeTabs from './sharedComponents/home/HomeNapRangeTabs';
 import HomeRoutineCard from './sharedComponents/home/HomeRoutineCard';
 import ScreenScrollLayout from './sharedComponents/ScreenScrollLayout';
 
@@ -38,9 +41,8 @@ const Home: React.FC = () => {
   const { user } = useAuth();
   const { presentPaywall } = useRevenueCat();
   const isProUser = user?.subscription_type === 'pro';
-  const [heroLabel, setHeroLabel] = useState('next nap');
-  const [heroValue, setHeroValue] = useState('--:--');
-  const [heroSubtitle, setHeroSubtitle] = useState<string | undefined>();
+  const [prediction, setPrediction] = useState<SleepPrediction | null>(null);
+  const [activeNapCount, setActiveNapCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -61,23 +63,25 @@ const Home: React.FC = () => {
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) {
-        setHeroLabel('next nap');
-        setHeroValue('--:--');
-        setHeroSubtitle(undefined);
+        setPrediction(null);
+        setActiveNapCount(null);
         return;
       }
 
-      const prediction = await fetchSleepPrediction(token);
-
-      const display = formatPredictionDisplay(prediction);
-      setHeroLabel(display.label);
-      setHeroValue(display.value);
-      setHeroSubtitle(display.subtitle);
+      const nextPrediction = await fetchSleepPrediction(token);
+      setPrediction(nextPrediction);
+      setActiveNapCount((current) => {
+        const counts = [
+          nextPrediction.daily_nap_count,
+          nextPrediction.daily_nap_count_alt,
+        ].filter((count): count is number => count != null);
+        if (current != null && counts.includes(current)) return current;
+        return nextPrediction.daily_nap_count;
+      });
       void refreshWidgetState(token);
     } catch {
-      setHeroLabel('next nap');
-      setHeroValue('--:--');
-      setHeroSubtitle(undefined);
+      setPrediction(null);
+      setActiveNapCount(null);
     } finally {
       setIsLoading(false);
     }
@@ -89,6 +93,27 @@ const Home: React.FC = () => {
     }, [loadHomeData])
   );
 
+  const napTabCounts = prediction
+    ? [
+        prediction.daily_nap_count,
+        prediction.daily_nap_count_alt,
+      ].filter((count): count is number => count != null)
+    : [];
+  const timerRunning = isSleepTimerRunning(prediction?.status);
+  const displayPrediction = useMemo(() => {
+    if (!prediction) return null;
+    if (timerRunning || prediction.daily_nap_count_alt == null) return prediction;
+
+    return (
+      prediction.range_predictions?.find(
+        (entry) => entry.daily_nap_count === activeNapCount
+      ) ?? prediction
+    );
+  }, [activeNapCount, prediction, timerRunning]);
+  const display = displayPrediction
+    ? formatPredictionDisplay(displayPrediction)
+    : { label: 'next nap', value: '--:--', subtitle: undefined };
+
   if (!loaded) {
     return null;
   }
@@ -98,26 +123,28 @@ const Home: React.FC = () => {
       contentContainerClassName={homeScrollContentClassName}
     >
       <VStack space="md" className={homeContentStackClassName}>
-        <VStack
-          className={`${glassCardCenteredClassName} justify-center`}
-          style={{ height: 120 }}
-        >
+        <VStack className={`${glassCardCenteredClassName} justify-center`}>
           {isLoading ? (
             <ActivityIndicator color="white" size="large" />
           ) : (
             <>
-              <Text className={`${mutedTextClassName} text-lg`}>{heroLabel}</Text>
+              {prediction != null && napTabCounts.length > 0 ? (
+                <HomeNapRangeTabs
+                  counts={napTabCounts}
+                  activeCount={activeNapCount ?? prediction.daily_nap_count}
+                  onChange={setActiveNapCount}
+                  disabled={timerRunning}
+                />
+              ) : null}
+              <Text className={`${mutedTextClassName} text-lg`}>{display.label}</Text>
               <Text className="text-white text-5xl font-mono tracking-wider mt-2">
-                {heroValue}
-              </Text>
-              <Text className={`${homeHintClassName} mt-2 min-h-5`}>
-                {heroSubtitle ?? ' '}
+                {display.value}
               </Text>
             </>
           )}
         </VStack>
 
-        <View style={{ paddingBottom: 40 }}></View>
+        <View style={{ paddingBottom: 10 }}></View>
 
         <HomeRoutineCard
           title="Add sleep"

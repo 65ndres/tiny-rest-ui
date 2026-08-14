@@ -19,7 +19,9 @@ export type SleepPrediction = {
   wake_window_minutes: number | null;
   naps_today: number;
   daily_nap_count: number;
+  daily_nap_count_alt?: number | null;
   active_sleep: SleepPredictionActiveSleep | null;
+  range_predictions?: SleepPrediction[];
 };
 
 export type SleepPredictionDisplay = {
@@ -49,6 +51,11 @@ const formatPredictionTime = (isoString: string): string => {
     minute: '2-digit',
   });
 };
+
+export const isSleepTimerRunning = (
+  status: SleepPredictionStatus | undefined
+): boolean =>
+  status === 'currently_napping' || status === 'currently_sleeping';
 
 export const formatPredictionDisplay = (
   prediction: SleepPrediction

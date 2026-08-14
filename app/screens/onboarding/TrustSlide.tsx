@@ -10,12 +10,14 @@ import {
 } from '@/app/constants/screenLayout';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
+import { formatNapSchedulePhrase } from '@/app/utils/napSchedule';
+import type { NapScheduleOption } from '@/app/utils/napSchedule';
 import { onboardingWidth } from './onboardingLayout';
 import OnboardingSlideShell from './OnboardingSlideShell';
 
 type TrustSlideProps = {
   babyName: string;
-  dailyNapCount: number | null;
+  napSchedule: NapScheduleOption | null;
   onPressNext?: () => void | Promise<void>;
 };
 
@@ -57,13 +59,12 @@ const Stars: React.FC<{ count: number }> = ({ count }) => (
 
 const TrustSlide: React.FC<TrustSlideProps> = ({
   babyName,
-  dailyNapCount,
+  napSchedule,
   onPressNext,
 }) => {
   const [activeReviewIndex, setActiveReviewIndex] = React.useState(0);
   const displayName = babyName.trim() || 'your baby';
-  const naps = dailyNapCount ?? 3;
-  const napPhrase = naps === 1 ? '1 nap a day' : `${naps} naps a day`;
+  const napPhrase = formatNapSchedulePhrase(napSchedule);
 
   return (
     <OnboardingSlideShell>

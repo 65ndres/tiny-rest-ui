@@ -15,6 +15,7 @@ export type UserProfile = {
   baby_name: string | null;
   baby_birthdate: string | null;
   daily_nap_count: number;
+  daily_nap_count_alt: number | null;
   day_start_minutes: number;
   day_end_minutes: number;
 };
@@ -27,6 +28,7 @@ export type UserProfileUpdate = Partial<{
   baby_name: string | null;
   baby_birthdate: string | null;
   daily_nap_count: number;
+  daily_nap_count_alt: number | null;
   day_start_minutes: number;
   day_end_minutes: number;
   password: string;
@@ -45,6 +47,7 @@ export const fetchUserProfile = async (token: string): Promise<UserProfile> => {
     ...response.data,
     baby_birthdate: response.data.baby_birthdate ?? null,
     daily_nap_count: response.data.daily_nap_count ?? 3,
+    daily_nap_count_alt: response.data.daily_nap_count_alt ?? null,
     day_start_minutes: normalizeDayMinutes(
       response.data.day_start_minutes,
       DEFAULT_DAY_START_MINUTES

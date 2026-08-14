@@ -16,7 +16,12 @@ import {
   minutesToDisplayTime,
   normalizeDayMinutes,
 } from '@/app/utils/dayWindow';
-import { normalizeDailyNapCount } from '@/app/utils/nextNapPrediction';
+import {
+  DEFAULT_NAP_SCHEDULE,
+  napScheduleFromProfile,
+  NAP_SCHEDULE_OPTIONS,
+} from '@/app/utils/napSchedule';
+import type { NapScheduleOption } from '@/app/utils/napSchedule';
 import {
   timerContentStackClassName,
   timerScrollContentClassName,
@@ -29,8 +34,6 @@ import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton'
 import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
 import TimerSettingRow from '@/app/sharedComponents/timer/TimerSettingRow';
 
-const NAP_OPTIONS = [1, 2, 3, 4, 5] as const;
-
 const formatBirthdate = (value: string | null): string => {
   if (!value) return '';
   const date = new Date(`${value}T12:00:00`);
@@ -41,9 +44,6 @@ const formatBirthdate = (value: string | null): string => {
     day: 'numeric',
   });
 };
-
-const formatNapCount = (count: number): string =>
-  count === 1 ? '1 nap' : `${count} naps`;
 
 const toDateInput = (value: string | null): Date => {
   if (!value) return new Date();
@@ -62,7 +62,8 @@ const SettingsScreen: React.FC = () => {
   const [babyName, setBabyName] = useState('');
   const [nameError, setNameError] = useState('');
   const [dayWindowError, setDayWindowError] = useState('');
-  const [dailyNapCount, setDailyNapCount] = useState(3);
+  const [napSchedule, setNapSchedule] =
+    useState<NapScheduleOption>(DEFAULT_NAP_SCHEDULE);
   const [babyBirthdate, setBabyBirthdate] = useState<string | null>(null);
   const [dayStartMinutes, setDayStartMinutes] = useState(
     DEFAULT_DAY_START_MINUTES
@@ -91,7 +92,12 @@ const SettingsScreen: React.FC = () => {
       setBabyName(profile.baby_name || '');
       setNameError('');
       setDayWindowError('');
-      setDailyNapCount(normalizeDailyNapCount(profile.daily_nap_count));
+      setNapSchedule(
+        napScheduleFromProfile(
+          profile.daily_nap_count,
+          profile.daily_nap_count_alt
+        )
+      );
       setBabyBirthdate(profile.baby_birthdate);
       setBirthdatePickerValue(toDateInput(profile.baby_birthdate));
       const start = normalizeDayMinutes(
@@ -121,9 +127,9 @@ const SettingsScreen: React.FC = () => {
 
   const pickDailyNapCount = () => {
     Alert.alert('Daily naps', undefined, [
-      ...NAP_OPTIONS.map((count) => ({
-        text: formatNapCount(count),
-        onPress: () => setDailyNapCount(count),
+      ...NAP_SCHEDULE_OPTIONS.map((option) => ({
+        text: option.label,
+        onPress: () => setNapSchedule(option),
       })),
       { text: 'Cancel', style: 'cancel' as const },
     ]);
@@ -156,7 +162,8 @@ const SettingsScreen: React.FC = () => {
       await updateUserProfile(token, {
         baby_name: trimmedName,
         baby_birthdate: babyBirthdate,
-        daily_nap_count: dailyNapCount,
+        daily_nap_count: napSchedule.daily_nap_count,
+        daily_nap_count_alt: napSchedule.daily_nap_count_alt,
         day_start_minutes: dayStartMinutes,
         day_end_minutes: dayEndMinutes,
       });
@@ -221,7 +228,7 @@ const SettingsScreen: React.FC = () => {
 
               <TimerSettingRow
                 label="Daily naps:"
-                value={formatNapCount(dailyNapCount)}
+                value={napSchedule.label}
                 placeholder="Select naps"
                 onPress={pickDailyNapCount}
                 disabled={isSaving}

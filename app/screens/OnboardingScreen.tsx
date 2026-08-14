@@ -15,6 +15,8 @@ import {
   setLocalOnboardingStep,
 } from '@/app/utils/onboardingProgress';
 import { fetchUserProfile } from '@/app/utils/userProfile';
+import { napScheduleFromProfile } from '@/app/utils/napSchedule';
+import type { NapScheduleOption } from '@/app/utils/napSchedule';
 import { getAppWindow } from '@/constants/appViewport';
 import {
   BabyProfileSlide,
@@ -43,7 +45,9 @@ const OnboardingScreen: React.FC = () => {
   const [isReady, setIsReady] = React.useState(false);
   const [babyName, setBabyName] = React.useState('');
   const [babyBirthdate, setBabyBirthdate] = React.useState<string | null>(null);
-  const [dailyNapCount, setDailyNapCount] = React.useState<number | null>(null);
+  const [napSchedule, setNapSchedule] = React.useState<NapScheduleOption | null>(
+    null
+  );
   const opacity = React.useRef(new Animated.Value(1)).current;
   const currentPageRef = React.useRef(0);
   currentPageRef.current = currentPage;
@@ -66,7 +70,12 @@ const OnboardingScreen: React.FC = () => {
           setBabyBirthdate(profile.baby_birthdate ?? null);
           // Only restore nap count when it was explicitly saved during onboarding.
           if (lastCompletedStep === 'nap_count' || lastCompletedStep === 'trust' || lastCompletedStep === 'paywall') {
-            setDailyNapCount(profile.daily_nap_count ?? null);
+            setNapSchedule(
+              napScheduleFromProfile(
+                profile.daily_nap_count,
+                profile.daily_nap_count_alt
+              )
+            );
           }
         }
 
@@ -146,19 +155,19 @@ const OnboardingScreen: React.FC = () => {
       />,
       <NapCountSlide
         key="nap_count"
-        dailyNapCount={dailyNapCount}
-        onDailyNapCountChange={setDailyNapCount}
+        napSchedule={napSchedule}
+        onNapScheduleChange={setNapSchedule}
         onPressNext={completeStepAndAdvance('nap_count')}
       />,
       <TrustSlide
         key="trust"
         babyName={babyName}
-        dailyNapCount={dailyNapCount}
+        napSchedule={napSchedule}
         onPressNext={completeStepAndAdvance('trust')}
       />,
       <SubscriptionChoiceSlide key="paywall" />,
     ],
-    [babyName, babyBirthdate, dailyNapCount, completeStepAndAdvance]
+    [babyName, babyBirthdate, napSchedule, completeStepAndAdvance]
   );
 
   if (!isReady) {

@@ -644,13 +644,10 @@ const styles = StyleSheet.create({
 });
 
 const BG_JPG = require('../assets/images/bg.jpg');
-const BGRD_JPG = require('../assets/images/bgrd.jpg');
 
 function prefetchBackgroundAssets() {
   const bg = Image.resolveAssetSource(BG_JPG);
-  const bgrd = Image.resolveAssetSource(BGRD_JPG);
   if (bg?.uri) void Image.prefetch(bg.uri);
-  if (bgrd?.uri) void Image.prefetch(bgrd.uri);
 }
 
 export default function Layout() {

@@ -25,7 +25,7 @@ type HomeNapPredictionCarouselProps = {
   disabled?: boolean;
 };
 
-const CAROUSEL_HEIGHT = 110;
+const CAROUSEL_HEIGHT = 100;
 const CHEVRON_SIZE = 28;
 const CHEVRON_HIT_SLOP = 8;
 

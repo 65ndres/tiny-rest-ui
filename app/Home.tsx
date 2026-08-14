@@ -158,7 +158,7 @@ const Home: React.FC = () => {
           </View>
         </VStack>
 
-        <View style={{ paddingBottom: 10 }}></View>
+        <View style={{ paddingBottom: 20 }}></View>
 
         <HomeRoutineCard
           title="Add sleep"

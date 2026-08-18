@@ -556,17 +556,17 @@ const RootLayout: React.FC = () => {
   }
 
   if (!user) {
-    return <UnauthenticatedNavigator />;
+    return <UnauthenticatedNavigator key="guest" />;
   }
 
   // Show onboarding when authenticated but onboarding not completed (sign up always; login when JWT has onboarding_completed false)
   // const onboardingCompleted =  AsyncStorage.getItem('onboarding_completed');
   console.log('user.subscription_type', user.subscription_type);
   if (user.onboarding_completed !== true) {
-    return <OnboardingRootLayout />;
+    return <OnboardingRootLayout key="onboarding" />;
   }
 
-  return <AuthenticatedNavigator />;
+  return <AuthenticatedNavigator key="authed" />;
 };
 
 const styles = StyleSheet.create({

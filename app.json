@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.afre92.tinyrest",
-      "buildNumber": "2",
+      "buildNumber": "3",
       "appleTeamId": "NQ6AG8RHP3",
       "infoPlist": {
         "UIBackgroundModes": ["audio"]

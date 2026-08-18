@@ -45,21 +45,37 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({
   constrainToPhoneViewport = true,
   enableFocusFade = true,
 }) => {
-  const opacity = useRef(new Animated.Value(enableFocusFade ? 0 : 1)).current;
+  // Start visible so a navigator remount (login/logout) cannot leave the body
+  // stuck at opacity 0 if a spurious blur races the first focus fade.
+  const opacity = useRef(new Animated.Value(1)).current;
+  const hasFocusedRef = useRef(false);
+  const fadeAnimRef = useRef<Animated.CompositeAnimation | null>(null);
 
   useFocusEffect(
     useCallback(() => {
       if (!enableFocusFade) return;
 
+      if (!hasFocusedRef.current) {
+        hasFocusedRef.current = true;
+        opacity.setValue(1);
+        return () => {
+          fadeAnimRef.current?.stop();
+          fadeAnimRef.current = null;
+        };
+      }
+
       opacity.setValue(0);
-      Animated.timing(opacity, {
+      const anim = Animated.timing(opacity, {
         toValue: 1,
         duration: FOCUS_FADE_IN_MS,
         useNativeDriver: true,
-      }).start();
+      });
+      fadeAnimRef.current = anim;
+      anim.start();
 
       return () => {
-        opacity.setValue(0);
+        fadeAnimRef.current?.stop();
+        fadeAnimRef.current = null;
       };
     }, [enableFocusFade, opacity])
   );

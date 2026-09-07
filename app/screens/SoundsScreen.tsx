@@ -19,7 +19,7 @@ const SoundsScreen: React.FC = () => {
     useAudioPlayback();
 
   const tileSize = useMemo(() => {
-    const sidePadding = layout.space24;
+    const sidePadding = layout.padX24;
     const tileGap = layout.space12;
     const contentWidth =
       getAppWindow().width * SCREEN_CONTENT_WIDTH_RATIO - sidePadding * 2;
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   },
   tileGrid: {
     paddingTop: layout.space16,
-    paddingHorizontal: layout.space24,
+    paddingHorizontal: layout.padX24,
     paddingBottom: vh(68) + layout.space16,
   },
 });

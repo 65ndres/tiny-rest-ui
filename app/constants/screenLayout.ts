@@ -1,5 +1,5 @@
 import type { TextStyle, ViewStyle } from 'react-native';
-import { vh } from '@/constants/appViewport';
+import { padX, vh } from '@/constants/appViewport';
 
 export const SCREEN_TOP_HEIGHT = '10%';
 export const SCREEN_CONTENT_HEIGHT = '80%';
@@ -44,12 +44,14 @@ export const layout = {
   footerLogo: vh(100),
   carouselHeight: vh(100),
   chevronSize: vh(28),
+  padX16: padX(16),
+  padX24: padX(32),
 };
 
 export const scrollViewClassName = 'flex-1 w-full';
 export const scrollContentClassName = 'flex-grow items-center';
 export const scrollContentStyle: ViewStyle = {
-  paddingHorizontal: vh(24),
+  paddingHorizontal: padX(32),
   paddingBottom: vh(16),
   paddingTop: vh(24),
   marginTop: vh(24),
@@ -60,7 +62,8 @@ export const stackGapStyle: ViewStyle = { gap: vh(16) };
 export const cardClassName = 'border border-white/90 w-full';
 export const cardStyle: ViewStyle = {
   borderRadius: vh(12),
-  padding: vh(24),
+  paddingVertical: vh(24),
+  paddingHorizontal: padX(32),
 };
 /** RGBA values matching glassCardClassName (for StyleSheet). */
 export const GLASS_BACKGROUND_COLOR = 'rgba(255, 255, 255, 0.1)';
@@ -73,7 +76,8 @@ export const CARD_BORDER_COLOR = 'rgba(255, 255, 255, 0.9)';
 export const glassCardClassName = 'border border-white/20 bg-white/10 w-full';
 export const glassCardStyle: ViewStyle = {
   borderRadius: vh(15),
-  padding: vh(24),
+  paddingVertical: vh(24),
+  paddingHorizontal: padX(32),
   overflow: 'visible',
   flexShrink: 0,
   minHeight: 'auto',
@@ -90,7 +94,7 @@ export const glassActionTileClassName =
 export const glassActionTileStyle: ViewStyle = {
   borderRadius: vh(15),
   minHeight: vh(80),
-  paddingHorizontal: vh(24),
+  paddingHorizontal: padX(32),
   paddingVertical: vh(20),
 };
 export const cardCenteredClassName = `${cardClassName} items-center`;
@@ -102,7 +106,7 @@ export const mutedTextStyle: TextStyle = { fontSize: vh(16) };
 /** Home routine timeline (Hatch-inspired). */
 export const homeScrollContentClassName = 'flex-grow items-center';
 export const homeScrollContentStyle: ViewStyle = {
-  paddingHorizontal: vh(24),
+  paddingHorizontal: padX(32),
   paddingBottom: vh(16),
   paddingTop: vh(16),
   marginTop: vh(8),
@@ -120,7 +124,8 @@ export const homeRoutineCardClassName =
   'border border-white/20 bg-white/10 w-full flex-row items-center active:opacity-80';
 export const homeRoutineCardStyle: ViewStyle = {
   borderRadius: vh(15),
-  padding: vh(16),
+  paddingVertical: vh(16),
+  paddingHorizontal: padX(24),
 };
 export const soundTileClassName =
   'border border-white/90 bg-white/10 overflow-hidden items-center justify-between';

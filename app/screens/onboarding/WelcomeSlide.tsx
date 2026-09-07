@@ -36,7 +36,7 @@ const WelcomeSlide: React.FC<WelcomeSlideProps> = ({ onPressNext }) => {
           <View style={{ marginVertical: layout.space24 }}>
             <Text
               className={mutedTextClassName}
-              style={[mutedTextStyle, { fontSize: layout.fontXl, marginBottom: layout.space16 }]}
+              style={[mutedTextStyle, { fontSize: layout.fontXl, fontWeight: '700', marginBottom: layout.space16 }]}
             >
               Missing the wake window leads to overtired meltdowns—and tracking
               it all by hand is exhausting.

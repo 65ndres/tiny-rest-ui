@@ -58,7 +58,7 @@ const LandingScreen: React.FC = () => {
           <Text
             style={{
               fontSize: vh(34),
-              fontWeight: 'bold',
+              fontWeight: '800',
               color: '#ffffff',
               lineHeight: vh(40),
             }}
@@ -68,16 +68,23 @@ const LandingScreen: React.FC = () => {
           <View style={{ marginVertical: layout.space32 }}>
             <Text
               className={mutedTextClassName}
-              style={[mutedTextStyle, { fontSize: layout.fontXl, marginBottom: layout.space16 }]}
+              style={[
+                mutedTextStyle,
+                { fontSize: layout.fontXl, fontWeight: '600', marginBottom: layout.space16 },
+              ]}
             >
               Track naps, feedings, and soothing sounds for your little one.
             </Text>
             <Text
               className={mutedTextClassName}
-              style={[mutedTextStyle, { fontSize: layout.fontXl }]}
+              style={[mutedTextStyle, { fontSize: layout.fontXl, fontWeight: '600' }]}
             >
               Create a {BASIC_PLAN_DISPLAY_NAME} account for free or try{' '}
-              {PRO_PLAN_DISPLAY_NAME} with a 14-day free trial.
+              {PRO_PLAN_DISPLAY_NAME} with a{' '}
+              <Text style={{ fontSize: layout.fontXl, fontWeight: '800', color: "#FFD700" }}>
+                14-day free trial
+              </Text>
+              .
             </Text>
           </View>
 

@@ -5,19 +5,24 @@ export type SubscriptionPlanPerks = {
   lines: readonly string[];
 };
 
+export const PLAN_COMPARISON_FEATURES = [
+  { label: 'Sleep tracking', includedInBasic: true },
+  { label: 'Nap time prediction', includedInBasic: true },
+  { label: 'Feeding tracking', includedInBasic: false },
+  { label: 'Timeline of entries', includedInBasic: false },
+  { label: 'Soothing sounds', includedInBasic: false },
+  { label: 'Premium support', includedInBasic: false },
+] as const;
+
 export const subscriptionPlanPerks = {
   basic: {
     sectionTitle: 'Included with Basic:',
-    lines: ['Sleep tracking', 'Nap time prediction'],
+    lines: PLAN_COMPARISON_FEATURES.filter((feature) => feature.includedInBasic).map(
+      (feature) => feature.label
+    ),
   },
   pro: {
     sectionTitle: 'Included with Pro:',
-    lines: [
-      'Everything in Basic',
-      'Feeding tracking',
-      'Timeline of entries',
-      'Soothing sounds',
-      'Premium support',
-    ],
+    lines: PLAN_COMPARISON_FEATURES.map((feature) => feature.label),
   },
 } satisfies Record<'basic' | 'pro', SubscriptionPlanPerks>;

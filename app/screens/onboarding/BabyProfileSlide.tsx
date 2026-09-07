@@ -220,7 +220,7 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
             className={timerSectionLabelClassName}
             style={[timerSectionLabelStyle, { marginTop: layout.space24 }]}
           >
-            Day vs night
+            Start and end of the day (normally)
           </Text>
           <TimerSettingRow
             label="Start:"

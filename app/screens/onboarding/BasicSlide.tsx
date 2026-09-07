@@ -32,7 +32,7 @@ const BasicSlide: React.FC<BasicSlideProps> = ({ onPressNext }) => {
             Know when they are ready
           </Text>
           <View style={{ marginVertical: layout.space24 }}>
-            <Text className={mutedTextClassName} style={[mutedTextStyle, { fontSize: layout.fontXl }]}>
+            <Text className={mutedTextClassName} style={[mutedTextStyle, { fontSize: layout.fontXl, fontWeight: '700' }]}>
               Bedtime feels less like guesswork—and more like a gentle rhythm
               you can trust.
             </Text>

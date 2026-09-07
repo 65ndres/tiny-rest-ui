@@ -6,7 +6,9 @@ import {
   APP_MIN_WIDTH,
   clampAppWindow,
   getAppWindow,
+  padX,
   vh,
+  vw,
 } from '../appViewport';
 
 jest.mock('react-native', () => ({
@@ -108,5 +110,30 @@ describe('vh', () => {
   it('does not grow past 17 Pro Max', () => {
     mockWindow(768, 1024);
     expect(vh(24)).toBe(24);
+  });
+});
+
+describe('vw', () => {
+  it('is identity on 17 Pro Max', () => {
+    mockWindow(440, 956);
+    expect(vw(24)).toBe(24);
+  });
+
+  it('scales down on iPhone SE', () => {
+    mockWindow(375, 667);
+    expect(vw(24)).toBeCloseTo(24 * (375 / 440));
+  });
+});
+
+describe('padX', () => {
+  it('keeps Pro Max gutters at the design value', () => {
+    mockWindow(440, 956);
+    expect(padX(24)).toBe(24);
+  });
+
+  it('does not shrink gutters on iPhone SE', () => {
+    mockWindow(375, 667);
+    expect(padX(24)).toBe(24);
+    expect(padX(16)).toBe(16);
   });
 });

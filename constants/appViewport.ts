@@ -38,6 +38,18 @@ export const vh = (designPx: number): number =>
   designPx * (getAppWindow().height / APP_MAX_HEIGHT);
 
 /**
+ * Scale a design px value authored at iPhone 17 Pro Max width (440).
+ */
+export const vw = (designPx: number): number =>
+  designPx * (getAppWindow().width / APP_MAX_WIDTH);
+
+/**
+ * Horizontal inset that never shrinks below the Pro Max design value.
+ * Height-based padding gets too tight on SE; gutters stay at least `designPx`.
+ */
+export const padX = (designPx: number): number => Math.max(designPx, vw(designPx));
+
+/**
  * Height-based scale of a design value (same as vh).
  * Kept so existing `s()` call sites pick up the new clamp.
  */

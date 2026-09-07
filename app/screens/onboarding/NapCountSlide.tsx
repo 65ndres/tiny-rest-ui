@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
@@ -18,6 +19,8 @@ import { layout, mutedTextStyle, stackGapStyle } from '@/app/constants/screenLay
 import { vh } from '@/constants/appViewport';
 import OnboardingSlideShell from './OnboardingSlideShell';
 
+const DROPDOWN_MAX_HEIGHT = vh(220);
+
 type NapCountSlideProps = {
   napSchedule: NapScheduleOption | null;
   onNapScheduleChange: (option: NapScheduleOption) => void;
@@ -31,6 +34,7 @@ const NapCountSlide: React.FC<NapCountSlideProps> = ({
 }) => {
   const [error, setError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleNext = async () => {
     if (napSchedule == null) {
@@ -61,88 +65,128 @@ const NapCountSlide: React.FC<NapCountSlideProps> = ({
 
   return (
     <OnboardingSlideShell>
-      <ScrollView
-        className="flex-1 w-full"
-        contentContainerClassName="flex-grow items-center"
-        contentContainerStyle={{ paddingBottom: layout.space16 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <VStack className={`${timerContentStackClassName} flex-1`} style={stackGapStyle}>
-          <TimerSectionCard>
-            <Text
+      <VStack className={`${timerContentStackClassName} flex-1`} style={stackGapStyle}>
+        <TimerSectionCard>
+          <Text
+            style={{
+              fontSize: vh(34),
+              fontWeight: 'bold',
+              color: '#ffffff',
+              lineHeight: vh(40),
+            }}
+          >
+            Daily naps
+          </Text>
+          <Text
+            className={mutedTextClassName}
+            style={[mutedTextStyle, { fontSize: layout.fontLg, marginBottom: layout.space24, marginTop: layout.space16 }]}
+          >
+            How many naps does your baby usually take each day?
+          </Text>
+
+          <View className="w-full" style={{ marginBottom: layout.space8 }}>
+            <Pressable
+              onPress={() => setIsDropdownOpen((open) => !open)}
+              disabled={isSaving}
+              accessibilityRole="button"
+              accessibilityState={{ expanded: isDropdownOpen }}
+              accessibilityLabel={napSchedule?.label ?? 'Select how many naps per day'}
+              className={`w-full flex-row items-center justify-between border ${
+                isDropdownOpen || napSchedule
+                  ? 'border-white bg-white/20'
+                  : 'border-white/30 bg-white/10'
+              }`}
               style={{
-                fontSize: vh(34),
-                fontWeight: 'bold',
-                color: '#ffffff',
-                lineHeight: vh(40),
+                borderRadius: layout.radius12,
+                paddingHorizontal: layout.space16,
+                paddingVertical: layout.space12,
               }}
             >
-              Daily naps
-            </Text>
-            <Text
-              className={mutedTextClassName}
-              style={[mutedTextStyle, { fontSize: layout.fontLg, marginBottom: layout.space24, marginTop: layout.space16 }]}
-            >
-              How many naps does your baby usually take each day?
-            </Text>
-
-            <View className="w-full" style={{ gap: layout.space12, marginBottom: layout.space8 }}>
-              {NAP_SCHEDULE_OPTIONS.map((option) => {
-                const selected = napSchedule?.id === option.id;
-                return (
-                  <Pressable
-                    key={option.id}
-                    onPress={() => {
-                      onNapScheduleChange(option);
-                      if (error) setError('');
-                    }}
-                    disabled={isSaving}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected }}
-                    accessibilityLabel={option.label}
-                    className={`w-full border ${
-                      selected
-                        ? 'border-white bg-white/20'
-                        : 'border-white/30 bg-white/10'
-                    }`}
-                    style={{
-                      borderRadius: layout.radius12,
-                      paddingHorizontal: layout.space16,
-                      paddingVertical: layout.space12,
-                    }}
-                  >
-                    <Text className="text-white font-semibold text-center" style={{ fontSize: layout.fontLg }}>
-                      {option.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-            {error ? (
               <Text
-                className="text-error-400 font-semibold"
-                style={{ fontSize: layout.fontLg, marginTop: layout.space4 }}
+                className={napSchedule ? 'text-white font-semibold' : 'text-white/60 font-semibold'}
+                style={{ fontSize: layout.fontLg }}
               >
-                {error}
+                {napSchedule?.label ?? 'Select naps'}
               </Text>
-            ) : null}
-
-            {onPressNext ? (
-              <TimerOutlineButton
-                label="Next"
-                iconName="arrow-forward-sharp"
-                onPress={() => void handleNext()}
-                disabled={isSaving}
-                isLoading={isSaving}
-                variant="solid"
-                size="xl"
-                style={{ marginTop: layout.space24 }}
-                accessibilityLabel="Next"
+              <Ionicons
+                name={isDropdownOpen ? 'chevron-up' : 'chevron-down'}
+                size={layout.iconLg}
+                color="rgba(255,255,255,0.7)"
               />
+            </Pressable>
+
+            {isDropdownOpen ? (
+              <View
+                className="w-full border border-white/30 bg-white/10"
+                style={{
+                  marginTop: layout.space8,
+                  borderRadius: layout.radius12,
+                  maxHeight: DROPDOWN_MAX_HEIGHT,
+                  overflow: 'hidden',
+                }}
+              >
+                <ScrollView nestedScrollEnabled showsVerticalScrollIndicator={false}>
+                  {NAP_SCHEDULE_OPTIONS.map((option, index) => {
+                    const selected = napSchedule?.id === option.id;
+                    return (
+                      <Pressable
+                        key={option.id}
+                        onPress={() => {
+                          onNapScheduleChange(option);
+                          if (error) setError('');
+                          setIsDropdownOpen(false);
+                        }}
+                        disabled={isSaving}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected }}
+                        accessibilityLabel={option.label}
+                        style={{
+                          paddingHorizontal: layout.space16,
+                          paddingVertical: layout.space12,
+                          borderTopWidth: index === 0 ? 0 : 1,
+                          borderTopColor: 'rgba(255, 255, 255, 0.15)',
+                          backgroundColor: selected
+                            ? 'rgba(255, 255, 255, 0.2)'
+                            : 'transparent',
+                        }}
+                      >
+                        <Text
+                          className="text-white font-semibold"
+                          style={{ fontSize: layout.fontLg }}
+                        >
+                          {option.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              </View>
             ) : null}
-          </TimerSectionCard>
-        </VStack>
-      </ScrollView>
+          </View>
+          {error ? (
+            <Text
+              className="text-error-400 font-semibold"
+              style={{ fontSize: layout.fontLg, marginTop: layout.space4 }}
+            >
+              {error}
+            </Text>
+          ) : null}
+
+          {onPressNext ? (
+            <TimerOutlineButton
+              label="Next"
+              iconName="arrow-forward-sharp"
+              onPress={() => void handleNext()}
+              disabled={isSaving}
+              isLoading={isSaving}
+              variant="solid"
+              size="xl"
+              style={{ marginTop: layout.space24 }}
+              accessibilityLabel="Next"
+            />
+          ) : null}
+        </TimerSectionCard>
+      </VStack>
     </OnboardingSlideShell>
   );
 };

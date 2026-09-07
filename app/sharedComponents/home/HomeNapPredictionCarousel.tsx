@@ -36,8 +36,6 @@ const PREDICTION_CAROUSEL_HEIGHT =
   layout.space4 +
   layout.fontLg * 1.3 +
   layout.space32 +
-  layout.font5xl +
-  layout.space8 +
   layout.fontSm * 1.3 +
   layout.space8;
 
@@ -102,7 +100,7 @@ const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
               </Text>
               <Text
                 className="text-white font-mono tracking-wider"
-                style={{ fontSize: layout.font5xl, marginTop: layout.space32, lineHeight: layout.font5xl }}
+                style={{ fontSize: layout.font5xl, marginTop: layout.space16, lineHeight: layout.font5xl }}
               >
                 {item.display.value}
               </Text>

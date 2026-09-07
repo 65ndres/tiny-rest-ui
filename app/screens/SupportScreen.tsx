@@ -23,12 +23,12 @@ import {
   GLASS_BACKGROUND_COLOR,
   TIMER_SOLID_BUTTON_CONTENT_COLOR,
 } from '@/app/constants/screenLayout';
-import { getAppWindow } from '@/constants/appViewport';
+import { APP_MAX_HEIGHT, APP_MAX_WIDTH, getAppWindow } from '@/constants/appViewport';
 import { API_URL } from '../../constants/Config';
 import BackButton from '../SampleModule/BackButton';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 
-const { width: screenWidth } = getAppWindow();
+const screenWidth = getAppWindow().height * (APP_MAX_WIDTH / APP_MAX_HEIGHT);
 
 const SENT_ACCENT = TIMER_SOLID_BUTTON_CONTENT_COLOR;
 const SENT_ACCENT_DISABLED = 'rgba(99, 72, 139, 0.4)';

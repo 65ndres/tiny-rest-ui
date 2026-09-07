@@ -14,6 +14,8 @@ import {
 } from '@/app/utils/napSchedule';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
+import { layout, mutedTextStyle, stackGapStyle } from '@/app/constants/screenLayout';
+import { vh } from '@/constants/appViewport';
 import OnboardingSlideShell from './OnboardingSlideShell';
 
 type NapCountSlideProps = {
@@ -61,26 +63,30 @@ const NapCountSlide: React.FC<NapCountSlideProps> = ({
     <OnboardingSlideShell>
       <ScrollView
         className="flex-1 w-full"
-        contentContainerClassName="flex-grow items-center pb-4"
+        contentContainerClassName="flex-grow items-center"
+        contentContainerStyle={{ paddingBottom: layout.space16 }}
         showsVerticalScrollIndicator={false}
       >
-        <VStack space="md" className={`${timerContentStackClassName} flex-1`}>
+        <VStack className={`${timerContentStackClassName} flex-1`} style={stackGapStyle}>
           <TimerSectionCard>
             <Text
               style={{
-                fontSize: 34,
+                fontSize: vh(34),
                 fontWeight: 'bold',
                 color: '#ffffff',
-                lineHeight: 40,
+                lineHeight: vh(40),
               }}
             >
               Daily naps
             </Text>
-            <Text className={`${mutedTextClassName} text-lg mb-6 mt-4`}>
+            <Text
+              className={mutedTextClassName}
+              style={[mutedTextStyle, { fontSize: layout.fontLg, marginBottom: layout.space24, marginTop: layout.space16 }]}
+            >
               How many naps does your baby usually take each day?
             </Text>
 
-            <View className="w-full gap-3 mb-2">
+            <View className="w-full" style={{ gap: layout.space12, marginBottom: layout.space8 }}>
               {NAP_SCHEDULE_OPTIONS.map((option) => {
                 const selected = napSchedule?.id === option.id;
                 return (
@@ -94,13 +100,18 @@ const NapCountSlide: React.FC<NapCountSlideProps> = ({
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
                     accessibilityLabel={option.label}
-                    className={`w-full rounded-xl border px-4 py-3 ${
+                    className={`w-full border ${
                       selected
                         ? 'border-white bg-white/20'
                         : 'border-white/30 bg-white/10'
                     }`}
+                    style={{
+                      borderRadius: layout.radius12,
+                      paddingHorizontal: layout.space16,
+                      paddingVertical: layout.space12,
+                    }}
                   >
-                    <Text className="text-white text-lg font-semibold text-center">
+                    <Text className="text-white font-semibold text-center" style={{ fontSize: layout.fontLg }}>
                       {option.label}
                     </Text>
                   </Pressable>
@@ -108,7 +119,10 @@ const NapCountSlide: React.FC<NapCountSlideProps> = ({
               })}
             </View>
             {error ? (
-              <Text className="text-error-400 text-lg font-semibold mt-1">
+              <Text
+                className="text-error-400 font-semibold"
+                style={{ fontSize: layout.fontLg, marginTop: layout.space4 }}
+              >
                 {error}
               </Text>
             ) : null}
@@ -122,7 +136,7 @@ const NapCountSlide: React.FC<NapCountSlideProps> = ({
                 isLoading={isSaving}
                 variant="solid"
                 size="xl"
-                className="mt-6"
+                style={{ marginTop: layout.space24 }}
                 accessibilityLabel="Next"
               />
             ) : null}

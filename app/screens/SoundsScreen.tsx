@@ -5,29 +5,31 @@ import {
   View,
 } from 'react-native';
 import { SOUND_CATALOG } from '@/app/constants/soundCatalog';
-import { SCREEN_CONTENT_WIDTH_RATIO } from '@/app/constants/screenLayout';
+import { SCREEN_CONTENT_WIDTH_RATIO, layout } from '@/app/constants/screenLayout';
 import { useAudioPlayback } from '@/app/context/AudioPlaybackContext';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
 import SoundTile from '@/app/sharedComponents/sounds/SoundTile';
 import VolumeOverlay from '@/app/sharedComponents/sounds/VolumeOverlay';
-import { getAppWindow } from '@/constants/appViewport';
+import { getAppWindow, vh } from '@/constants/appViewport';
 
-const TILE_GAP = 12;
 const NUM_COLUMNS = 2;
-const SIDE_PADDING = 24;
-const VOLUME_OVERLAY_HEIGHT = 68;
 
 const SoundsScreen: React.FC = () => {
   const { activeTrackId, volume, toggleTrack, setVolume } =
     useAudioPlayback();
 
   const tileSize = useMemo(() => {
+    const sidePadding = layout.space24;
+    const tileGap = layout.space12;
     const contentWidth =
-      getAppWindow().width * SCREEN_CONTENT_WIDTH_RATIO - SIDE_PADDING * 2;
-    return Math.floor(
-      (contentWidth - TILE_GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS
+      getAppWindow().width * SCREEN_CONTENT_WIDTH_RATIO - sidePadding * 2;
+    const widthFit = Math.floor(
+      (contentWidth - tileGap * (NUM_COLUMNS - 1)) / NUM_COLUMNS
     );
+    return Math.min(Math.round(vh(190)), widthFit);
   }, []);
+
+  const tileGap = layout.space12;
 
   return (
     <ScreenComponent contentFlex>
@@ -36,7 +38,7 @@ const SoundsScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.tileGrid}
         >
-          <View style={[styles.grid, { gap: TILE_GAP, maxWidth: tileSize * NUM_COLUMNS + TILE_GAP }]}>
+          <View style={[styles.grid, { gap: tileGap, maxWidth: tileSize * NUM_COLUMNS + tileGap }]}>
             {SOUND_CATALOG.map((item) => (
               <SoundTile
                 key={item.id}
@@ -69,8 +71,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   tileGrid: {
-    paddingTop: 16,
-    paddingHorizontal: SIDE_PADDING,
-    paddingBottom: VOLUME_OVERLAY_HEIGHT + 16,
+    paddingTop: layout.space16,
+    paddingHorizontal: layout.space24,
+    paddingBottom: vh(68) + layout.space16,
   },
 });

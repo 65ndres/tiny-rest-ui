@@ -4,10 +4,15 @@ import { Alert, Pressable, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
+  layout,
+  stackGapStyle,
   timerContentStackClassName,
-  timerSectionLabelClassName,
-  timerSessionResetLinkClassName,
   timerScrollContentClassName,
+  timerScrollContentStyle,
+  timerSectionLabelClassName,
+  timerSectionLabelStyle,
+  timerSessionResetLinkClassName,
+  timerSessionResetLinkStyle,
 } from '@/app/constants/screenLayout';
 import {
   beginTimerSession,
@@ -245,14 +250,22 @@ const TimerScreenGuest: React.FC = () => {
     !isRunning && startTime && hasStoppedSession ? 'Resume' : 'Start';
 
   return (
-    <ScreenScrollLayout contentContainerClassName={timerScrollContentClassName}>
-      <VStack space="md" className={timerContentStackClassName}>
+    <ScreenScrollLayout
+      contentContainerClassName={timerScrollContentClassName}
+      contentContainerStyle={timerScrollContentStyle}
+    >
+      <VStack className={timerContentStackClassName} style={stackGapStyle}>
         <TimerSectionCard>
-          <View style={{ paddingBottom: 30, paddingTop: 60 }}>
+          <View style={{ paddingBottom: layout.space16, paddingTop: layout.space8 }}>
             <TimerElapsedDisplay elapsedMs={elapsedMs} />
           </View>
 
-          <Text className={`${timerSectionLabelClassName} mt-4`}>Time</Text>
+          <Text
+            className={timerSectionLabelClassName}
+            style={[timerSectionLabelStyle, { marginTop: layout.space8 }]}
+          >
+            Time
+          </Text>
           <TimerSettingRow
             label="Started at:"
             value={formatClockTime(startTime)}
@@ -280,7 +293,7 @@ const TimerScreenGuest: React.FC = () => {
             disabled={isSubmitting}
             variant="solid"
             size="xl"
-            className="mt-4"
+            style={{ marginTop: layout.space16 }}
             accessibilityLabel={isRunning ? 'Stop' : playButtonLabel}
           />
           <TimerOutlineButton
@@ -289,7 +302,7 @@ const TimerScreenGuest: React.FC = () => {
             onPress={() => void handleSubmit()}
             disabled={!isSubmitEnabled}
             isLoading={isSubmitting}
-            className="mt-3"
+            style={{ marginTop: layout.space12 }}
             size="xl"
             variant="solid"
           />
@@ -301,6 +314,7 @@ const TimerScreenGuest: React.FC = () => {
           >
             <Text
               className={`${timerSessionResetLinkClassName}${isSubmitting || !canReset ? ' opacity-40' : ''}`}
+              style={timerSessionResetLinkStyle}
             >
               Reset
             </Text>

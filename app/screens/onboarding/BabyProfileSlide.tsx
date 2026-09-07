@@ -4,11 +4,18 @@ import { Alert, TextInput, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
+  fieldLabelStyle,
+  layout,
   mutedTextClassName,
+  mutedTextStyle,
+  stackGapStyle,
   timerContentStackClassName,
   timerSectionLabelClassName,
+  timerSectionLabelStyle,
   timerSettingRowClassName,
+  timerSettingRowStyle,
 } from '@/app/constants/screenLayout';
+import { vh } from '@/constants/appViewport';
 import {
   dateToMinutes,
   DEFAULT_DAY_END_MINUTES,
@@ -134,24 +141,27 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
 
   return (
     <OnboardingSlideShell>
-      <VStack space="md" className={`${timerContentStackClassName} flex-1`}>
+      <VStack className={`${timerContentStackClassName} flex-1`} style={stackGapStyle}>
         <TimerSectionCard>
           <Text
             style={{
-              fontSize: 34,
+              fontSize: vh(34),
               fontWeight: 'bold',
               color: '#ffffff',
-              lineHeight: 40,
+              lineHeight: vh(40),
             }}
           >
             Tell us about baby
           </Text>
-          <Text className={`${mutedTextClassName} text-lg mb-6 mt-4`}>
+          <Text
+            className={mutedTextClassName}
+            style={[mutedTextStyle, { fontSize: layout.fontLg, marginBottom: layout.space24, marginTop: layout.space16 }]}
+          >
             We&apos;ll personalize nap guidance for your little one.
           </Text>
 
-          <View className={`${timerSettingRowClassName} border-t-0`}>
-            <Text className="text-white text-xl font-semibold flex-1 mr-2">
+          <View className={`${timerSettingRowClassName} border-t-0`} style={timerSettingRowStyle}>
+            <Text className="text-white font-semibold flex-1" style={fieldLabelStyle}>
               Name:
             </Text>
             <TextInput
@@ -164,11 +174,12 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
               placeholderTextColor="rgba(255,255,255,0.5)"
               editable={!isSaving}
               style={{
-                lineHeight: 20,
-                fontSize: 18,
+                lineHeight: layout.iconLg,
+                fontSize: layout.fontLg,
+                minWidth: layout.space32 * 4 - layout.space8,
               }}
               accessibilityLabel="Baby name"
-              className="text-white text-lg font-semibold underline text-right min-w-[120px] py-0"
+              className="text-white font-semibold underline text-right py-0"
               cursorColor="#ffffff"
               selectionColor="white"
               autoCapitalize="words"
@@ -176,7 +187,10 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
             />
           </View>
           {nameError ? (
-            <Text className="text-error-400 text-lg font-semibold mt-1">
+            <Text
+              className="text-error-400 font-semibold"
+              style={{ fontSize: layout.fontLg, marginTop: layout.space4 }}
+            >
               {nameError}
             </Text>
           ) : null}
@@ -194,12 +208,18 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
             size="lg"
           />
           {birthdateError ? (
-            <Text className="text-error-400 text-lg font-semibold mt-1">
+            <Text
+              className="text-error-400 font-semibold"
+              style={{ fontSize: layout.fontLg, marginTop: layout.space4 }}
+            >
               {birthdateError}
             </Text>
           ) : null}
 
-          <Text className={`${timerSectionLabelClassName} mt-6`}>
+          <Text
+            className={timerSectionLabelClassName}
+            style={[timerSectionLabelStyle, { marginTop: layout.space24 }]}
+          >
             Day vs night
           </Text>
           <TimerSettingRow
@@ -227,7 +247,10 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
             size="lg"
           />
           {dayWindowError ? (
-            <Text className="text-error-400 text-lg font-semibold mt-1">
+            <Text
+              className="text-error-400 font-semibold"
+              style={{ fontSize: layout.fontLg, marginTop: layout.space4 }}
+            >
               {dayWindowError}
             </Text>
           ) : null}
@@ -241,7 +264,7 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
               isLoading={isSaving}
               variant="solid"
               size="xl"
-              className="mt-6"
+              style={{ marginTop: layout.space24 }}
               accessibilityLabel="Next"
             />
           ) : null}

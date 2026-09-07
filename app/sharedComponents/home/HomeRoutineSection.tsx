@@ -4,7 +4,10 @@ import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
   homeAddStepClassName,
+  homeAddStepStyle,
   homeSectionLabelClassName,
+  homeSectionLabelStyle,
+  layout,
 } from '@/app/constants/screenLayout';
 
 type HomeRoutineSectionProps = {
@@ -21,11 +24,16 @@ const HomeRoutineSection: React.FC<HomeRoutineSectionProps> = ({
   onAddPress,
 }) => (
   <View className="w-full flex-row">
-    <View className="w-4 items-center">
-      <View className="flex-1 border-l border-white/20 ml-1.5" />
+    <View className="items-center" style={{ width: layout.space16 }}>
+      <View
+        className="flex-1 border-l border-white/20"
+        style={{ marginLeft: layout.space6 }}
+      />
     </View>
-    <VStack className="flex-1 pb-6" space="sm">
-      <Text className={homeSectionLabelClassName}>{title}</Text>
+    <VStack className="flex-1" style={{ paddingBottom: layout.space24, gap: layout.space8 }}>
+      <Text className={homeSectionLabelClassName} style={homeSectionLabelStyle}>
+        {title}
+      </Text>
       {children}
       {addLabel && onAddPress ? (
         <Pressable
@@ -33,7 +41,9 @@ const HomeRoutineSection: React.FC<HomeRoutineSectionProps> = ({
           accessibilityRole="button"
           accessibilityLabel={addLabel}
         >
-          <Text className={homeAddStepClassName}>{addLabel}</Text>
+          <Text className={homeAddStepClassName} style={homeAddStepStyle}>
+            {addLabel}
+          </Text>
         </Pressable>
       ) : null}
     </VStack>

@@ -34,6 +34,7 @@ import {
   type TimerSession,
 } from '@/app/utils/timerHistory';
 import { TIMER_SOLID_BUTTON_CONTENT_COLOR } from '@/app/constants/screenLayout';
+import { vh } from '@/constants/appViewport';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
 
 const calendarTheme = {
@@ -66,15 +67,15 @@ const timelineTheme = {
   },
   event: {
     opacity: 0.95,
-    borderRadius: 6,
-    paddingLeft: 6,
-    paddingRight: 6,
-    paddingTop: 4,
-    paddingBottom: 4,
+    borderRadius: vh(6),
+    paddingLeft: vh(6),
+    paddingRight: vh(6),
+    paddingTop: vh(4),
+    paddingBottom: vh(4),
   },
   timeLabel: {
     color: 'rgba(255,255,255,0.75)',
-    fontSize: 12,
+    fontSize: vh(12),
   },
   line: {
     backgroundColor: 'rgba(255,255,255,0.2)',
@@ -373,7 +374,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: 'rgba(255,255,255,0.75)',
-    fontSize: 16,
+    fontSize: vh(16),
   },
   eventContent: {
     flex: 1,
@@ -385,18 +386,18 @@ const styles = StyleSheet.create({
   eventTitle: {
     color: TIMER_SOLID_BUTTON_CONTENT_COLOR,
     fontWeight: '700',
-    fontSize: 15,
+    fontSize: vh(15),
   },
   eventSummary: {
     color: TIMER_SOLID_BUTTON_CONTENT_COLOR,
     fontWeight: '600',
-    fontSize: 13,
-    marginTop: 2,
+    fontSize: vh(13),
+    marginTop: vh(2),
   },
   deleteButton: {
     alignSelf: 'flex-start',
-    marginTop: 4,
-    paddingVertical: 2,
+    marginTop: vh(4),
+    paddingVertical: vh(2),
   },
 });
 

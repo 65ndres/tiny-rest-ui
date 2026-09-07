@@ -6,6 +6,7 @@ import {
   View,
 } from 'react-native';
 import { Text } from '@/components/ui/text';
+import { layout, timerSettingRowStyle } from '@/app/constants/screenLayout';
 import { FEEDING_TYPE_OPTIONS } from '@/app/constants/feedingTheme';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 import TimerSettingRow from '@/app/sharedComponents/timer/TimerSettingRow';
@@ -98,29 +99,53 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
         size="lg"
       />
 
-      <View className="flex-row items-center justify-between py-3 border-t border-white/10">
+      <View
+        className="flex-row items-center justify-between border-t border-white/10"
+        style={timerSettingRowStyle}
+      >
         <View>
-          <Text className="text-white text-xl font-semibold">Amount</Text>
-          <Text className="text-white/75 text-sm">optional</Text>
+          <Text className="text-white font-semibold" style={{ fontSize: layout.fontXl }}>
+            Amount
+          </Text>
+          <Text className="text-white/75" style={{ fontSize: layout.fontSm }}>
+            optional
+          </Text>
         </View>
         <Pressable onPress={() => adjustAmount(1)}>
-          <Text className="text-white text-lg font-semibold underline">
+          <Text
+            className="text-white font-semibold underline"
+            style={{ fontSize: layout.fontLg }}
+          >
             {amount > 0 ? `${amount} ${unit}` : 'Set amount'}
           </Text>
         </Pressable>
       </View>
 
-      <View className="flex-row items-center gap-2 mb-2">
-        <Text className="text-white/75 text-sm w-6 text-center">0</Text>
-        <View className="flex-1 flex-row items-center gap-2">
+      <View
+        className="flex-row items-center"
+        style={{ gap: layout.space8, marginBottom: layout.space8 }}
+      >
+        <Text
+          className="text-white/75 text-center"
+          style={{ fontSize: layout.fontSm, width: layout.space24 }}
+        >
+          0
+        </Text>
+        <View className="flex-1 flex-row items-center" style={{ gap: layout.space8 }}>
           <Pressable
             onPress={() => adjustAmount(-1)}
-            className="w-9 h-9 rounded-full bg-white/10 items-center justify-center"
+            className="rounded-full bg-white/10 items-center justify-center"
+            style={{ width: layout.space36, height: layout.space36 }}
             accessibilityLabel="Decrease amount"
           >
-            <Text className="text-white text-xl leading-6">−</Text>
+            <Text className="text-white" style={{ fontSize: layout.fontXl, lineHeight: layout.space24 }}>
+              −
+            </Text>
           </Pressable>
-          <View className="flex-1 h-1.5 rounded-full bg-white/20 overflow-hidden">
+          <View
+            className="flex-1 rounded-full bg-white/20 overflow-hidden"
+            style={{ height: layout.space6 }}
+          >
             <View
               style={[styles.fill, { width: `${(amount / MAX_AMOUNT) * 100}%` }]}
               className="h-full bg-white rounded-full"
@@ -128,13 +153,21 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
           </View>
           <Pressable
             onPress={() => adjustAmount(1)}
-            className="w-9 h-9 rounded-full bg-white/10 items-center justify-center"
+            className="rounded-full bg-white/10 items-center justify-center"
+            style={{ width: layout.space36, height: layout.space36 }}
             accessibilityLabel="Increase amount"
           >
-            <Text className="text-white text-xl leading-6">+</Text>
+            <Text className="text-white" style={{ fontSize: layout.fontXl, lineHeight: layout.space24 }}>
+              +
+            </Text>
           </Pressable>
         </View>
-        <Text className="text-white/75 text-sm w-6 text-center">{MAX_AMOUNT}</Text>
+        <Text
+          className="text-white/75 text-center"
+          style={{ fontSize: layout.fontSm, width: layout.space24 }}
+        >
+          {MAX_AMOUNT}
+        </Text>
       </View>
 
       <TimerOutlineButton
@@ -145,7 +178,7 @@ const BottleFeedingForm: React.FC<BottleFeedingFormProps> = ({
         isLoading={isSaving}
         size="xl"
         variant="solid"
-        className="mt-6"
+        style={{ marginTop: layout.space24 }}
       />
     </View>
   );

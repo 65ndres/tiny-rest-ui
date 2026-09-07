@@ -14,11 +14,19 @@ import {
   updateUserProfile,
 } from '@/app/utils/userProfile';
 import {
+  fieldInputStyle,
+  fieldLabelStyle,
+  layout,
+  stackGapStyle,
+  timerButtonStyle,
   timerContentStackClassName,
   timerOutlineButtonClassName,
   timerScrollContentClassName,
+  timerScrollContentStyle,
   timerSectionLabelClassName,
+  timerSectionLabelStyle,
   timerSettingRowClassName,
+  timerSettingRowStyle,
 } from '@/app/constants/screenLayout';
 import { useAuth } from '../context/AuthContext';
 import ScreenScrollLayout from '../sharedComponents/ScreenScrollLayout';
@@ -34,9 +42,9 @@ type RootDrawerParamList = {
 type NavigationProp = DrawerNavigationProp<RootDrawerParamList>;
 
 const inputClassName =
-  'text-white text-lg font-semibold underline text-right min-w-[120px] flex-1 py-0';
-const labelClassName = 'text-white text-xl font-semibold mr-2';
-const valueClassName = 'text-white text-lg font-semibold underline text-right flex-1';
+  'text-white font-semibold underline text-right flex-1 py-0';
+const labelClassName = 'text-white font-semibold';
+const valueClassName = 'text-white font-semibold underline text-right flex-1';
 
 type ProfileFieldRowProps = {
   label: string;
@@ -49,8 +57,13 @@ const ProfileFieldRow: React.FC<ProfileFieldRowProps> = ({
   isFirst = false,
   children,
 }) => (
-  <View className={`${timerSettingRowClassName}${isFirst ? ' border-t-0' : ''}`}>
-    <Text className={labelClassName}>{label}</Text>
+  <View
+    className={`${timerSettingRowClassName}${isFirst ? ' border-t-0' : ''}`}
+    style={timerSettingRowStyle}
+  >
+    <Text className={labelClassName} style={fieldLabelStyle}>
+      {label}
+    </Text>
     {children}
   </View>
 );
@@ -184,12 +197,15 @@ const UserProfileScreen: React.FC = () => {
   return (
     <ScreenScrollLayout
       contentContainerClassName={timerScrollContentClassName}
+      contentContainerStyle={timerScrollContentStyle}
       keyboardShouldPersistTaps="handled"
     >
-      <VStack space="md" className={timerContentStackClassName}>
+      <VStack className={timerContentStackClassName} style={stackGapStyle}>
         {isLoadingProfile ? (
           <TimerSectionCard>
-            <Text className="text-white/75 text-base">Loading...</Text>
+            <Text className="text-white/75" style={{ fontSize: layout.fontBase }}>
+              Loading...
+            </Text>
           </TimerSectionCard>
         ) : (
           <>
@@ -197,11 +213,21 @@ const UserProfileScreen: React.FC = () => {
   
 
               <ProfileFieldRow label="Email:" isFirst>
-                <Text className={valueClassName}>{email || '—'}</Text>
+                <Text className={valueClassName} style={fieldInputStyle}>
+                  {email || '—'}
+                </Text>
               </ProfileFieldRow>
 
-              <Text className={`${timerSectionLabelClassName} mt-6`}>Password</Text>
-              <Text className="text-white/75 text-lg mb-2">
+              <Text
+                className={timerSectionLabelClassName}
+                style={[timerSectionLabelStyle, { marginTop: layout.space24 }]}
+              >
+                Password
+              </Text>
+              <Text
+                className="text-white/75"
+                style={{ fontSize: layout.fontLg, marginBottom: layout.space8 }}
+              >
                 You will be signed out if the password is changed.
               </Text>
 
@@ -220,6 +246,7 @@ const UserProfileScreen: React.FC = () => {
                   editable={!fieldsDisabled}
                   accessibilityLabel="New password"
                   className={inputClassName}
+                  style={{ ...fieldInputStyle, minWidth: layout.space32 * 4 - layout.space8 }}
                   cursorColor="#ffffff"
                   selectionColor="white"
                   secureTextEntry={!showPassword}
@@ -231,7 +258,7 @@ const UserProfileScreen: React.FC = () => {
                   disabled={fieldsDisabled}
                   accessibilityRole="button"
                   accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-                  className="ml-2 p-1"
+                  style={{ marginLeft: layout.space8, padding: layout.space4 }}
                 >
                   <Icon
                     as={showPassword ? EyeIcon : EyeOffIcon}
@@ -241,7 +268,12 @@ const UserProfileScreen: React.FC = () => {
                 </Pressable>
               </ProfileFieldRow>
               {newPasswordError ? (
-                <Text className="text-error-400 text-sm mt-1">{newPasswordError}</Text>
+                <Text
+                  className="text-error-400"
+                  style={{ fontSize: layout.fontSm, marginTop: layout.space4 }}
+                >
+                  {newPasswordError}
+                </Text>
               ) : null}
 
               <ProfileFieldRow label="Confirm:">
@@ -259,6 +291,7 @@ const UserProfileScreen: React.FC = () => {
                   editable={!fieldsDisabled}
                   accessibilityLabel="Confirm password"
                   className={inputClassName}
+                  style={{ ...fieldInputStyle, minWidth: layout.space32 * 4 - layout.space8 }}
                   cursorColor="#ffffff"
                   selectionColor="white"
                   secureTextEntry={!showConfirmPassword}
@@ -274,7 +307,7 @@ const UserProfileScreen: React.FC = () => {
                       ? 'Hide confirm password'
                       : 'Show confirm password'
                   }
-                  className="ml-2 p-1"
+                  style={{ marginLeft: layout.space8, padding: layout.space4 }}
                 >
                   <Icon
                     as={showConfirmPassword ? EyeIcon : EyeOffIcon}
@@ -284,7 +317,12 @@ const UserProfileScreen: React.FC = () => {
                 </Pressable>
               </ProfileFieldRow>
               {confirmPasswordError ? (
-                <Text className="text-error-400 text-sm mt-1">{confirmPasswordError}</Text>
+                <Text
+                  className="text-error-400"
+                  style={{ fontSize: layout.fontSm, marginTop: layout.space4 }}
+                >
+                  {confirmPasswordError}
+                </Text>
               ) : null}
 
               <TimerOutlineButton
@@ -295,7 +333,7 @@ const UserProfileScreen: React.FC = () => {
                 isLoading={isLoading}
                 size="xl"
                 variant="solid"
-                className="mt-6"
+                style={{ marginTop: layout.space24 }}
               />
 
               <TimerOutlineButton
@@ -304,13 +342,18 @@ const UserProfileScreen: React.FC = () => {
                 disabled={fieldsDisabled}
                 size="xl"
                 variant="solid"
-                className="mt-3"
+                style={{ marginTop: layout.space12 }}
               />
             </TimerSectionCard>
 
             <TimerSectionCard>
-              <Text className={timerSectionLabelClassName}>Delete account</Text>
-              <Text className="text-white/75 text-lg mb-4">
+              <Text className={timerSectionLabelClassName} style={timerSectionLabelStyle}>
+                Delete account
+              </Text>
+              <Text
+                className="text-white/75"
+                style={{ fontSize: layout.fontLg, marginBottom: layout.space16 }}
+              >
                 To delete your account, cancel any active subscription first.
                 Deletion is permanent and cannot be undone.
               </Text>
@@ -318,6 +361,7 @@ const UserProfileScreen: React.FC = () => {
                 className={`${timerOutlineButtonClassName} bg-[#e53935] border-[#e53935]${
                   fieldsDisabled || isDeletingAccount ? ' opacity-40' : ''
                 }`}
+                style={timerButtonStyle}
                 onPress={confirmDeleteAccount}
                 disabled={fieldsDisabled || isDeletingAccount}
                 accessibilityRole="button"
@@ -326,7 +370,7 @@ const UserProfileScreen: React.FC = () => {
                 {isDeletingAccount ? (
                   <ActivityIndicator color="white" size="small" />
                 ) : (
-                  <Text className="text-white text-lg font-semibold">
+                  <Text className="text-white font-semibold" style={{ fontSize: layout.fontLg }}>
                     Delete account
                   </Text>
                 )}

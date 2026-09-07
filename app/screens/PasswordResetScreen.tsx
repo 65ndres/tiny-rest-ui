@@ -7,11 +7,19 @@ import { Link, LinkText } from '@/components/ui/link';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
+  fieldInputStyle,
+  fieldLabelStyle,
+  layout,
   mutedTextClassName,
+  mutedTextStyle,
+  stackGapStyle,
   timerContentStackClassName,
   timerScrollContentClassName,
+  timerScrollContentStyle,
   timerSettingRowClassName,
+  timerSettingRowStyle,
 } from '@/app/constants/screenLayout';
+import { vh } from '@/constants/appViewport';
 import { API_URL } from '../../constants/Config';
 import ScreenScrollLayout from '../sharedComponents/ScreenScrollLayout';
 import TimerOutlineButton from '../sharedComponents/timer/TimerOutlineButton';
@@ -26,8 +34,8 @@ type AuthStackParamList = {
 type NavigationProp = DrawerNavigationProp<AuthStackParamList>;
 
 const inputClassName =
-  'text-white text-lg font-semibold underline text-right min-w-[120px] flex-1 py-0';
-const labelClassName = 'text-white text-xl font-semibold mr-2';
+  'text-white font-semibold underline text-right flex-1 py-0';
+const labelClassName = 'text-white font-semibold';
 
 type FieldRowProps = {
   label: string;
@@ -36,8 +44,13 @@ type FieldRowProps = {
 };
 
 const FieldRow: React.FC<FieldRowProps> = ({ label, isFirst = false, children }) => (
-  <View className={`${timerSettingRowClassName}${isFirst ? ' border-t-0' : ''}`}>
-    <Text className={labelClassName}>{label}</Text>
+  <View
+    className={`${timerSettingRowClassName}${isFirst ? ' border-t-0' : ''}`}
+    style={timerSettingRowStyle}
+  >
+    <Text className={labelClassName} style={fieldLabelStyle}>
+      {label}
+    </Text>
     {children}
   </View>
 );
@@ -98,21 +111,25 @@ const PasswordResetScreen: React.FC = () => {
   return (
     <ScreenScrollLayout
       contentContainerClassName={`${timerScrollContentClassName}`}
+      contentContainerStyle={timerScrollContentStyle}
       keyboardShouldPersistTaps="handled"
     >
-      <VStack space="md" className={timerContentStackClassName}>
+      <VStack className={timerContentStackClassName} style={stackGapStyle}>
         <TimerSectionCard>
           <Text
             style={{
-              fontSize: 34,
+              fontSize: vh(34),
               fontWeight: 'bold',
               color: '#ffffff',
-              lineHeight: 40,
+              lineHeight: vh(40),
             }}
           >
             Forgot password
           </Text>
-          <Text className={`${mutedTextClassName} text-lg mb-6`}>
+          <Text
+            className={mutedTextClassName}
+            style={[mutedTextStyle, { fontSize: layout.fontLg, marginBottom: layout.space24 }]}
+          >
             {emailSubmitted
               ? 'Check your inbox for a reset code'
               : 'Enter your email to receive a reset code'}
@@ -133,8 +150,10 @@ const PasswordResetScreen: React.FC = () => {
                   accessibilityLabel="Email"
                   className={inputClassName}
                   style={{
-                    lineHeight: 25,
-                    height: 30,
+                    ...fieldInputStyle,
+                    minWidth: layout.space32 * 4 - layout.space8,
+                    lineHeight: vh(25),
+                    height: layout.space32,
                   }}
                   cursorColor="#ffffff"
                   selectionColor="white"
@@ -157,16 +176,22 @@ const PasswordResetScreen: React.FC = () => {
                 isLoading={isSubmitting}
                 variant="solid"
                 size="xl"
-                className="mt-4"
+                style={{ marginTop: layout.space16 }}
                 accessibilityLabel="Reset password"
               />
             </>
           ) : (
             <>
-              <Text className={`${mutedTextClassName} text-lg mb-4`}>
+              <Text
+                className={mutedTextClassName}
+                style={[mutedTextStyle, { fontSize: layout.fontLg, marginBottom: layout.space16 }]}
+              >
                 We will send you an email if the email is registered.
               </Text>
-              <Text className={`${mutedTextClassName} text-lg mb-6`}>
+              <Text
+                className={mutedTextClassName}
+                style={[mutedTextStyle, { fontSize: layout.fontLg, marginBottom: layout.space24 }]}
+              >
                 If you don&apos;t receive an email, please check your spam folder.
               </Text>
 
@@ -176,7 +201,7 @@ const PasswordResetScreen: React.FC = () => {
                 onPress={handleTryAgain}
                 variant="solid"
                 size="xl"
-                className="mt-2"
+                style={{ marginTop: layout.space8 }}
                 accessibilityLabel="Try again"
               />
               <TimerOutlineButton
@@ -185,14 +210,21 @@ const PasswordResetScreen: React.FC = () => {
                 onPress={handleInputCode}
                 variant="solid"
                 size="xl"
-                className="mt-3"
+                style={{ marginTop: layout.space12 }}
                 accessibilityLabel="Input code"
               />
             </>
           )}
         </TimerSectionCard>
 
-        <View className="w-full items-center mt-6 mb-2 gap-6">
+        <View
+          className="w-full items-center"
+          style={{
+            marginTop: layout.space24,
+            marginBottom: layout.space8,
+            gap: layout.space24,
+          }}
+        >
           <Pressable
             onPress={() => navigation.navigate('LoginGluestack')}
             disabled={isSubmitting}
@@ -201,10 +233,10 @@ const PasswordResetScreen: React.FC = () => {
           >
             <Text
               style={{
-                fontSize: 18,
+                fontSize: layout.fontLg,
                 fontWeight: 'bold',
                 color: '#ffffff',
-                lineHeight: 20,
+                lineHeight: layout.iconLg,
               }}
             >
               Log in
@@ -218,10 +250,10 @@ const PasswordResetScreen: React.FC = () => {
           >
             <LinkText
               style={{
-                fontSize: 18,
+                fontSize: layout.fontLg,
                 fontWeight: 'bold',
                 color: '#ffffff',
-                lineHeight: 20,
+                lineHeight: layout.iconLg,
               }}
             >
               Don&apos;t have an account? Sign up

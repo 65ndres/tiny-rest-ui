@@ -1,7 +1,11 @@
 import { Dimensions } from 'react-native';
 
+/** Logical points for iPhone SE 3rd gen (4.7"). */
+export const APP_MIN_WIDTH = 375;
+export const APP_MIN_HEIGHT = 667;
+
 /**
- * Logical points for iPhone 16 Pro Max.
+ * Logical points for iPhone 17 Pro Max (6.9").
  * Content (not the full-bleed background) never lays out wider/taller than this.
  */
 export const APP_MAX_WIDTH = 440;
@@ -12,21 +16,29 @@ export type AppWindowSize = {
   height: number;
 };
 
-/** Device window capped to iPhone 16 Pro Max — use for content sizing. */
+export const clampAppWindow = (
+  width: number,
+  height: number
+): AppWindowSize => ({
+  width: Math.min(APP_MAX_WIDTH, Math.max(APP_MIN_WIDTH, width)),
+  height: Math.min(APP_MAX_HEIGHT, Math.max(APP_MIN_HEIGHT, height)),
+});
+
+/** Device window clamped between iPhone SE and iPhone 17 Pro Max. */
 export const getAppWindow = (): AppWindowSize => {
   const { width, height } = Dimensions.get('window');
-  return {
-    width: Math.min(width, APP_MAX_WIDTH),
-    height: Math.min(height, APP_MAX_HEIGHT),
-  };
+  return clampAppWindow(width, height);
 };
 
 /**
- * Scale a design value using the classic 375×812 phone baseline,
- * never larger than the iPhone 16 Pro Max content viewport.
+ * Scale a design px value authored at iPhone 17 Pro Max height (956).
+ * Identical on Pro Max; shrinks toward SE; clamped outside that range.
  */
-export const scaleFromPhoneBaseline = (value: number): number => {
-  const { width, height } = getAppWindow();
-  const scale = Math.min(height / 812, width / 375);
-  return value * scale;
-};
+export const vh = (designPx: number): number =>
+  designPx * (getAppWindow().height / APP_MAX_HEIGHT);
+
+/**
+ * Height-based scale of a design value (same as vh).
+ * Kept so existing `s()` call sites pick up the new clamp.
+ */
+export const scaleFromPhoneBaseline = vh;

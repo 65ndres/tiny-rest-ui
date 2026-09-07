@@ -2,6 +2,7 @@ import { useFonts } from 'expo-font';
 import React from 'react';
 import { Image, StyleSheet, View, type ViewStyle } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
+import { layout } from '@/app/constants/screenLayout';
 
 type AppScreenFooterProps = {
   /** Extra downward offset for the logo (e.g. onboarding). */
@@ -19,10 +20,14 @@ const AppScreenFooter: React.FC<AppScreenFooterProps> = ({ logoOffset = 0 }) => 
 
   return (
     <View style={styles.container}>
-      <VStack className="w-full items-center justify-center flex-1 p-3" space="xs">
+      <VStack
+        className="w-full items-center justify-center flex-1"
+        style={{ padding: layout.space12 }}
+        space="xs"
+      >
         <Image
           source={require('@/assets/images/footer-logo.png')}
-          style={[styles.logo, { marginTop: 15 + logoOffset }]}
+          style={[styles.logo, { marginTop: layout.space14 + logoOffset }]}
           resizeMode="contain"
         />
       </VStack>
@@ -36,7 +41,7 @@ const styles = StyleSheet.create({
     width: '100%',
   } as ViewStyle,
   logo: {
-    height: 100,
+    height: layout.footerLogo,
   },
 });
 

@@ -13,14 +13,15 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
-import { getAppWindow } from '@/constants/appViewport';
+import { APP_MAX_HEIGHT, APP_MAX_WIDTH, getAppWindow } from '@/constants/appViewport';
 import { getSavedItems } from '../lib/sampleContent';
 import type { SampleItem } from '../types/sampleItem';
 import SampleModule from './SampleModule/SampleModule';
 import BackButton from './SampleModule/BackButton';
 import ScreenComponent from './sharedComponents/ScreenComponent';
 
-const { width: screenWidth, height: screenHeight } = getAppWindow();
+const screenHeight = getAppWindow().height;
+const screenWidth = screenHeight * (APP_MAX_WIDTH / APP_MAX_HEIGHT);
 
 type RootStackParamList = {
   Home: undefined;

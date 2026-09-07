@@ -23,10 +23,16 @@ import {
 } from '@/app/utils/napSchedule';
 import type { NapScheduleOption } from '@/app/utils/napSchedule';
 import {
+  fieldLabelStyle,
+  layout,
+  stackGapStyle,
   timerContentStackClassName,
   timerScrollContentClassName,
+  timerScrollContentStyle,
   timerSectionLabelClassName,
+  timerSectionLabelStyle,
   timerSettingRowClassName,
+  timerSettingRowStyle,
 } from '@/app/constants/screenLayout';
 import ScreenScrollLayout from '@/app/sharedComponents/ScreenScrollLayout';
 import TimerDateTimePickerDrawer from '@/app/sharedComponents/TimerDateTimePickerDrawer';
@@ -179,20 +185,31 @@ const SettingsScreen: React.FC = () => {
   return (
     <ScreenScrollLayout
       contentContainerClassName={timerScrollContentClassName}
+      contentContainerStyle={timerScrollContentStyle}
       keyboardShouldPersistTaps="handled"
     >
-      <VStack space="md" className={timerContentStackClassName}>
+      <VStack className={timerContentStackClassName} style={stackGapStyle}>
         {isLoading ? (
           <TimerSectionCard>
-            <Text className="text-white/75 text-base">Loading...</Text>
+            <Text className="text-white/75" style={{ fontSize: layout.fontBase }}>
+              Loading...
+            </Text>
           </TimerSectionCard>
         ) : (
           <>
             <TimerSectionCard>
-              <Text className={timerSectionLabelClassName}>Baby</Text>
+              <Text className={timerSectionLabelClassName} style={timerSectionLabelStyle}>
+                Baby
+              </Text>
 
-              <View className={`${timerSettingRowClassName} border-t-0`}>
-                <Text className="text-white text-xl font-semibold flex-1 mr-2">
+              <View
+                className={`${timerSettingRowClassName} border-t-0`}
+                style={timerSettingRowStyle}
+              >
+                <Text
+                  className="text-white font-semibold flex-1"
+                  style={fieldLabelStyle}
+                >
                   Name:
                 </Text>
                 <TextInput
@@ -205,7 +222,8 @@ const SettingsScreen: React.FC = () => {
                   placeholderTextColor="rgba(255,255,255,0.5)"
                   editable={!isSaving}
                   accessibilityLabel="Baby name"
-                  className="text-white text-lg font-semibold underline text-right min-w-[120px] py-0"
+                  className="text-white font-semibold underline text-right py-0"
+                  style={{ fontSize: layout.fontLg, minWidth: layout.space32 * 4 - layout.space8 }}
                   cursorColor="#ffffff"
                   selectionColor="white"
                   autoCapitalize="words"
@@ -213,7 +231,12 @@ const SettingsScreen: React.FC = () => {
                 />
               </View>
               {nameError ? (
-                <Text className="text-error-400 text-sm mt-1">{nameError}</Text>
+                <Text
+                  className="text-error-400"
+                  style={{ fontSize: layout.fontSm, marginTop: layout.space4 }}
+                >
+                  {nameError}
+                </Text>
               ) : null}
 
               <TimerSettingRow
@@ -236,7 +259,10 @@ const SettingsScreen: React.FC = () => {
                 size="lg"
               />
 
-              <Text className={`${timerSectionLabelClassName} mt-6`}>
+              <Text
+                className={timerSectionLabelClassName}
+                style={[timerSectionLabelStyle, { marginTop: layout.space24 }]}
+              >
                 Day vs night
               </Text>
               <TimerSettingRow
@@ -264,7 +290,10 @@ const SettingsScreen: React.FC = () => {
                 size="lg"
               />
               {dayWindowError ? (
-                <Text className="text-error-400 text-sm mt-1">
+                <Text
+                  className="text-error-400"
+                  style={{ fontSize: layout.fontSm, marginTop: layout.space4 }}
+                >
                   {dayWindowError}
                 </Text>
               ) : null}
@@ -277,7 +306,7 @@ const SettingsScreen: React.FC = () => {
                 isLoading={isSaving}
                 size="xl"
                 variant="solid"
-                className="mt-6"
+                style={{ marginTop: layout.space24 }}
               />
             </TimerSectionCard>
           </>

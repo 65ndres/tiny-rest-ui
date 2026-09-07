@@ -11,6 +11,7 @@ import {
   CARD_BORDER_COLOR,
   GLASS_BACKGROUND_COLOR,
   GLASS_BORDER_COLOR,
+  layout,
 } from '@/app/constants/screenLayout';
 
 type SoundTileProps = {
@@ -73,7 +74,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tile: {
-    borderRadius: 15,
+    borderRadius: layout.radius15,
     backgroundColor: GLASS_BACKGROUND_COLOR,
     alignItems: 'center',
     justifyContent: 'center',
@@ -91,9 +92,9 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   title: {
-    marginTop: 8,
+    marginTop: layout.space8,
     color: '#ffffff',
-    fontSize: 18,
+    fontSize: layout.fontLg,
     fontWeight: '600',
     textAlign: 'center',
   },

@@ -3,11 +3,15 @@ import { View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
+  layout,
   mutedTextClassName,
+  mutedTextStyle,
+  stackGapStyle,
   timerContentStackClassName,
 } from '@/app/constants/screenLayout';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
+import { vh } from '@/constants/appViewport';
 import OnboardingSlideShell from './OnboardingSlideShell';
 
 type WelcomeSlideProps = {
@@ -17,20 +21,23 @@ type WelcomeSlideProps = {
 const WelcomeSlide: React.FC<WelcomeSlideProps> = ({ onPressNext }) => {
   return (
     <OnboardingSlideShell>
-      <VStack space="md" className={`${timerContentStackClassName} flex-1`}>
+      <VStack className={`${timerContentStackClassName} flex-1`} style={stackGapStyle}>
         <TimerSectionCard>
           <Text
             style={{
-              fontSize: 34,
+              fontSize: vh(34),
               fontWeight: 'bold',
               color: '#ffffff',
-              lineHeight: 40,
+              lineHeight: vh(40),
             }}
           >
             Tired of guessing nap time?
           </Text>
-          <View style={{ marginVertical: 24 }}>
-            <Text className={`${mutedTextClassName} text-xl mb-4`}>
+          <View style={{ marginVertical: layout.space24 }}>
+            <Text
+              className={mutedTextClassName}
+              style={[mutedTextStyle, { fontSize: layout.fontXl, marginBottom: layout.space16 }]}
+            >
               Missing the wake window leads to overtired meltdowns—and tracking
               it all by hand is exhausting.
             </Text>
@@ -42,7 +49,7 @@ const WelcomeSlide: React.FC<WelcomeSlideProps> = ({ onPressNext }) => {
               onPress={() => void onPressNext?.()}
               variant="solid"
               size="xl"
-              className="mt-2"
+              style={{ marginTop: layout.space8 }}
               accessibilityLabel="Next"
             />
           ) : null}

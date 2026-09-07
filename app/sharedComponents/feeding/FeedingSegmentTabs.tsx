@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui/text';
+import { layout } from '@/app/constants/screenLayout';
 
 export type FeedingTab = 'nursing' | 'bottle';
 
@@ -18,25 +19,34 @@ const FeedingSegmentTabs: React.FC<FeedingSegmentTabsProps> = ({
   activeTab,
   onChange,
 }) => (
-  <View className="w-full flex-row items-stretch border-b border-white/20 mb-4">
+  <View
+    className="w-full flex-row items-stretch border-b border-white/20"
+    style={{ marginBottom: layout.space16 }}
+  >
     {TABS.map((tab, index) => {
-      const isActive = activeTab === tab.id;
+      const isActive = tab.id === activeTab;
       return (
         <React.Fragment key={tab.id}>
           {index > 0 ? (
-            <View className="w-px bg-white/20 self-stretch my-1" />
+            <View
+              className="bg-white/20 self-stretch"
+              style={{ width: 1, marginVertical: layout.space4 }}
+            />
           ) : null}
           <Pressable
-            className="flex-1 items-center justify-center py-3 active:opacity-80"
+            className="flex-1 items-center justify-center active:opacity-80"
+            style={{ paddingVertical: layout.space12 }}
             onPress={() => onChange(tab.id)}
             accessibilityRole="button"
             accessibilityState={{ selected: isActive }}
             accessibilityLabel={tab.label}
           >
             <Text
-              className={`text-xl ${
-                isActive ? 'text-white font-semibold' : 'text-white/50'
-              }`}
+              style={{
+                fontSize: layout.fontXl,
+                color: isActive ? '#ffffff' : 'rgba(255,255,255,0.5)',
+                fontWeight: isActive ? '600' : '400',
+              }}
             >
               {tab.label}
             </Text>

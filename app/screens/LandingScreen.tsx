@@ -5,11 +5,17 @@ import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
+  layout,
   mutedTextClassName,
+  mutedTextStyle,
+  stackGapStyle,
   timerContentStackClassName,
   timerScrollContentClassName,
+  timerScrollContentStyle,
   timerSessionResetLinkClassName,
+  timerSessionResetLinkStyle,
 } from '@/app/constants/screenLayout';
+import { vh } from '@/constants/appViewport';
 import {
   APP_DISPLAY_NAME,
   BASIC_PLAN_DISPLAY_NAME,
@@ -45,24 +51,31 @@ const LandingScreen: React.FC = () => {
   return (
     <ScreenScrollLayout
       contentContainerClassName={`${timerScrollContentClassName}`}
+      contentContainerStyle={timerScrollContentStyle}
     >
-      <VStack space="md" className={timerContentStackClassName}>
+      <VStack className={timerContentStackClassName} style={stackGapStyle}>
         <TimerSectionCard>
           <Text
             style={{
-              fontSize: 34,
+              fontSize: vh(34),
               fontWeight: 'bold',
               color: '#ffffff',
-              lineHeight: 40,
+              lineHeight: vh(40),
             }}
           >
             Welcome to {APP_DISPLAY_NAME}
           </Text>
-          <View style={{ marginVertical: 30 }}>
-            <Text className={`${mutedTextClassName} text-xl mb-4`}>
+          <View style={{ marginVertical: layout.space32 }}>
+            <Text
+              className={mutedTextClassName}
+              style={[mutedTextStyle, { fontSize: layout.fontXl, marginBottom: layout.space16 }]}
+            >
               Track naps, feedings, and soothing sounds for your little one.
             </Text>
-            <Text className={`${mutedTextClassName} text-xl`}>
+            <Text
+              className={mutedTextClassName}
+              style={[mutedTextStyle, { fontSize: layout.fontXl }]}
+            >
               Create a {BASIC_PLAN_DISPLAY_NAME} account for free or try{' '}
               {PRO_PLAN_DISPLAY_NAME} with a 14-day free trial.
             </Text>
@@ -74,7 +87,7 @@ const LandingScreen: React.FC = () => {
             onPress={handleLogin}
             variant="solid"
             size="xl"
-            className="mt-2"
+            style={{ marginTop: layout.space8 }}
             accessibilityLabel="Log in"
           />
 
@@ -84,7 +97,7 @@ const LandingScreen: React.FC = () => {
             onPress={handleSignUp}
             variant="solid"
             size="xl"
-            className="mt-3"
+            style={{ marginTop: layout.space12 }}
             accessibilityLabel="Sign up"
           />
 
@@ -93,7 +106,7 @@ const LandingScreen: React.FC = () => {
             hitSlop={12}
             onPress={handleContinueGuest}
           >
-            <Text className={timerSessionResetLinkClassName}>
+            <Text className={timerSessionResetLinkClassName} style={timerSessionResetLinkStyle}>
               Continue as a guest
             </Text>
           </Pressable>

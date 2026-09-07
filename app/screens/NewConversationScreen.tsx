@@ -17,6 +17,7 @@ import {
 import { ScrollView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
+import { vh } from '@/constants/appViewport';
 import { API_URL } from '../../constants/Config';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 
@@ -167,13 +168,13 @@ const NewConversationScreen: React.FC = () => {
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholderTextColor={'#d8d8d8ff'}
-              inputStyle={{ color: 'white', fontSize: 22 }}
+              inputStyle={{ color: 'white', fontSize: vh(22) }}
               inputContainerStyle={{ borderBottomColor: 'white' }}
               leftIcon={{ 
                 type: 'materialIcons', 
                 name: 'search', 
                 color: '#ffffffff', 
-                size: 30 
+                size: vh(30) 
               }}
               cursorColor={"#ffffff"}
               selectionColor={'white'}
@@ -236,20 +237,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 50,
+    paddingTop: vh(50),
   } as ViewStyle,
   errorText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: vh(18),
     textAlign: 'center',
   },
   emptyText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: vh(18),
     textAlign: 'center',
   },
   searchContainer: {
-    paddingTop: 10,
+    paddingTop: vh(10),
   },
   lineItemContainer: {
     flex: 1,
@@ -258,23 +259,22 @@ const styles = StyleSheet.create({
     // padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'white',
-    paddingBottom: 20,
-    paddingTop: 20,
-    // paddingHorizontal: 10,
-    marginHorizontal: 20,
+    paddingBottom: vh(20),
+    paddingTop: vh(20),
+    marginHorizontal: vh(20),
   },
   userInfo: {
     flex: 1,
   },
   userName: {
     color: 'white',
-    fontSize: 20,
+    fontSize: vh(20),
     fontWeight: '500',
-    marginBottom: 5,
+    marginBottom: vh(5),
   },
   userEmail: {
     color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: 16,
+    fontSize: vh(16),
   },
   image: {
     flex: 1,

@@ -2,7 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { timerSettingRowClassName } from '@/app/constants/screenLayout';
+import {
+  layout,
+  timerSettingRowClassName,
+  timerSettingRowStyle,
+} from '@/app/constants/screenLayout';
 
 type TimerSettingRowProps = {
   label: string;
@@ -29,32 +33,38 @@ const TimerSettingRow: React.FC<TimerSettingRowProps> = ({
   hint,
 }) => {
   const isLg = size === 'lg';
-  const labelClassName = isLg
-    ? 'text-white text-xl font-semibold'
-    : 'text-white text-lg font-semibold';
-  const valueClassName = isLg
-    ? 'text-white text-lg font-semibold underline mr-1'
-    : 'text-white text-base font-semibold underline mr-1';
+  const labelSize = isLg ? layout.fontXl : layout.fontLg;
+  const valueSize = isLg ? layout.fontLg : layout.fontBase;
 
   return (
     <Pressable
       className={`${timerSettingRowClassName}${isFirst ? ' border-t-0' : ''}`}
+      style={timerSettingRowStyle}
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
     >
-      <View className="flex-1 mr-2">
-        <Text className={labelClassName}>{label}</Text>
+      <View className="flex-1" style={{ marginRight: layout.space8 }}>
+        <Text className="text-white font-semibold" style={{ fontSize: labelSize }}>
+          {label}
+        </Text>
         {hint ? (
-          <Text className="text-white/75 text-sm">{hint}</Text>
+          <Text className="text-white/75" style={{ fontSize: layout.fontSm }}>
+            {hint}
+          </Text>
         ) : null}
       </View>
       <View className="flex-row items-center">
-        <Text className={valueClassName}>{value || placeholder}</Text>
+        <Text
+          className="text-white font-semibold underline"
+          style={{ fontSize: valueSize, marginRight: layout.space4 }}
+        >
+          {value || placeholder}
+        </Text>
         <Ionicons
           name="chevron-down"
-          size={isLg ? 18 : 16}
+          size={isLg ? layout.iconMd : layout.iconSm}
           color="rgba(255,255,255,0.5)"
         />
       </View>

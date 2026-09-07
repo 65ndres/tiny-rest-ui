@@ -7,11 +7,19 @@ import { Link, LinkText } from '@/components/ui/link';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
+  fieldInputStyle,
+  fieldLabelStyle,
+  layout,
   mutedTextClassName,
+  mutedTextStyle,
+  stackGapStyle,
   timerContentStackClassName,
   timerScrollContentClassName,
+  timerScrollContentStyle,
   timerSettingRowClassName,
+  timerSettingRowStyle,
 } from '@/app/constants/screenLayout';
+import { vh } from '@/constants/appViewport';
 import { useAuth } from '../context/AuthContext';
 import ScreenScrollLayout from '../sharedComponents/ScreenScrollLayout';
 import TimerOutlineButton from '../sharedComponents/timer/TimerOutlineButton';
@@ -25,8 +33,8 @@ type AuthStackParamList = {
 type NavigationProp = DrawerNavigationProp<AuthStackParamList>;
 
 const inputClassName =
-  'text-white text-lg font-semibold underline text-right min-w-[120px] flex-1 py-0';
-const labelClassName = 'text-white text-xl font-semibold mr-2';
+  'text-white font-semibold underline text-right flex-1 py-0';
+const labelClassName = 'text-white font-semibold';
 
 type FieldRowProps = {
   label: string;
@@ -35,8 +43,13 @@ type FieldRowProps = {
 };
 
 const FieldRow: React.FC<FieldRowProps> = ({ label, isFirst = false, children }) => (
-  <View className={`${timerSettingRowClassName}${isFirst ? ' border-t-0' : ''}`}>
-    <Text className={labelClassName}>{label}</Text>
+  <View
+    className={`${timerSettingRowClassName}${isFirst ? ' border-t-0' : ''}`}
+    style={timerSettingRowStyle}
+  >
+    <Text className={labelClassName} style={fieldLabelStyle}>
+      {label}
+    </Text>
     {children}
   </View>
 );
@@ -120,21 +133,25 @@ const SignUpScreenGluestack: React.FC = () => {
   return (
     <ScreenScrollLayout
       contentContainerClassName={`${timerScrollContentClassName}`}
+      contentContainerStyle={timerScrollContentStyle}
       keyboardShouldPersistTaps="handled"
     >
-      <VStack space="md" className={timerContentStackClassName}>
+      <VStack className={timerContentStackClassName} style={stackGapStyle}>
         <TimerSectionCard>
           <Text
             style={{
-              fontSize: 34,
+              fontSize: vh(34),
               fontWeight: 'bold',
               color: '#ffffff',
-              lineHeight: 40,
+              lineHeight: vh(40),
             }}
           >
             Sign up
           </Text>
-          <Text className={`${mutedTextClassName} text-lg mb-6`}>
+          <Text
+            className={mutedTextClassName}
+            style={[mutedTextStyle, { fontSize: layout.fontLg, marginBottom: layout.space24 }]}
+          >
             Create your account
           </Text>
 
@@ -151,8 +168,10 @@ const SignUpScreenGluestack: React.FC = () => {
               accessibilityLabel="Email"
               className={inputClassName}
               style={{
-                lineHeight: 25,
-                height: 30,
+                ...fieldInputStyle,
+                minWidth: layout.space32 * 4 - layout.space8,
+                lineHeight: vh(25),
+                height: layout.space32,
               }}
               cursorColor="#ffffff"
               selectionColor="white"
@@ -162,7 +181,12 @@ const SignUpScreenGluestack: React.FC = () => {
             />
           </FieldRow>
           {emailError ? (
-            <Text className="text-error-400 text-lg font-semibold mt-1">{emailError}</Text>
+            <Text
+              className="text-error-400 font-semibold"
+              style={{ fontSize: layout.fontLg, marginTop: layout.space4 }}
+            >
+              {emailError}
+            </Text>
           ) : null}
 
           <FieldRow label="Password:">
@@ -178,6 +202,7 @@ const SignUpScreenGluestack: React.FC = () => {
               editable={!isLoading}
               accessibilityLabel="Password"
               className={inputClassName}
+              style={{ ...fieldInputStyle, minWidth: layout.space32 * 4 - layout.space8 }}
               cursorColor="#ffffff"
               selectionColor="white"
               secureTextEntry={!showPassword}
@@ -189,7 +214,7 @@ const SignUpScreenGluestack: React.FC = () => {
               disabled={isLoading}
               accessibilityRole="button"
               accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-              className="ml-2 p-1"
+              style={{ marginLeft: layout.space8, padding: layout.space4 }}
             >
               <Icon
                 as={showPassword ? EyeIcon : EyeOffIcon}
@@ -199,7 +224,12 @@ const SignUpScreenGluestack: React.FC = () => {
             </Pressable>
           </FieldRow>
           {passwordError ? (
-            <Text className="text-error-400 text-lg font-semibold mt-1">{passwordError}</Text>
+            <Text
+              className="text-error-400 font-semibold"
+              style={{ fontSize: layout.fontLg, marginTop: layout.space4 }}
+            >
+              {passwordError}
+            </Text>
           ) : null}
 
           <FieldRow label="Confirm:">
@@ -215,6 +245,7 @@ const SignUpScreenGluestack: React.FC = () => {
               editable={!isLoading}
               accessibilityLabel="Confirm password"
               className={inputClassName}
+              style={{ ...fieldInputStyle, minWidth: layout.space32 * 4 - layout.space8 }}
               cursorColor="#ffffff"
               selectionColor="white"
               secureTextEntry={!showConfirmPassword}
@@ -228,7 +259,7 @@ const SignUpScreenGluestack: React.FC = () => {
               accessibilityLabel={
                 showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'
               }
-              className="ml-2 p-1"
+              style={{ marginLeft: layout.space8, padding: layout.space4 }}
             >
               <Icon
                 as={showConfirmPassword ? EyeIcon : EyeOffIcon}
@@ -238,11 +269,14 @@ const SignUpScreenGluestack: React.FC = () => {
             </Pressable>
           </FieldRow>
           {passwordConfirmationError ? (
-            <Text className="text-error-400 text-lg font-semibold mt-1">
+            <Text
+              className="text-error-400 font-semibold"
+              style={{ fontSize: layout.fontLg, marginTop: layout.space4 }}
+            >
               {passwordConfirmationError}
             </Text>
           ) : null}
-          <View style={{marginTop: 30}}>
+          <View style={{ marginTop: layout.space32 }}>
             <TimerOutlineButton
               label="Create account"
               iconName="person-add-sharp"
@@ -251,13 +285,20 @@ const SignUpScreenGluestack: React.FC = () => {
               isLoading={isLoading}
               variant="solid"
               size="xl"
-              className="mt-4"
+              style={{ marginTop: layout.space16 }}
               accessibilityLabel="Create account"
             />
             </View>
         </TimerSectionCard>
 
-        <View className="w-full items-center mt-6 mb-2 gap-6">
+        <View
+          className="w-full items-center"
+          style={{
+            marginTop: layout.space24,
+            marginBottom: layout.space8,
+            gap: layout.space24,
+          }}
+        >
           <Link
             onPress={() => navigation.navigate('LoginGluestack')}
             disabled={isLoading}
@@ -265,10 +306,10 @@ const SignUpScreenGluestack: React.FC = () => {
           >
             <LinkText
               style={{
-                fontSize: 18,
+                fontSize: layout.fontLg,
                 fontWeight: 'bold',
                 color: '#ffffff',
-                lineHeight: 20,
+                lineHeight: layout.iconLg,
               }}
             >
               Already have an account? Log in

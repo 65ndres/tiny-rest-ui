@@ -7,7 +7,10 @@ import Carousel, {
 import { Text } from '@/components/ui/text';
 import {
   homeHintClassName,
+  homeHintStyle,
+  layout,
   mutedTextClassName,
+  mutedTextStyle,
 } from '@/app/constants/screenLayout';
 import type { SleepPredictionDisplay } from '@/app/utils/sleepPrediction';
 
@@ -25,9 +28,18 @@ type HomeNapPredictionCarouselProps = {
   disabled?: boolean;
 };
 
-const CAROUSEL_HEIGHT = 100;
-const CHEVRON_SIZE = 28;
 const CHEVRON_HIT_SLOP = 8;
+const SLIDE_PADDING_TOP = 10;
+const PREDICTION_CAROUSEL_HEIGHT =
+  SLIDE_PADDING_TOP +
+  layout.fontXl * 1.3 +
+  layout.space4 +
+  layout.fontLg * 1.3 +
+  layout.space32 +
+  layout.font5xl +
+  layout.space8 +
+  layout.fontSm * 1.3 +
+  layout.space8;
 
 const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
   slides,
@@ -52,12 +64,12 @@ const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
 
   return (
     <View className="w-full items-center">
-      <View className="w-full" style={{ height: CAROUSEL_HEIGHT }}>
+      <View className="w-full" style={{ height: PREDICTION_CAROUSEL_HEIGHT }}>
         <Carousel
           ref={carouselRef}
           key={slides.map((slide) => slide.count).join('-')}
           width={width}
-          height={CAROUSEL_HEIGHT}
+          height={PREDICTION_CAROUSEL_HEIGHT}
           data={slides}
           loop={false}
           autoPlay={false}
@@ -71,19 +83,34 @@ const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
           renderItem={({ item }) => (
             <View
               className="w-full items-center justify-center"
-              style={{ paddingHorizontal: showChevrons ? CHEVRON_SIZE : 0 }}
+              style={{
+                paddingHorizontal: showChevrons ? layout.chevronSize : 0,
+                paddingTop: SLIDE_PADDING_TOP,
+              }}
             >
-              <Text className="text-white text-xl font-semibold">
+              <Text
+                className="text-white font-semibold"
+                style={{ fontSize: layout.fontXl }}
+              >
                 {item.countLabel}
               </Text>
-              <Text className={`${mutedTextClassName} text-lg mt-1`}>
+              <Text
+                className={mutedTextClassName}
+                style={[mutedTextStyle, { fontSize: layout.fontLg, marginTop: layout.space4 }]}
+              >
                 {item.display.label}
               </Text>
-              <Text className="text-white text-5xl font-mono tracking-wider mt-2">
+              <Text
+                className="text-white font-mono tracking-wider"
+                style={{ fontSize: layout.font5xl, marginTop: layout.space32, lineHeight: layout.font5xl }}
+              >
                 {item.display.value}
               </Text>
               {item.display.subtitle ? (
-                <Text className={`${homeHintClassName} mt-2`}>
+                <Text
+                  className={homeHintClassName}
+                  style={[homeHintStyle, { marginTop: layout.space8 }]}
+                >
                   {item.display.subtitle}
                 </Text>
               ) : null}
@@ -103,11 +130,11 @@ const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
               accessibilityLabel="Previous nap schedule"
               accessibilityState={{ disabled: !canGoPrev }}
               className="absolute left-0 top-0 items-center justify-center"
-              style={{ width: CHEVRON_SIZE, height: CAROUSEL_HEIGHT }}
+              style={{ width: layout.chevronSize, height: PREDICTION_CAROUSEL_HEIGHT }}
             >
               <Ionicons
                 name="chevron-back"
-                size={22}
+                size={layout.iconXl}
                 color={canGoPrev ? 'white' : 'rgba(255,255,255,0.25)'}
               />
             </Pressable>
@@ -122,11 +149,11 @@ const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
               accessibilityLabel="Next nap schedule"
               accessibilityState={{ disabled: !canGoNext }}
               className="absolute right-0 top-0 items-center justify-center"
-              style={{ width: CHEVRON_SIZE, height: CAROUSEL_HEIGHT }}
+              style={{ width: layout.chevronSize, height: PREDICTION_CAROUSEL_HEIGHT }}
             >
               <Ionicons
                 name="chevron-forward"
-                size={22}
+                size={layout.iconXl}
                 color={canGoNext ? 'white' : 'rgba(255,255,255,0.25)'}
               />
             </Pressable>
@@ -134,13 +161,17 @@ const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
         ) : null}
       </View>
       {showChevrons ? (
-        <View className="flex-row items-center justify-center mt-2 gap-2">
+        <View
+          className="flex-row items-center justify-center"
+          style={{ marginTop: layout.space8, gap: layout.space8 }}
+        >
           {slides.map((slide, index) => (
             <View
               key={slide.count}
-              className={`h-1.5 w-1.5 rounded-full ${
+              className={`rounded-full ${
                 index === activeIndex ? 'bg-white' : 'bg-white/40'
               }`}
+              style={{ height: layout.space6, width: layout.space6 }}
             />
           ))}
         </View>

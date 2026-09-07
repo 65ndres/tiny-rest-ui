@@ -21,14 +21,15 @@ import 'react-native-reanimated';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Input } from '@rneui/themed';
-import { getAppWindow } from '@/constants/appViewport';
+import { APP_MAX_HEIGHT, APP_MAX_WIDTH, getAppWindow } from '@/constants/appViewport';
 import { API_URL } from '../../constants/Config';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 import BackButton from '../SampleModule/BackButton';
 import { formatItemForMessage, getItemById, searchByQuery } from '../../lib/sampleContent';
 import type { SampleItem } from '../../types/sampleItem';
 
-const { width: screenWidth, height: screenHeight } = getAppWindow();
+const screenHeight = getAppWindow().height;
+const screenWidth = screenHeight * (APP_MAX_WIDTH / APP_MAX_HEIGHT);
 
 type RootStackParamList = {
   Home: undefined;

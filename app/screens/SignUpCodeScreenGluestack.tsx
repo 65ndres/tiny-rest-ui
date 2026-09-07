@@ -5,11 +5,19 @@ import { Alert, Pressable, TextInput, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
+  fieldInputStyle,
+  fieldLabelStyle,
+  layout,
   mutedTextClassName,
+  mutedTextStyle,
+  stackGapStyle,
   timerContentStackClassName,
   timerScrollContentClassName,
+  timerScrollContentStyle,
   timerSettingRowClassName,
+  timerSettingRowStyle,
 } from '@/app/constants/screenLayout';
+import { vh } from '@/constants/appViewport';
 import { useAuth } from '../context/AuthContext';
 import ScreenScrollLayout from '../sharedComponents/ScreenScrollLayout';
 import TimerOutlineButton from '../sharedComponents/timer/TimerOutlineButton';
@@ -25,8 +33,8 @@ type NavigationProp = DrawerNavigationProp<AuthStackParamList>;
 type SignUpCodeRouteProp = RouteProp<AuthStackParamList, 'SignUpCode'>;
 
 const inputClassName =
-  'text-white text-lg font-semibold underline text-right min-w-[120px] flex-1 py-0';
-const labelClassName = 'text-white text-xl font-semibold mr-2';
+  'text-white font-semibold underline text-right flex-1 py-0';
+const labelClassName = 'text-white font-semibold';
 
 const SignUpCodeScreenGluestack: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -83,26 +91,32 @@ const SignUpCodeScreenGluestack: React.FC = () => {
   return (
     <ScreenScrollLayout
       contentContainerClassName={`${timerScrollContentClassName}`}
+      contentContainerStyle={timerScrollContentStyle}
       keyboardShouldPersistTaps="handled"
     >
-      <VStack space="md" className={timerContentStackClassName}>
+      <VStack className={timerContentStackClassName} style={stackGapStyle}>
         <TimerSectionCard>
           <Text
             style={{
-              fontSize: 34,
+              fontSize: vh(34),
               fontWeight: 'bold',
               color: '#ffffff',
-              lineHeight: 40,
+              lineHeight: vh(40),
             }}
           >
             Verify email
           </Text>
-          <Text className={`${mutedTextClassName} text-lg mb-6`}>
+          <Text
+            className={mutedTextClassName}
+            style={[mutedTextStyle, { fontSize: layout.fontLg, marginBottom: layout.space24 }]}
+          >
             Enter the 6-digit code we sent to {email || 'your email'}.
           </Text>
 
-          <View className={`${timerSettingRowClassName} border-t-0`}>
-            <Text className={labelClassName}>Code:</Text>
+          <View className={`${timerSettingRowClassName} border-t-0`} style={timerSettingRowStyle}>
+            <Text className={labelClassName} style={fieldLabelStyle}>
+              Code:
+            </Text>
             <TextInput
               value={code}
               onChangeText={(text) => {
@@ -115,9 +129,10 @@ const SignUpCodeScreenGluestack: React.FC = () => {
               accessibilityLabel="Verification code"
               className={inputClassName}
               style={{
-                lineHeight: 25,
-                height: 30,
-                letterSpacing: 4,
+                ...fieldInputStyle,
+                lineHeight: vh(25),
+                height: layout.space32,
+                letterSpacing: vh(4),
               }}
               cursorColor="#ffffff"
               selectionColor="white"
@@ -129,10 +144,15 @@ const SignUpCodeScreenGluestack: React.FC = () => {
             />
           </View>
           {codeError ? (
-            <Text className="text-error-400 text-lg font-semibold mt-1">{codeError}</Text>
+            <Text
+              className="text-error-400 font-semibold"
+              style={{ fontSize: layout.fontLg, marginTop: layout.space4 }}
+            >
+              {codeError}
+            </Text>
           ) : null}
 
-          <View style={{ marginTop: 30 }}>
+          <View style={{ marginTop: layout.space32 }}>
             <TimerOutlineButton
               label="Verify"
               iconName="checkmark-circle"
@@ -141,13 +161,20 @@ const SignUpCodeScreenGluestack: React.FC = () => {
               isLoading={isVerifying}
               variant="solid"
               size="xl"
-              className="mt-4"
+              style={{ marginTop: layout.space16 }}
               accessibilityLabel="Verify code"
             />
           </View>
         </TimerSectionCard>
 
-        <View className="w-full items-center mt-6 mb-2 gap-6">
+        <View
+          className="w-full items-center"
+          style={{
+            marginTop: layout.space24,
+            marginBottom: layout.space8,
+            gap: layout.space24,
+          }}
+        >
           <Pressable
             onPress={() => void handleResend()}
             disabled={isVerifying || isResending}
@@ -156,10 +183,10 @@ const SignUpCodeScreenGluestack: React.FC = () => {
           >
             <Text
               style={{
-                fontSize: 18,
+                fontSize: layout.fontLg,
                 fontWeight: 'bold',
                 color: '#ffffff',
-                lineHeight: 20,
+                lineHeight: layout.iconLg,
                 opacity: isResending ? 0.6 : 1,
               }}
             >
@@ -175,10 +202,10 @@ const SignUpCodeScreenGluestack: React.FC = () => {
           >
             <Text
               style={{
-                fontSize: 18,
+                fontSize: layout.fontLg,
                 fontWeight: 'bold',
                 color: '#ffffff',
-                lineHeight: 20,
+                lineHeight: layout.iconLg,
               }}
             >
               Back to sign up

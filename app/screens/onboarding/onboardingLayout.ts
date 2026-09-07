@@ -6,7 +6,7 @@ const { width: appWidth, height: appHeight } = getAppWindow();
 export const onboardingHeight = appHeight;
 export const onboardingWidth = appWidth;
 
-/** Design values are authored against a 812pt baseline; height is capped at Pro Max. */
+/** Design values are authored against a 812pt baseline; height is clamped SE–17 Pro Max. */
 export const vh = (value: number) => (onboardingHeight / 812) * value;
 
 export const slideStyles = StyleSheet.create({

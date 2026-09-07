@@ -19,11 +19,12 @@ import {
 import { ScrollView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
-import { getAppWindow } from '@/constants/appViewport';
+import { APP_MAX_HEIGHT, APP_MAX_WIDTH, getAppWindow } from '@/constants/appViewport';
 import { API_URL } from '../../constants/Config';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 
-const { width: screenWidth, height: screenHeight } = getAppWindow();
+const screenHeight = getAppWindow().height;
+const screenWidth = screenHeight * (APP_MAX_WIDTH / APP_MAX_HEIGHT);
 
 // Define the navigation stack param list
 type RootStackParamList = {

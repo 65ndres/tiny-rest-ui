@@ -14,7 +14,7 @@ import {
   ViewStyle
 } from 'react-native';
 import 'react-native-reanimated';
-import { getAppWindow } from '@/constants/appViewport';
+import { getAppWindow, vh } from '@/constants/appViewport';
 import { API_URL } from '../../constants/Config';
 import { useAuth } from '../context/AuthContext';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
@@ -202,8 +202,8 @@ const PasswordCodeScreen: React.FC = () => {
                     placeholder='Enter verification code'
                     selectionColor={'white'}
                     placeholderTextColor={'#d8d8d8ff'}
-                    leftIcon={{ type: 'font-awesome', name: 'key', color: '#ffffffff', size: 30 }}
-                    inputStyle={{color: 'white', fontSize: 22, paddingLeft: 20}}
+                    leftIcon={{ type: 'font-awesome', name: 'key', color: '#ffffffff', size: vh(30) }}
+                    inputStyle={{color: 'white', fontSize: vh(22), paddingLeft: vh(20)}}
                     labelStyle={{color: 'white'}}
                     inputContainerStyle={{borderBottomColor: 'white'}}
                     errorMessage={codeError}
@@ -243,8 +243,8 @@ const PasswordCodeScreen: React.FC = () => {
                     placeholder='New password'
                     selectionColor={'white'}
                     placeholderTextColor={'#d8d8d8ff'}
-                    leftIcon={{ type: 'font-awesome', name: 'lock', color: '#ffffffff', size: 30 }}
-                    inputStyle={{color: 'white', fontSize: 22, paddingLeft: 20}}
+                    leftIcon={{ type: 'font-awesome', name: 'lock', color: '#ffffffff', size: vh(30) }}
+                    inputStyle={{color: 'white', fontSize: vh(22), paddingLeft: vh(20)}}
                     labelStyle={{color: 'white'}}
                     inputContainerStyle={{borderBottomColor: 'white'}}
                     errorMessage={passwordError}
@@ -264,8 +264,8 @@ const PasswordCodeScreen: React.FC = () => {
                     placeholder='Confirm new password'
                     selectionColor={'white'}
                     placeholderTextColor={'#d8d8d8ff'}
-                    leftIcon={{ type: 'font-awesome', name: 'lock', color: '#ffffffff', size: 30 }}
-                    inputStyle={{color: 'white', fontSize: 22, paddingLeft: 20}}
+                    leftIcon={{ type: 'font-awesome', name: 'lock', color: '#ffffffff', size: vh(30) }}
+                    inputStyle={{color: 'white', fontSize: vh(22), paddingLeft: vh(20)}}
                     labelStyle={{color: 'white'}}
                     inputContainerStyle={{borderBottomColor: 'white'}}
                     errorMessage={passwordConfirmationError}
@@ -317,13 +317,13 @@ const styles = StyleSheet.create({
   } as ViewStyle,
   text: {
     color: 'white',
-    fontSize: 44,
-    lineHeight: 84,
+    fontSize: vh(44),
+    lineHeight: vh(84),
     fontWeight: '300',
     textAlign: 'center',
   } as TextStyle,
   separator: {
-    marginVertical: 8,
+    marginVertical: vh(8),
     width: '80%',
     borderBottomColor: 'white',
     borderBottomWidth: 1,
@@ -331,8 +331,8 @@ const styles = StyleSheet.create({
     marginRight: 'auto',
   } as ViewStyle,
   logoImage: {
-    height: 80,
-    width: 80,
+    height: vh(80),
+    width: vh(80),
     alignSelf: 'center',
   },
   bottomSectionInner: {

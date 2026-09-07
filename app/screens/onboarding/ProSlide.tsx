@@ -9,6 +9,8 @@ import {
 } from '@/app/constants/screenLayout';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
+import { layout, mutedTextStyle, stackGapStyle } from '@/app/constants/screenLayout';
+import { vh } from '@/constants/appViewport';
 import OnboardingSlideShell from './OnboardingSlideShell';
 
 type ProSlideProps = {
@@ -19,36 +21,36 @@ const ProSlide: React.FC<ProSlideProps> = ({ onPressNext }) => {
   return (
     <OnboardingSlideShell>
       <VStack
-        space="md"
         className={`${timerContentStackClassName} flex-1 justify-center`}
+        style={stackGapStyle}
       >
         <TimerSectionCard>
           <Text
             style={{
-              fontSize: 34,
+              fontSize: vh(34),
               fontWeight: 'bold',
               color: '#ffffff',
-              lineHeight: 40,
+              lineHeight: vh(40),
             }}
           >
             {PRO_PLAN_DISPLAY_NAME}
           </Text>
-          <View style={{ marginVertical: 24 }}>
-            <Text className={`${mutedTextClassName} text-xl mb-4`}>
+          <View style={{ marginVertical: layout.space24 }}>
+            <Text className={mutedTextClassName} style={[mutedTextStyle, { fontSize: layout.fontXl, marginBottom: layout.space16 }]}>
               Avoid overtiredness before it starts. Pro surfaces your child&apos;s
               recent sleep pattern and suggests when the next nap window is
               approaching.
             </Text>
-            <Text className={`${mutedTextClassName} text-xl mb-2`}>
+            <Text className={mutedTextClassName} style={[mutedTextStyle, { fontSize: layout.fontXl, marginBottom: layout.space8 }]}>
               • Next-nap prediction on your home screen
             </Text>
-            <Text className={`${mutedTextClassName} text-xl mb-2`}>
+            <Text className={mutedTextClassName} style={[mutedTextStyle, { fontSize: layout.fontXl, marginBottom: layout.space8 }]}>
               • Simple start/stop timer with history by day
             </Text>
-            <Text className={`${mutedTextClassName} text-xl mb-2`}>
+            <Text className={mutedTextClassName} style={[mutedTextStyle, { fontSize: layout.fontXl, marginBottom: layout.space8 }]}>
               • Feeding logs and soothing sounds
             </Text>
-            <Text className={`${mutedTextClassName} text-xl`}>
+            <Text className={mutedTextClassName} style={[mutedTextStyle, { fontSize: layout.fontXl }]}>
               • Catch sleepy cues before late fussiness
             </Text>
           </View>
@@ -59,7 +61,7 @@ const ProSlide: React.FC<ProSlideProps> = ({ onPressNext }) => {
               onPress={onPressNext}
               variant="solid"
               size="xl"
-              className="mt-2"
+              style={{ marginTop: layout.space8 }}
               accessibilityLabel="Choose a plan"
             />
           ) : null}

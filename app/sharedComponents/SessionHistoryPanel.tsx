@@ -14,7 +14,12 @@ import {
 import { ChevronDownIcon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
-import { homeRoutineCardClassName } from '@/app/constants/screenLayout';
+import {
+  homeRoutineCardClassName,
+  homeRoutineCardStyle,
+  layout,
+  stackGapStyle,
+} from '@/app/constants/screenLayout';
 import {
   deleteTimerRun,
   formatLabeledDuration,
@@ -47,14 +52,14 @@ type MetaRowData = {
 const isNumericId = (id: string): boolean => /^\d+$/.test(id);
 
 const MetaRow = ({ iconName, label, value }: MetaRowData) => (
-  <View className="flex-row items-center mt-1">
+  <View className="flex-row items-center" style={{ marginTop: layout.space4 }}>
     <Ionicons
       name={iconName}
-      size={16}
+      size={layout.iconSm}
       color="#ffffff"
-      style={{ marginRight: 6 }}
+      style={{ marginRight: layout.space6 }}
     />
-    <Text className="text-white text-lg font-semibold">
+    <Text className="text-white font-semibold" style={{ fontSize: layout.fontLg }}>
       {label ? `${label} ${value}` : value}
     </Text>
   </View>
@@ -175,11 +180,15 @@ const SessionHistoryPanel: React.FC<SessionHistoryPanelProps> = ({
   return (
     <TimerSectionCard title="History">
       {isLoading ? (
-        <Text className="text-white text-lg font-semibold">Loading...</Text>
+        <Text className="text-white font-semibold" style={{ fontSize: layout.fontLg }}>
+          Loading...
+        </Text>
       ) : null}
 
       {!isLoading && sessions.length === 0 ? (
-        <Text className="text-white text-lg font-semibold">{emptyMessage}</Text>
+        <Text className="text-white font-semibold" style={{ fontSize: layout.fontLg }}>
+          {emptyMessage}
+        </Text>
       ) : null}
 
       {!isLoading && dayGroups.length > 0 ? (
@@ -199,8 +208,14 @@ const SessionHistoryPanel: React.FC<SessionHistoryPanelProps> = ({
               }
             >
               <AccordionHeader>
-                <AccordionTrigger className="px-0 py-3 bg-transparent data-[focus-visible=true]:bg-transparent">
-                  <AccordionTitleText className="text-white text-xl font-bold">
+                <AccordionTrigger
+                  className="px-0 bg-transparent data-[focus-visible=true]:bg-transparent"
+                  style={{ paddingVertical: layout.space12 }}
+                >
+                  <AccordionTitleText
+                    className="text-white font-bold"
+                    style={{ fontSize: layout.fontXl }}
+                  >
                     {group.label}
                   </AccordionTitleText>
                   <AccordionIcon
@@ -210,12 +225,13 @@ const SessionHistoryPanel: React.FC<SessionHistoryPanelProps> = ({
                   />
                 </AccordionTrigger>
               </AccordionHeader>
-              <AccordionContent className="px-0 pb-2">
-                <VStack space="md">
+              <AccordionContent className="px-0" style={{ paddingBottom: layout.space8 }}>
+                <VStack style={stackGapStyle}>
                   {group.sessions.map((session) => (
                     <View
                       key={session.id}
                       className={homeRoutineCardClassName}
+                      style={homeRoutineCardStyle}
                     >
                       <VStack className="flex-1" space="xs">
                         {buildSessionRows(session, variant).map((row, index) => (
@@ -230,9 +246,10 @@ const SessionHistoryPanel: React.FC<SessionHistoryPanelProps> = ({
                         accessibilityRole="button"
                         hitSlop={8}
                         onPress={() => confirmDelete(session.id)}
-                        className="ml-2 self-start"
+                        className="self-start"
+                        style={{ marginLeft: layout.space8 }}
                       >
-                        <Ionicons name="trash-outline" size={22} color="#ffffff" />
+                        <Ionicons name="trash-outline" size={layout.iconXl} color="#ffffff" />
                       </Pressable>
                     </View>
                   ))}

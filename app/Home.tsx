@@ -7,8 +7,12 @@ import { ActivityIndicator, View } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import {
   glassCardCenteredClassName,
+  glassCardStyle,
   homeContentStackClassName,
   homeScrollContentClassName,
+  homeScrollContentStyle,
+  layout,
+  stackGapStyle,
 } from '@/app/constants/screenLayout';
 import {
   fetchSleepPrediction,
@@ -132,9 +136,13 @@ const Home: React.FC = () => {
   return (
     <ScreenScrollLayout
       contentContainerClassName={homeScrollContentClassName}
+      contentContainerStyle={homeScrollContentStyle}
     >
-      <VStack space="md" className={homeContentStackClassName}>
-        <VStack className={`${glassCardCenteredClassName} justify-center`}>
+      <VStack className={homeContentStackClassName} style={stackGapStyle}>
+        <VStack
+          className={`${glassCardCenteredClassName} justify-center`}
+          style={glassCardStyle}
+        >
           <View
             className="w-full"
             onLayout={(event) => {
@@ -158,7 +166,6 @@ const Home: React.FC = () => {
           </View>
         </VStack>
 
-        <View style={{ paddingBottom: 20 }}></View>
 
         <HomeRoutineCard
           title="Add sleep"

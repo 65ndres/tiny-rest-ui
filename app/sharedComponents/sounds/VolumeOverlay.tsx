@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import {
   GLASS_BACKGROUND_COLOR,
   GLASS_BORDER_COLOR,
+  layout,
 } from '@/app/constants/screenLayout';
 
 type VolumeOverlayProps = {
@@ -18,7 +19,7 @@ const VolumeOverlay: React.FC<VolumeOverlayProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      <Ionicons name="volume-low-outline" size={22} color="white" />
+      <Ionicons name="volume-low-outline" size={layout.iconXl} color="white" />
       <Slider
         style={styles.slider}
         minimumValue={0}
@@ -29,7 +30,7 @@ const VolumeOverlay: React.FC<VolumeOverlayProps> = ({
         maximumTrackTintColor="rgba(255, 255, 255, 0.35)"
         thumbTintColor="#d0d0d0"
       />
-      <Ionicons name="volume-high-outline" size={22} color="white" />
+      <Ionicons name="volume-high-outline" size={layout.iconXl} color="white" />
     </View>
   );
 };
@@ -44,15 +45,15 @@ const styles = StyleSheet.create({
     bottom: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: layout.space16,
+    paddingVertical: layout.space14,
     backgroundColor: GLASS_BACKGROUND_COLOR,
     borderTopWidth: 1,
     borderTopColor: GLASS_BORDER_COLOR,
-    gap: 8,
+    gap: layout.space8,
   },
   slider: {
     flex: 1,
-    height: 40,
+    height: layout.iconCircle,
   },
 });

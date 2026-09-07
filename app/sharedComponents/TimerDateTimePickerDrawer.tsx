@@ -11,7 +11,8 @@ import {
   DrawerHeader,
 } from '@/components/ui/drawer';
 import { Heading } from '@/components/ui/heading';
-import { TIMER_SOLID_BUTTON_CONTENT_COLOR } from '@/app/constants/screenLayout';
+import { TIMER_SOLID_BUTTON_CONTENT_COLOR, layout } from '@/app/constants/screenLayout';
+import { vh } from '@/constants/appViewport';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 import {
   isUsableTimerPickerDate,
@@ -117,8 +118,15 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
           style={styles.background}
         >
           <View style={styles.centeredContent}>
-            <DrawerHeader className="px-6 pt-6" style={{ paddingTop: '0%' }}>
-              <Heading size="lg" className="text-white font-bold">
+            <DrawerHeader
+              className="px-0"
+              style={{ paddingTop: 0, paddingHorizontal: layout.space24 }}
+            >
+              <Heading
+                size="lg"
+                className="text-white font-bold"
+                style={{ fontSize: layout.fontLg }}
+              >
                 {title}
               </Heading>
               <DrawerCloseButton className="p-1">
@@ -172,8 +180,8 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingBottom: 32,
+    paddingHorizontal: layout.space24,
+    paddingBottom: layout.space32,
   },
   pickerScale: {
     width: '100%',
@@ -183,16 +191,16 @@ const styles = StyleSheet.create({
   },
   picker: {
     width: '100%',
-    height: 216,
+    height: vh(216),
   },
   doneButton: {
     width: '100%',
-    marginTop: 36,
+    marginTop: layout.space36,
     alignItems: 'center',
   },
   closeIcon: {
-    width: 40,
-    height: 40,
+    width: layout.iconCircle,
+    height: layout.iconCircle,
     resizeMode: 'contain',
   },
 });

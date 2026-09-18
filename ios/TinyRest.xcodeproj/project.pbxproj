@@ -245,7 +245,7 @@
 		};
 		XX2F69133A9526A479C040XX /* widget */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = XX16D9E2CAB9FB28118261XX /* Build configuration list for PBXNativeTarget "widget" */;
+			buildConfigurationList = XX20C04687916480384DFCXX /* Build configuration list for PBXNativeTarget "widget" */;
 			buildPhases = (
 				XX074B8811C1CF8E8A3D74XX /* Frameworks */,
 				XXE45443DC38DCFE1DB622XX /* Sources */,
@@ -713,7 +713,7 @@
 			};
 			name = Release;
 		};
-		XX8CE3B7316A61A513D1F9XX /* Release */ = {
+		XX0E4EFFBEB8DB2ED27CC0XX /* Release */ = {
 			isa = XCBuildConfiguration;
 			name = Release;
 			buildSettings = {
@@ -727,7 +727,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -754,7 +754,7 @@
 				DEVELOPMENT_TEAM = NQ6AG8RHP3;
 			};
 		};
-		XXA1A6ECF56283FAC42B7DXX /* Debug */ = {
+		XXF82DE9F43C7B9EE96049XX /* Debug */ = {
 			isa = XCBuildConfiguration;
 			name = Debug;
 			buildSettings = {
@@ -767,7 +767,7 @@
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -816,12 +816,12 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		XX16D9E2CAB9FB28118261XX /* Build configuration list for PBXNativeTarget "widget" */ = {
+		XX20C04687916480384DFCXX /* Build configuration list for PBXNativeTarget "widget" */ = {
 			isa = XCConfigurationList;
 			defaultConfigurationIsVisible = 0;
 			buildConfigurations = (
-				XXA1A6ECF56283FAC42B7DXX /* Debug */,
-				XX8CE3B7316A61A513D1F9XX /* Release */,
+				XXF82DE9F43C7B9EE96049XX /* Debug */,
+				XX0E4EFFBEB8DB2ED27CC0XX /* Release */,
 			);
 			defaultConfigurationName = Release;
 		};

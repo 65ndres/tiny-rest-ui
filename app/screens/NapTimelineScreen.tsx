@@ -34,8 +34,11 @@ import {
   type TimerSession,
 } from '@/app/utils/timerHistory';
 import { TIMER_SOLID_BUTTON_CONTENT_COLOR } from '@/app/constants/screenLayout';
-import { vh } from '@/constants/appViewport';
+import { getAppWindow, vh, vw } from '@/constants/appViewport';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
+
+const { width: timelineWidth, height: timelineHeight } = getAppWindow();
+const TIMELINE_LEFT_INSET = vw(56);
 
 const calendarTheme = {
   backgroundColor: 'transparent',
@@ -55,6 +58,9 @@ const calendarTheme = {
   textDayFontWeight: '400' as const,
   textMonthFontWeight: '500' as const,
   textDayHeaderFontWeight: '500' as const,
+  textDayFontSize: vh(16),
+  textMonthFontSize: vh(16),
+  textDayHeaderFontSize: vh(13),
 };
 
 const timelineTheme = {
@@ -276,7 +282,7 @@ const NapTimelineScreen: React.FC = () => {
         >
           <Ionicons
             name="trash-outline"
-            size={22}
+            size={vh(22)}
             color={TIMER_SOLID_BUTTON_CONTENT_COLOR}
           />
         </Pressable>
@@ -288,8 +294,9 @@ const NapTimelineScreen: React.FC = () => {
   const timelineProps = useMemo(
     () => ({
       format24h: true,
-      overlapEventsSpacing: 8,
-      rightEdgeSpacing: 24,
+      overlapEventsSpacing: vw(8),
+      rightEdgeSpacing: vw(24),
+      timelineLeftInset: TIMELINE_LEFT_INSET,
       theme: timelineTheme,
       onEventPress: handleEventPress,
       renderEvent,
@@ -317,12 +324,14 @@ const NapTimelineScreen: React.FC = () => {
           showTodayButton
           disabledOpacity={0.6}
           theme={calendarTheme}
+          timelineLeftInset={TIMELINE_LEFT_INSET}
           style={styles.provider}
         >
           <WeekCalendar
             markedDates={markedDates}
             theme={calendarTheme}
             allowShadow={false}
+            calendarWidth={timelineWidth}
           />
           <TimelineList
             events={eventsByDate}
@@ -369,7 +378,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 48,
+    bottom: timelineHeight * 0.05,
     alignItems: 'center',
   },
   emptyText: {

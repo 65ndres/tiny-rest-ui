@@ -37,7 +37,7 @@ import AddFeedingScreen from './screens/AddFeedingScreen';
 import SoundsScreen from './screens/SoundsScreen';
 import BackButton from './SampleModule/BackButton';
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
-import { getAppWindow } from '@/constants/appViewport';
+import { getAppWindow, vh } from '@/constants/appViewport';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import '@/global.css';
 
@@ -99,7 +99,7 @@ const OnboardingStack = createStackNavigator<{
 
 const DrawerToggleButton: React.FC<{ size?: number }> = ({ size }) => {
   const navigation = useNavigation();
-  const iconSize = size || height * 0.035; // scales with screen height
+  const iconSize = size || height * 0.035;
   
   return (
     <TouchableOpacity
@@ -206,12 +206,12 @@ const AuthenticatedNavigator: React.FC = () => {
         headerTransparent: true,
         drawerStyle: {
           backgroundColor: 'transparent', 
-          width: width * 0.75, // scales with screen width (~75% of screen width)
+          width: Math.min(280, width * 0.72),
         },
         drawerLabelStyle: {
           color: 'white', 
-          lineHeight: height * 0.04, // scales with screen height
-          fontSize: height * 0.031, // scales with screen height
+          lineHeight: vh(28),
+          fontSize: vh(22),
           fontWeight: '300',
           textAlign: 'center'
           
@@ -378,12 +378,12 @@ const UnauthenticatedNavigator: React.FC = () => {
           headerTransparent: true,
           drawerStyle: {
             backgroundColor: 'transparent',
-            width: width * 0.75,
+            width: Math.min(280, width * 0.72),
           },
           drawerLabelStyle: {
             color: 'white',
-            lineHeight: height * 0.04,
-            fontSize: height * 0.031,
+            lineHeight: vh(28),
+            fontSize: vh(22),
             fontWeight: '300',
             textAlign: 'center',
           },
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
   } as ViewStyle,
   drawerMain: {
     flex: 1,
-    paddingTop: height * 0.185,
+    paddingTop: vh(110),
   } as ViewStyle,
   drawerScrollView: {
     flex: 1,
@@ -597,15 +597,15 @@ const styles = StyleSheet.create({
   } as ViewStyle,
   drawerScrollContent: {
     flexGrow: 1,
-    paddingTop: height * 0.185,
+    paddingTop: vh(110),
   } as ViewStyle,
   drawerFooter: {
-    paddingBottom: height * 0.04,
+    paddingBottom: vh(32),
   } as ViewStyle,
   drawerLabel: {
     color: 'white',
-    lineHeight: height * 0.04,
-    fontSize: height * 0.031,
+    lineHeight: vh(28),
+    fontSize: vh(22),
     fontWeight: '300',
     textAlign: 'center',
   },
@@ -616,8 +616,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'white',
     fontWeight: 300,
-    fontSize: height * 0.032,
-    lineHeight: height * 0.04,
+    fontSize: vh(22),
+    lineHeight: vh(28),
   },
   footerLabel: {
     textAlign: 'center',

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleProp, View, ViewStyle } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
@@ -16,6 +16,7 @@ type HomeRoutineCardProps = {
   onPress: () => void;
   accessibilityLabel: string;
   dimmed?: boolean;
+  style?: StyleProp<ViewStyle>;
 };
 
 const HomeRoutineCard: React.FC<HomeRoutineCardProps> = ({
@@ -25,10 +26,11 @@ const HomeRoutineCard: React.FC<HomeRoutineCardProps> = ({
   onPress,
   accessibilityLabel,
   dimmed = false,
+  style,
 }) => (
   <Pressable
     className={homeRoutineCardClassName}
-    style={[homeRoutineCardStyle, dimmed ? { opacity: 0.45 } : undefined]}
+    style={[homeRoutineCardStyle, style, dimmed ? { opacity: 0.45 } : undefined]}
     onPress={onPress}
     accessibilityRole="button"
     accessibilityLabel={accessibilityLabel}

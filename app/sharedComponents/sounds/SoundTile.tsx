@@ -17,7 +17,8 @@ import {
 type SoundTileProps = {
   track: SoundTrack;
   isActive: boolean;
-  tileSize: number;
+  tileWidth: number;
+  tileHeight: number;
   onPress: () => void;
 };
 
@@ -29,11 +30,12 @@ const IMAGE_SCALE = 0.42;
 const SoundTile: React.FC<SoundTileProps> = ({
   track,
   isActive,
-  tileSize,
+  tileWidth,
+  tileHeight,
   onPress,
 }) => {
   const playable = track.source != null;
-  const imageSize = Math.round(tileSize * IMAGE_SCALE);
+  const imageSize = Math.round(Math.min(tileWidth, tileHeight) * IMAGE_SCALE);
 
   return (
     <Pressable
@@ -43,14 +45,14 @@ const SoundTile: React.FC<SoundTileProps> = ({
       disabled={!playable}
       style={[
         styles.wrapper,
-        { width: tileSize },
+        { width: tileWidth },
         !playable ? styles.tileDisabled : null,
       ]}
     >
       <View
         style={[
           styles.tile,
-          { width: tileSize, height: tileSize },
+          { width: tileWidth, height: tileHeight },
           isActive ? styles.tileActive : styles.tileInactive,
         ]}
       >

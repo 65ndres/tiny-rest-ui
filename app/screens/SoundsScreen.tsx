@@ -9,27 +9,25 @@ import { layout } from '@/app/constants/screenLayout';
 import { useAudioPlayback } from '@/app/context/AudioPlaybackContext';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
 import SoundTile from '@/app/sharedComponents/sounds/SoundTile';
-import VolumeOverlay from '@/app/sharedComponents/sounds/VolumeOverlay';
 import { getAppWindow, padX, vh } from '@/constants/appViewport';
 
 const TILE_GAP = layout.space12;
 const NUM_COLUMNS = 2;
-const VOLUME_OVERLAY_HEIGHT = vh(68);
+const TILE_HEIGHT = vh(150);
 
 const SoundsScreen: React.FC = () => {
-  const { activeTrackId, volume, toggleTrack, setVolume } =
-    useAudioPlayback();
+  const { activeTrackId, toggleTrack } = useAudioPlayback();
 
-  const { tileSize, gridWidth, rows } = useMemo(() => {
+  const { tileWidth, gridWidth, rows } = useMemo(() => {
     const gridWidth = getAppWindow().width - padX(48) * 2;
-    const tileSize = Math.floor(
+    const tileWidth = Math.floor(
       (gridWidth - TILE_GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS
     );
     const rows = [];
     for (let i = 0; i < SOUND_CATALOG.length; i += NUM_COLUMNS) {
       rows.push(SOUND_CATALOG.slice(i, i + NUM_COLUMNS));
     }
-    return { tileSize, gridWidth, rows };
+    return { tileWidth, gridWidth, rows };
   }, []);
 
   return (
@@ -49,7 +47,8 @@ const SoundsScreen: React.FC = () => {
                   <SoundTile
                     key={item.id}
                     track={item}
-                    tileSize={tileSize}
+                    tileWidth={tileWidth}
+                    tileHeight={TILE_HEIGHT}
                     isActive={activeTrackId === item.id}
                     onPress={() => toggleTrack(item.id)}
                   />
@@ -58,7 +57,6 @@ const SoundsScreen: React.FC = () => {
             ))}
           </View>
         </ScrollView>
-        <VolumeOverlay volume={volume} onVolumeChange={setVolume} />
       </View>
     </ScreenComponent>
   );
@@ -83,6 +81,6 @@ const styles = StyleSheet.create({
   tileGrid: {
     paddingTop: layout.space16,
     paddingHorizontal: 0,
-    paddingBottom: VOLUME_OVERLAY_HEIGHT + layout.space16,
+    paddingBottom: layout.space16,
   },
 });

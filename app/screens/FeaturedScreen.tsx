@@ -7,7 +7,7 @@ import SampleModule from '../SampleModule/SampleModule';
 
 const { width: screenWidth } = getAppWindow();
 const s = scaleFromPhoneBaseline;
-const quoteContentMaxWidth = screenWidth - padX(48) * 2;
+const quoteContentMaxWidth = screenWidth - padX(20) * 2;
 
 const FeaturedScreen: React.FC = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;

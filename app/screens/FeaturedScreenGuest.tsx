@@ -9,7 +9,7 @@ import SampleModule from '../SampleModule/SampleModule';
 
 const { width: screenWidth } = getAppWindow();
 const s = scaleFromPhoneBaseline;
-const quoteContentMaxWidth = screenWidth - padX(48) * 2;
+const quoteContentMaxWidth = screenWidth - padX(20) * 2;
 
 type AuthStackParamList = {
   Login: undefined;

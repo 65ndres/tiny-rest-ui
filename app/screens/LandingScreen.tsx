@@ -15,7 +15,7 @@ import {
   timerSessionResetLinkClassName,
   timerSessionResetLinkStyle,
 } from '@/app/constants/screenLayout';
-import { vh } from '@/constants/appViewport';
+import { padX, vh } from '@/constants/appViewport';
 import {
   APP_DISPLAY_NAME,
   BASIC_PLAN_DISPLAY_NAME,
@@ -54,7 +54,7 @@ const LandingScreen: React.FC = () => {
       contentContainerStyle={timerScrollContentStyle}
     >
       <VStack className={timerContentStackClassName} style={stackGapStyle}>
-        <TimerSectionCard>
+        <TimerSectionCard style={{ paddingHorizontal: padX(24) }}>
           <Text
             style={{
               fontSize: vh(34),

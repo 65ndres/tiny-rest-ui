@@ -9,11 +9,9 @@ import {
   glassCardCenteredClassName,
   glassCardStyle,
   homeContentStackClassName,
-  homeScrollContentClassName,
-  homeScrollContentStyle,
   layout,
-  stackGapStyle,
 } from '@/app/constants/screenLayout';
+import { getAppWindow, padX } from '@/constants/appViewport';
 import {
   fetchSleepPrediction,
   formatPredictionDisplay,
@@ -28,7 +26,7 @@ import HomeNapPredictionCarousel, {
   type HomeNapPredictionSlide,
 } from './sharedComponents/home/HomeNapPredictionCarousel';
 import HomeRoutineCard from './sharedComponents/home/HomeRoutineCard';
-import ScreenScrollLayout from './sharedComponents/ScreenScrollLayout';
+import ScreenComponent from './sharedComponents/ScreenComponent';
 
 type RootDrawerParamList = {
   Home: undefined;
@@ -39,6 +37,12 @@ type RootDrawerParamList = {
 };
 
 type NavigationProp = DrawerNavigationProp<RootDrawerParamList, 'Home'>;
+
+const PREDICTION_PANEL_HEIGHT = '32%';
+const ACTIONS_HEIGHT = '58%';
+const HOME_SECTION_GAP = '5%';
+const HOME_HORIZONTAL_PADDING =
+  getAppWindow().width >= 414 ? padX(8) : layout.padX24;
 
 const Home: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -134,14 +138,21 @@ const Home: React.FC = () => {
   }
 
   return (
-    <ScreenScrollLayout
-      contentContainerClassName={homeScrollContentClassName}
-      contentContainerStyle={homeScrollContentStyle}
-    >
-      <VStack className={homeContentStackClassName} style={stackGapStyle}>
+    <ScreenComponent contentFlex>
+      <View
+        className={`${homeContentStackClassName} flex-1 min-h-0`}
+        style={{
+          paddingTop: layout.space8,
+          paddingBottom: layout.space8,
+          paddingHorizontal: HOME_HORIZONTAL_PADDING,
+        }}
+      >
         <VStack
           className={`${glassCardCenteredClassName} justify-center`}
-          style={glassCardStyle}
+          style={[
+            glassCardStyle,
+            { height: PREDICTION_PANEL_HEIGHT, minHeight: 0 },
+          ]}
         >
           <View
             className="w-full"
@@ -166,43 +177,52 @@ const Home: React.FC = () => {
           </View>
         </VStack>
 
-        <View style={{ paddingBottom: layout.space20 }}></View>
+        <View style={{ height: HOME_SECTION_GAP }} />
 
-        <HomeRoutineCard
-          title="Add sleep"
-          subtitle="Log a nap session"
-          iconName="moon-sharp"
-          onPress={() => navigation.navigate('Timer')}
-          accessibilityLabel="Add sleep"
-        />
+        <VStack
+          className="w-full"
+          style={{ height: ACTIONS_HEIGHT, gap: layout.space12 }}
+        >
+          <HomeRoutineCard
+            title="Add sleep"
+            subtitle="Log a nap session"
+            iconName="moon-sharp"
+            onPress={() => navigation.navigate('Timer')}
+            accessibilityLabel="Add sleep"
+            style={{ flex: 1, minHeight: 0 }}
+          />
 
-        <HomeRoutineCard
-          title="Add feeding"
-          subtitle="Bottle or nursing session"
-          iconName="water-sharp"
-          onPress={() => navigateOrPaywall('AddFeeding')}
-          accessibilityLabel="Add feeding"
-          dimmed={!isProUser}
-        />
+          <HomeRoutineCard
+            title="Add feeding"
+            subtitle="Bottle or nursing session"
+            iconName="water-sharp"
+            onPress={() => navigateOrPaywall('AddFeeding')}
+            accessibilityLabel="Add feeding"
+            dimmed={!isProUser}
+            style={{ flex: 1, minHeight: 0 }}
+          />
 
-        <HomeRoutineCard
-          title="View timeline"
-          subtitle="See today's schedule"
-          iconName="calendar-sharp"
-          onPress={() => navigateOrPaywall('NapTimeline')}
-          accessibilityLabel="View timeline"
-          dimmed={!isProUser}
-        />
-        <HomeRoutineCard
-          title="Soothing sounds"
-          subtitle="White noise & lullabies"
-          iconName="musical-notes-sharp"
-          onPress={() => navigateOrPaywall('Sounds')}
-          accessibilityLabel="Soothing sounds"
-          dimmed={!isProUser}
-        />
-      </VStack>
-    </ScreenScrollLayout>
+          <HomeRoutineCard
+            title="View timeline"
+            subtitle="See today's schedule"
+            iconName="calendar-sharp"
+            onPress={() => navigateOrPaywall('NapTimeline')}
+            accessibilityLabel="View timeline"
+            dimmed={!isProUser}
+            style={{ flex: 1, minHeight: 0 }}
+          />
+          <HomeRoutineCard
+            title="Soothing sounds"
+            subtitle="White noise & lullabies"
+            iconName="musical-notes-sharp"
+            onPress={() => navigateOrPaywall('Sounds')}
+            accessibilityLabel="Soothing sounds"
+            dimmed={!isProUser}
+            style={{ flex: 1, minHeight: 0 }}
+          />
+        </VStack>
+      </View>
+    </ScreenComponent>
   );
 };
 

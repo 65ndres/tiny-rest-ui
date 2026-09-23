@@ -19,9 +19,7 @@ import RevenueCatUI, {
 import { useAuth } from './AuthContext';
 
 // EXPO_PUBLIC_* keys are injected at build time; pick DEV vs PROD by environment
-const REVENUECAT_API_KEY = isProduction
-  ? process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_PROD
-  : process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_DEV;
+const REVENUECAT_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY;
 // Entitlement identifier
 export const ENTITLEMENT_IDENTIFIER = 'Tiny Rest Pro';
 
@@ -93,10 +91,8 @@ export const RevenueCatProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const initializeRevenueCat = async () => {
       try {
         if (!REVENUECAT_API_KEY) {
-          const envName = isProduction
-            ? 'EXPO_PUBLIC_REVENUECAT_API_KEY_PROD'
-            : 'EXPO_PUBLIC_REVENUECAT_API_KEY_DEV';
-          const message = `Missing RevenueCat API key (${envName}). Restart Metro after updating .env.`;
+  
+          const message = `Missing RevenueCat API key . Restart Metro after updating .env.`;
           console.error(message);
           if (__DEV__) {
             Alert.alert('RevenueCat Configuration Error', message);

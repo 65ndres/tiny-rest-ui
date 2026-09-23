@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { StyleProp, View, ViewStyle } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
@@ -16,6 +16,7 @@ type TimerSectionCardProps = {
   titleStyle?: object;
   showAccent?: boolean;
   children: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
 };
 
 const TimerGradientAccent: React.FC = () => (
@@ -39,12 +40,14 @@ const TimerSectionCard: React.FC<TimerSectionCardProps> = ({
   titleStyle,
   showAccent = false,
   children,
+  style,
 }) => (
   <View
     className={`${glassCardClassName}${showAccent ? ' flex-row' : ''}`}
     style={[
       glassCardStyle,
       showAccent ? { alignItems: 'flex-start' } : null,
+      style,
     ]}
   >
     {showAccent ? <TimerGradientAccent /> : null}

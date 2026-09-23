@@ -1,6 +1,6 @@
 {
   "name": "tiny-rest",
-  "main": "expo-router/entry",
+  "main": "index.js",
   "version": "2.1.0",
   "scripts": {
     "start": "expo start --dev-client",

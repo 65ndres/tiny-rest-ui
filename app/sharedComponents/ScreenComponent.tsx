@@ -154,7 +154,9 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({
             contentFlex
               ? styles.flexContent
               : { height: showFooter ? SCREEN_CONTENT_HEIGHT : '85%' },
-            styles.contentPadding,
+            constrainToPhoneViewport
+              ? styles.contentPadding
+              : styles.stretchContent,
           ]}
         >
           {processChildren(children)}
@@ -180,6 +182,11 @@ const styles = StyleSheet.create({
     width: insetContentWidth,
     maxWidth: insetContentWidth,
     alignSelf: 'center',
+  } as ViewStyle,
+  stretchContent: {
+    width: '100%',
+    maxWidth: '100%',
+    alignSelf: 'stretch',
   } as ViewStyle,
   screenContainer: {
     flex: 1,

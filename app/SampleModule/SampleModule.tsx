@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { ICarouselInstance } from 'react-native-reanimated-carousel';
 import Carousel from 'react-native-reanimated-carousel';
-import { getAppWindow } from '@/constants/appViewport';
+import { getAppWindow, padX } from '@/constants/appViewport';
 import {
   getFeaturedItems,
   getSavedItems,
@@ -39,6 +39,7 @@ type RootDrawerParamList = {
 type NavigationProp = DrawerNavigationProp<RootDrawerParamList>;
 
 const { width, height } = getAppWindow();
+const carouselWidth = width - padX(48) * 2;
 const carouselHeight = Math.min(height * 0.4, width * 1.15);
 
 const SampleModule: React.FC<SampleModuleProps> = ({
@@ -166,7 +167,7 @@ const SampleModule: React.FC<SampleModuleProps> = ({
         <View style={{ flex: 1 }}>
           <Carousel
             ref={ref}
-            width={width * 0.84}
+            width={carouselWidth}
             height={carouselHeight}
             data={items}
             loop={false}

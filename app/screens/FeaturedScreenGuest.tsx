@@ -1,5 +1,5 @@
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
-import { getAppWindow, scaleFromPhoneBaseline } from '@/constants/appViewport';
+import { getAppWindow, padX, scaleFromPhoneBaseline } from '@/constants/appViewport';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useRef } from 'react';
@@ -9,7 +9,7 @@ import SampleModule from '../SampleModule/SampleModule';
 
 const { width: screenWidth } = getAppWindow();
 const s = scaleFromPhoneBaseline;
-const quoteContentMaxWidth = Math.min(s(340), screenWidth);
+const quoteContentMaxWidth = screenWidth - padX(48) * 2;
 
 type AuthStackParamList = {
   Login: undefined;
@@ -81,7 +81,6 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: quoteContentMaxWidth,
     alignSelf: 'center',
-    paddingHorizontal: s(24),
   },
   middleSection: { flex: 6, minHeight: 0 },
   bottomSection: { flex: 2, minHeight: 0 },

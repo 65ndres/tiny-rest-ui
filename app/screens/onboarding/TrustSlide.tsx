@@ -7,7 +7,7 @@ import {
   layout,
   mutedTextClassName,
   mutedTextStyle,
-  SCREEN_CONTENT_WIDTH_RATIO,
+  SCREEN_HORIZONTAL_INSET,
   stackGapStyle,
   timerContentStackClassName,
 } from '@/app/constants/screenLayout';
@@ -48,7 +48,7 @@ const REVIEWS = [
   },
 ] as const;
 
-const CAROUSEL_WIDTH = onboardingWidth * SCREEN_CONTENT_WIDTH_RATIO;
+const CAROUSEL_WIDTH = onboardingWidth - SCREEN_HORIZONTAL_INSET * 2;
 const CAROUSEL_HEIGHT = vh(140);
 
 const Stars: React.FC<{ count: number }> = ({ count }) => (

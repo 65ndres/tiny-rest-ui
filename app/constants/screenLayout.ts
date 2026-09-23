@@ -6,6 +6,8 @@ export const SCREEN_CONTENT_HEIGHT = '80%';
 export const SCREEN_FOOTER_HEIGHT = '10%';
 /** Matches ScreenComponent screenContainer width ratio. */
 export const SCREEN_CONTENT_WIDTH_RATIO = 1;
+/** Shared outer gutter for screen content, including compact iPhones. */
+export const SCREEN_HORIZONTAL_INSET = padX(48);
 
 /** Design px authored at iPhone 17 Pro Max; use for one-off sizes. */
 export const layout = {

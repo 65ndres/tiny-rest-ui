@@ -13,12 +13,14 @@ import {
   SCREEN_CONTENT_HEIGHT,
   SCREEN_CONTENT_WIDTH_RATIO,
   SCREEN_FOOTER_HEIGHT,
+  SCREEN_HORIZONTAL_INSET,
   SCREEN_TOP_HEIGHT,
 } from '@/app/constants/screenLayout';
 import { getAppWindow } from '@/constants/appViewport';
 import AppScreenFooter from './AppScreenFooter';
 
 const cappedContentWidth = getAppWindow().width * SCREEN_CONTENT_WIDTH_RATIO;
+const insetContentWidth = cappedContentWidth - SCREEN_HORIZONTAL_INSET * 2;
 const FOCUS_FADE_IN_MS = 220;
 
 interface ScreenComponentProps {
@@ -148,11 +150,12 @@ const ScreenComponent: React.FC<ScreenComponentProps> = ({
       >
         <View style={{ height: SCREEN_TOP_HEIGHT }} />
         <View
-          style={
+          style={[
             contentFlex
               ? styles.flexContent
-              : { height: showFooter ? SCREEN_CONTENT_HEIGHT : '85%' }
-          }
+              : { height: showFooter ? SCREEN_CONTENT_HEIGHT : '85%' },
+            styles.contentPadding,
+          ]}
         >
           {processChildren(children)}
         </View>
@@ -170,6 +173,13 @@ const styles = StyleSheet.create({
   flexContent: {
     flex: 1,
     minHeight: 0,
+  } as ViewStyle,
+  contentPadding: {
+    // Give percentage-width children a genuinely inset containing block.
+    // Padding/margins alone still allow `w-full` children to overflow.
+    width: insetContentWidth,
+    maxWidth: insetContentWidth,
+    alignSelf: 'center',
   } as ViewStyle,
   screenContainer: {
     flex: 1,

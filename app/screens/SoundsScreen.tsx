@@ -5,31 +5,32 @@ import {
   View,
 } from 'react-native';
 import { SOUND_CATALOG } from '@/app/constants/soundCatalog';
-import { SCREEN_CONTENT_WIDTH_RATIO, layout } from '@/app/constants/screenLayout';
+import { layout } from '@/app/constants/screenLayout';
 import { useAudioPlayback } from '@/app/context/AudioPlaybackContext';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
 import SoundTile from '@/app/sharedComponents/sounds/SoundTile';
 import VolumeOverlay from '@/app/sharedComponents/sounds/VolumeOverlay';
-import { getAppWindow, vh } from '@/constants/appViewport';
+import { getAppWindow, padX, vh } from '@/constants/appViewport';
 
+const TILE_GAP = layout.space12;
 const NUM_COLUMNS = 2;
+const VOLUME_OVERLAY_HEIGHT = vh(68);
 
 const SoundsScreen: React.FC = () => {
   const { activeTrackId, volume, toggleTrack, setVolume } =
     useAudioPlayback();
 
-  const tileSize = useMemo(() => {
-    const sidePadding = layout.padX24;
-    const tileGap = layout.space12;
-    const contentWidth =
-      getAppWindow().width * SCREEN_CONTENT_WIDTH_RATIO - sidePadding * 2;
-    const widthFit = Math.floor(
-      (contentWidth - tileGap * (NUM_COLUMNS - 1)) / NUM_COLUMNS
+  const { tileSize, gridWidth, rows } = useMemo(() => {
+    const gridWidth = getAppWindow().width - padX(48) * 2;
+    const tileSize = Math.floor(
+      (gridWidth - TILE_GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS
     );
-    return Math.min(Math.round(vh(190)), widthFit);
+    const rows = [];
+    for (let i = 0; i < SOUND_CATALOG.length; i += NUM_COLUMNS) {
+      rows.push(SOUND_CATALOG.slice(i, i + NUM_COLUMNS));
+    }
+    return { tileSize, gridWidth, rows };
   }, []);
-
-  const tileGap = layout.space12;
 
   return (
     <ScreenComponent contentFlex>
@@ -38,15 +39,22 @@ const SoundsScreen: React.FC = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.tileGrid}
         >
-          <View style={[styles.grid, { gap: tileGap, maxWidth: tileSize * NUM_COLUMNS + tileGap }]}>
-            {SOUND_CATALOG.map((item) => (
-              <SoundTile
-                key={item.id}
-                track={item}
-                tileSize={tileSize}
-                isActive={activeTrackId === item.id}
-                onPress={() => toggleTrack(item.id)}
-              />
+          <View style={[styles.grid, { width: gridWidth }]}>
+            {rows.map((row) => (
+              <View
+                key={row.map((item) => item.id).join('-')}
+                style={[styles.row, { gap: TILE_GAP }]}
+              >
+                {row.map((item) => (
+                  <SoundTile
+                    key={item.id}
+                    track={item}
+                    tileSize={tileSize}
+                    isActive={activeTrackId === item.id}
+                    onPress={() => toggleTrack(item.id)}
+                  />
+                ))}
+              </View>
             ))}
           </View>
         </ScrollView>
@@ -65,14 +73,16 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   grid: {
-    flexDirection: 'row',
-    justifyContent: 'center',
     alignSelf: 'center',
-    flexWrap: 'wrap',
+    gap: TILE_GAP,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
   },
   tileGrid: {
     paddingTop: layout.space16,
-    paddingHorizontal: layout.padX24,
-    paddingBottom: vh(68) + layout.space16,
+    paddingHorizontal: 0,
+    paddingBottom: VOLUME_OVERLAY_HEIGHT + layout.space16,
   },
 });

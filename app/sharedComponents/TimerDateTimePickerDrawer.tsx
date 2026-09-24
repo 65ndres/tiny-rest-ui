@@ -12,15 +12,23 @@ import {
 } from '@/components/ui/drawer';
 import { Heading } from '@/components/ui/heading';
 import { TIMER_SOLID_BUTTON_CONTENT_COLOR, layout } from '@/app/constants/screenLayout';
-import { vh } from '@/constants/appViewport';
+import {
+  APP_MAX_HEIGHT,
+  APP_MIN_HEIGHT,
+  getAppWindow,
+  vh,
+} from '@/constants/appViewport';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 import {
   isUsableTimerPickerDate,
   resolveTimerPickerValue,
 } from '@/app/utils/timerHistory';
-
 const DATE_PICKER_BG = require('../../assets/images/bg-date-picker.png');
 const SPARKLE_ICON = require('../../assets/images/sparkle.png');
+const DATE_PICKER_HEIGHT_PROGRESS =
+  (getAppWindow().height - APP_MIN_HEIGHT) /
+  (APP_MAX_HEIGHT - APP_MIN_HEIGHT);
+const DATE_PICKER_SCALE = 0.82 + DATE_PICKER_HEIGHT_PROGRESS * 0.18;
 
 /**
  * iOS spinner needs BOTH min and max. Min-only (or missing max after a
@@ -137,7 +145,14 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
                 />
               </DrawerCloseButton>
             </DrawerHeader>
-            <View style={styles.pickerScale}>
+            <View
+              style={[
+                styles.pickerScale,
+                resolvedMode === 'date'
+                  ? styles.datePickerScale
+                  : styles.defaultPickerScale,
+              ]}
+            >
               {isOpen ? (
                 <DateTimePicker
                   key={`dtp-${openGeneration}`}
@@ -187,6 +202,11 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  datePickerScale: {
+    transform: [{ scale: DATE_PICKER_SCALE }],
+  },
+  defaultPickerScale: {
     transform: [{ scale: 1.15 }],
   },
   picker: {

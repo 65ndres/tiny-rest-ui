@@ -5,7 +5,10 @@ import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
+  layout,
   mutedTextClassName,
+  mutedTextStyle,
+  stackGapStyle,
   timerContentStackClassName,
 } from '@/app/constants/screenLayout';
 import { updateUserProfile } from '@/app/utils/userProfile';
@@ -15,11 +18,10 @@ import {
 } from '@/app/utils/napSchedule';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
-import { layout, mutedTextStyle, stackGapStyle } from '@/app/constants/screenLayout';
 import { vh } from '@/constants/appViewport';
 import OnboardingSlideShell from './OnboardingSlideShell';
 
-const DROPDOWN_MAX_HEIGHT = vh(220);
+const DROPDOWN_MAX_HEIGHT = vh(132);
 
 type NapCountSlideProps = {
   napSchedule: NapScheduleOption | null;
@@ -66,25 +68,32 @@ const NapCountSlide: React.FC<NapCountSlideProps> = ({
   return (
     <OnboardingSlideShell>
       <VStack className={`${timerContentStackClassName} flex-1`} style={stackGapStyle}>
-        <TimerSectionCard>
+        <TimerSectionCard style={{ paddingVertical: layout.space12 }}>
           <Text
             style={{
-              fontSize: vh(34),
+              fontSize: vh(30),
               fontWeight: 'bold',
               color: '#ffffff',
-              lineHeight: vh(40),
+              lineHeight: vh(36),
             }}
           >
             Daily naps
           </Text>
           <Text
             className={mutedTextClassName}
-            style={[mutedTextStyle, { fontSize: layout.fontLg, marginBottom: layout.space24, marginTop: layout.space16 }]}
+            style={[
+              mutedTextStyle,
+              {
+                fontSize: layout.fontLg,
+                marginBottom: layout.space8,
+                marginTop: layout.space4,
+              },
+            ]}
           >
             How many naps does your baby usually take each day?
           </Text>
 
-          <View className="w-full" style={{ marginBottom: layout.space8 }}>
+          <View className="w-full" style={{ marginBottom: layout.space4 }}>
             <Pressable
               onPress={() => setIsDropdownOpen((open) => !open)}
               disabled={isSaving}
@@ -99,7 +108,7 @@ const NapCountSlide: React.FC<NapCountSlideProps> = ({
               style={{
                 borderRadius: layout.radius12,
                 paddingHorizontal: layout.space16,
-                paddingVertical: layout.space12,
+                paddingVertical: layout.space6,
               }}
             >
               <Text
@@ -119,7 +128,7 @@ const NapCountSlide: React.FC<NapCountSlideProps> = ({
               <View
                 className="w-full border border-white/30 bg-white/10"
                 style={{
-                  marginTop: layout.space8,
+                  marginTop: layout.space4,
                   borderRadius: layout.radius12,
                   maxHeight: DROPDOWN_MAX_HEIGHT,
                   overflow: 'hidden',
@@ -142,7 +151,7 @@ const NapCountSlide: React.FC<NapCountSlideProps> = ({
                         accessibilityLabel={option.label}
                         style={{
                           paddingHorizontal: layout.space16,
-                          paddingVertical: layout.space12,
+                          paddingVertical: layout.space6,
                           borderTopWidth: index === 0 ? 0 : 1,
                           borderTopColor: 'rgba(255, 255, 255, 0.15)',
                           backgroundColor: selected
@@ -181,7 +190,10 @@ const NapCountSlide: React.FC<NapCountSlideProps> = ({
               isLoading={isSaving}
               variant="solid"
               size="xl"
-              style={{ marginTop: layout.space24 }}
+              style={{
+                marginTop: layout.space8,
+                paddingVertical: layout.space10,
+              }}
               accessibilityLabel="Next"
             />
           ) : null}

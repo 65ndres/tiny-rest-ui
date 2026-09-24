@@ -142,25 +142,35 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
   return (
     <OnboardingSlideShell>
       <VStack className={`${timerContentStackClassName} flex-1`} style={stackGapStyle}>
-        <TimerSectionCard>
+        <TimerSectionCard style={{ paddingVertical: layout.space16 }}>
           <Text
             style={{
-              fontSize: vh(34),
+              fontSize: vh(30),
               fontWeight: 'bold',
               color: '#ffffff',
-              lineHeight: vh(40),
+              lineHeight: vh(36),
             }}
           >
             Tell us about baby
           </Text>
           <Text
             className={mutedTextClassName}
-            style={[mutedTextStyle, { fontSize: layout.fontLg, marginBottom: layout.space24, marginTop: layout.space16 }]}
+            style={[
+              mutedTextStyle,
+              {
+                fontSize: layout.fontLg,
+                marginBottom: layout.space12,
+                marginTop: layout.space8,
+              },
+            ]}
           >
             We&apos;ll personalize nap guidance for your little one.
           </Text>
 
-          <View className={`${timerSettingRowClassName} border-t-0`} style={timerSettingRowStyle}>
+          <View
+            className={`${timerSettingRowClassName} border-t-0`}
+            style={[timerSettingRowStyle, { paddingVertical: layout.space8 }]}
+          >
             <Text className="text-white font-semibold flex-1" style={fieldLabelStyle}>
               Name:
             </Text>
@@ -206,6 +216,7 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
             disabled={isSaving}
             accessibilityLabel="Set baby birthdate"
             size="lg"
+            style={{ paddingVertical: layout.space8 }}
           />
           {birthdateError ? (
             <Text
@@ -218,7 +229,13 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
 
           <Text
             className={timerSectionLabelClassName}
-            style={[timerSectionLabelStyle, { marginTop: layout.space24 }]}
+            style={[
+              timerSectionLabelStyle,
+              {
+                marginBottom: layout.space8,
+                marginTop: layout.space12,
+              },
+            ]}
           >
             Start and end of the day (normally)
           </Text>
@@ -233,6 +250,7 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
             disabled={isSaving}
             accessibilityLabel="Set day start time"
             size="lg"
+            style={{ paddingVertical: layout.space8 }}
           />
           <TimerSettingRow
             label="End:"
@@ -245,6 +263,7 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
             disabled={isSaving}
             accessibilityLabel="Set day end time"
             size="lg"
+            style={{ paddingVertical: layout.space8 }}
           />
           {dayWindowError ? (
             <Text
@@ -264,7 +283,10 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
               isLoading={isSaving}
               variant="solid"
               size="xl"
-              style={{ marginTop: layout.space24 }}
+              style={{
+                marginTop: layout.space12,
+                paddingVertical: layout.space12,
+              }}
               accessibilityLabel="Next"
             />
           ) : null}

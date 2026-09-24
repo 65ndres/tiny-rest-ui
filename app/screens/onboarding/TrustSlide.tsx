@@ -49,7 +49,7 @@ const REVIEWS = [
 ] as const;
 
 const CAROUSEL_WIDTH = onboardingWidth - SCREEN_HORIZONTAL_INSET * 2;
-const CAROUSEL_HEIGHT = vh(140);
+const CAROUSEL_HEIGHT = vh(108);
 
 const Stars: React.FC<{ count: number }> = ({ count }) => (
   <Text
@@ -73,36 +73,48 @@ const TrustSlide: React.FC<TrustSlideProps> = ({
   return (
     <OnboardingSlideShell>
       <VStack className={`${timerContentStackClassName} flex-1`} style={stackGapStyle}>
-        <TimerSectionCard>
+        <TimerSectionCard style={{ paddingVertical: layout.space12 }}>
           <Text
             style={{
-              fontSize: vh(34),
+              fontSize: vh(30),
               fontWeight: 'bold',
               color: '#ffffff',
-              lineHeight: vh(40),
+              lineHeight: vh(36),
             }}
           >
             Now relax, we are here to help you.
           </Text>
-          <View style={{ marginVertical: layout.space4 }}>
+          <View style={{ marginVertical: layout.space2 }}>
             <Text
               className={mutedTextClassName}
-              style={[mutedTextStyle, { fontSize: layout.fontXl, marginBottom: layout.space16 }]}
+              style={[
+                mutedTextStyle,
+                {
+                  fontSize: layout.fontLg,
+                  marginBottom: layout.space8,
+                },
+              ]}
             >
               Together, we&apos;ll help{' '}
-              <Text className="text-white font-bold" style={{ fontSize: layout.fontXl }}>{displayName}</Text>
+              <Text className="text-white font-bold" style={{ fontSize: layout.fontLg }}>{displayName}</Text>
               {' '}take{' '}
-              <Text className="text-white font-bold" style={{ fontSize: layout.fontXl }}>{napPhrase}</Text>
+              <Text className="text-white font-bold" style={{ fontSize: layout.fontLg }}>{napPhrase}</Text>
               {' '}with ease.
             </Text>
 
           </View>
 
-          <View className="border-b border-white/30" style={{ paddingBottom: layout.space16 }}></View>
+          <View className="border-b border-white/30" style={{ paddingBottom: layout.space8 }}></View>
 
           <Text
             className={`${mutedTextClassName} text-center font-bold`}
-            style={[mutedTextStyle, { fontSize: layout.fontXl, marginTop: layout.space24 }]}
+            style={[
+              mutedTextStyle,
+              {
+                fontSize: layout.fontLg,
+                marginTop: layout.space12,
+              },
+            ]}
           >
               Join other parents who don&apos;t need to guess the next nap time!
             </Text>
@@ -119,10 +131,10 @@ const TrustSlide: React.FC<TrustSlideProps> = ({
               // snapEnabled
               onSnapToItem={setActiveReviewIndex}
               renderItem={({ item }) => (
-                <View className="text-center" style={{ paddingVertical: layout.space24, paddingHorizontal: vh(60) }}>
+                <View className="text-center" style={{ paddingVertical: layout.space8, paddingHorizontal: vh(48) }}>
                   
                   <Text className={`${mutedTextClassName} text-center`} style={[mutedTextStyle, { marginBottom: layout.space8 }]}>
-                    "{item.quote}"
+                    “{item.quote}”
                   </Text>
                   <View className="flex-row justify-center">
                     <Stars count={item.rating} />
@@ -133,7 +145,7 @@ const TrustSlide: React.FC<TrustSlideProps> = ({
                 </View>
               )}
             />
-            <View className="flex-row items-center justify-center" style={{ marginTop: layout.space12, gap: layout.space8 }}>
+            <View className="flex-row items-center justify-center" style={{ marginTop: layout.space4, gap: layout.space6 }}>
               {REVIEWS.map((review, index) => (
                 <View
                   key={review.author}
@@ -153,7 +165,10 @@ const TrustSlide: React.FC<TrustSlideProps> = ({
               onPress={() => void onPressNext?.()}
               variant="solid"
               size="xl"
-              style={{ marginTop: layout.space24 }}
+              style={{
+                marginTop: layout.space8,
+                paddingVertical: layout.space10,
+              }}
               accessibilityLabel="Choose a plan"
             />
           ) : null}

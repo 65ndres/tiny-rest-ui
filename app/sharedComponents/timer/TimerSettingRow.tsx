@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Text } from '@/components/ui/text';
 import {
   layout,
@@ -17,6 +17,7 @@ type TimerSettingRowProps = {
   accessibilityLabel: string;
   isFirst?: boolean;
   size?: 'md' | 'lg';
+  style?: StyleProp<ViewStyle>;
   /** Secondary line under the label (e.g. "optional"). */
   hint?: string;
 };
@@ -30,6 +31,7 @@ const TimerSettingRow: React.FC<TimerSettingRowProps> = ({
   accessibilityLabel,
   isFirst = false,
   size = 'md',
+  style,
   hint,
 }) => {
   const isLg = size === 'lg';
@@ -39,7 +41,7 @@ const TimerSettingRow: React.FC<TimerSettingRowProps> = ({
   return (
     <Pressable
       className={`${timerSettingRowClassName}${isFirst ? ' border-t-0' : ''}`}
-      style={timerSettingRowStyle}
+      style={[timerSettingRowStyle, style]}
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"

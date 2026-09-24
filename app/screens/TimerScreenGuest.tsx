@@ -253,6 +253,7 @@ const TimerScreenGuest: React.FC = () => {
     <ScreenScrollLayout
       contentContainerClassName={timerScrollContentClassName}
       contentContainerStyle={timerScrollContentStyle}
+      stackClassName={timerContentStackClassName}
     >
       <VStack className={timerContentStackClassName} style={stackGapStyle}>
         <TimerSectionCard>

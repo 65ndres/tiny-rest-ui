@@ -19,45 +19,49 @@ struct WidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TinyRestTimerAttributes.self) { context in
             ZStack {
-                Image("bg-widget")
-                    .resizable()
-                    .scaledToFill()
+                GeometryReader { geometry in
+                    Image("bg-widget")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(
+                            width: geometry.size.width,
+                            height: geometry.size.height
+                        )
+                        .clipped()
+                }
 
-                VStack(alignment: .leading, spacing: 14) {
-                    HStack {
-                        Label(timerLabel(context.attributes.timerType), systemImage: "moon.stars.fill")
-                            .font(.system(size: 17, weight: .medium))
-                            .foregroundStyle(.white.opacity(0.85))
+                VStack(spacing: 8) {
+                    Text(timerLabel(context.attributes.timerType).lowercased())
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .lineLimit(1)
 
-                        Spacer()
+                    TimerValue(state: context.state, fontSize: 42)
 
-                        Text(context.state.isPaused ? "Paused" : "Running")
+                    if context.state.isPaused {
+                        Text("paused")
                             .font(.system(size: 14, weight: .regular))
                             .foregroundStyle(.white.opacity(0.7))
                     }
-
-                    HStack(alignment: .center, spacing: 18) {
-                        TimerValue(state: context.state, fontSize: 48)
-
-                        Spacer(minLength: 4)
-
-                        Button(intent: ToggleTinyRestTimerIntent()) {
-                            Image(systemName: context.state.isPaused ? "play.fill" : "pause.fill")
-                                .font(.system(size: 22, weight: .bold))
-                                .frame(width: 58, height: 58)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.white.opacity(0.2))
-                        .accessibilityLabel(context.state.isPaused ? "Resume timer" : "Pause timer")
-                    }
                 }
-                .padding(.horizontal, 4)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.horizontal, 72)
+
+                Button(intent: ToggleTinyRestTimerIntent()) {
+                    Image(systemName: context.state.isPaused ? "play.fill" : "pause.fill")
+                        .font(.system(size: 22, weight: .bold))
+                        .frame(width: 58, height: 58)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.white.opacity(0.2))
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+                .padding(.trailing, 16)
+                .accessibilityLabel(context.state.isPaused ? "Resume timer" : "Pause timer")
             }
             // iOS caps Lock Screen Live Activities at roughly 160 points.
-            // The system's content margins occupy the remaining height.
             .frame(maxWidth: .infinity, minHeight: 140)
             .clipped()
-            .activityBackgroundTint(Color(red: 0.18, green: 0.30, blue: 0.38))
+            .activityBackgroundTint(.clear)
             .activitySystemActionForegroundColor(.white)
             .widgetURL(URL(string: "tinyrest://"))
         } dynamicIsland: { context in
@@ -93,6 +97,7 @@ struct WidgetLiveActivity: Widget {
             .widgetURL(URL(string: "tinyrest://"))
             .keylineTint(Color(red: 0.55, green: 0.76, blue: 0.86))
         }
+        .contentMarginsDisabled()
     }
 }
 

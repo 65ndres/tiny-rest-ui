@@ -14,6 +14,7 @@ type ScreenScrollLayoutProps = {
   children: React.ReactNode;
   contentContainerClassName?: string;
   contentContainerStyle?: ViewStyle;
+  stackClassName?: string;
   keyboardShouldPersistTaps?: 'always' | 'never' | 'handled';
 };
 
@@ -21,6 +22,7 @@ const ScreenScrollLayout: React.FC<ScreenScrollLayoutProps> = ({
   children,
   contentContainerClassName,
   contentContainerStyle,
+  stackClassName,
   keyboardShouldPersistTaps,
 }) => (
   <ScreenComponent contentFlex>
@@ -33,7 +35,10 @@ const ScreenScrollLayout: React.FC<ScreenScrollLayoutProps> = ({
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps={keyboardShouldPersistTaps}
     >
-      <VStack className={contentStackClassName} style={stackGapStyle}>
+      <VStack
+        className={stackClassName ?? contentStackClassName}
+        style={stackGapStyle}
+      >
         {children}
       </VStack>
     </ScrollView>

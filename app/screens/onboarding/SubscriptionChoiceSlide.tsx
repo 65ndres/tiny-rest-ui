@@ -23,7 +23,6 @@ import { useAuth } from '../../context/AuthContext';
 import { useRevenueCat } from '../../context/RevenueCatContext';
 import OnboardingSlideShell from './OnboardingSlideShell';
 import { vh } from './onboardingLayout';
-import { padX } from '@/constants/appViewport';
 
 type PlanId = 'basic' | 'pro';
 
@@ -186,7 +185,7 @@ const SubscriptionChoiceSlide: React.FC = () => {
   }
 
   return (
-    <OnboardingSlideShell paddingHorizontal={padX(32)}>
+    <OnboardingSlideShell>
       <View style={styles.subscriptionSlideRoot}>
         <View style={styles.contentCluster}>
         <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>

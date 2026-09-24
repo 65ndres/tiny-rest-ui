@@ -8,10 +8,10 @@ import { VStack } from '@/components/ui/vstack';
 import {
   glassCardCenteredClassName,
   glassCardStyle,
+  HOME_HORIZONTAL_PADDING,
   homeContentStackClassName,
   layout,
 } from '@/app/constants/screenLayout';
-import { getAppWindow, padX } from '@/constants/appViewport';
 import {
   fetchSleepPrediction,
   formatPredictionDisplay,
@@ -41,8 +41,6 @@ type NavigationProp = DrawerNavigationProp<RootDrawerParamList, 'Home'>;
 const PREDICTION_PANEL_HEIGHT = '32%';
 const ACTIONS_HEIGHT = '58%';
 const HOME_SECTION_GAP = '5%';
-const HOME_HORIZONTAL_PADDING =
-  getAppWindow().width >= 414 ? padX(8) : layout.padX24;
 
 const Home: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -140,87 +138,89 @@ const Home: React.FC = () => {
   return (
     <ScreenComponent contentFlex>
       <View
-        className={`${homeContentStackClassName} flex-1 min-h-0`}
+        className="flex-1 min-h-0"
         style={{
           paddingTop: layout.space8,
           paddingBottom: layout.space8,
           paddingHorizontal: HOME_HORIZONTAL_PADDING,
         }}
       >
-        <VStack
-          className={`${glassCardCenteredClassName} justify-center`}
-          style={[
-            glassCardStyle,
-            { height: PREDICTION_PANEL_HEIGHT, minHeight: 0 },
-          ]}
-        >
-          <View
-            className="w-full"
-            onLayout={(event) => {
-              const nextWidth = Math.round(event.nativeEvent.layout.width);
-              if (nextWidth > 0 && nextWidth !== carouselWidth) {
-                setCarouselWidth(nextWidth);
-              }
-            }}
+        <View className={`${homeContentStackClassName} flex-1 min-h-0`}>
+          <VStack
+            className={`${glassCardCenteredClassName} justify-center`}
+            style={[
+              glassCardStyle,
+              { height: PREDICTION_PANEL_HEIGHT, minHeight: 0 },
+            ]}
           >
-            {isLoading ? (
-              <ActivityIndicator color="white" size="large" />
-            ) : slides.length > 0 ? (
-              <HomeNapPredictionCarousel
-                slides={slides}
-                activeCount={activeNapCount ?? slides[0].count}
-                onChange={setActiveNapCount}
-                width={carouselWidth}
-                disabled={timerRunning}
-              />
-            ) : null}
-          </View>
-        </VStack>
+            <View
+              className="w-full"
+              onLayout={(event) => {
+                const nextWidth = Math.round(event.nativeEvent.layout.width);
+                if (nextWidth > 0 && nextWidth !== carouselWidth) {
+                  setCarouselWidth(nextWidth);
+                }
+              }}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="white" size="large" />
+              ) : slides.length > 0 ? (
+                <HomeNapPredictionCarousel
+                  slides={slides}
+                  activeCount={activeNapCount ?? slides[0].count}
+                  onChange={setActiveNapCount}
+                  width={carouselWidth}
+                  disabled={timerRunning}
+                />
+              ) : null}
+            </View>
+          </VStack>
 
-        <View style={{ height: HOME_SECTION_GAP }} />
+          <View style={{ height: HOME_SECTION_GAP }} />
 
-        <VStack
-          className="w-full"
-          style={{ height: ACTIONS_HEIGHT, gap: layout.space12 }}
-        >
-          <HomeRoutineCard
-            title="Add sleep"
-            subtitle="Log a nap session"
-            iconName="moon-sharp"
-            onPress={() => navigation.navigate('Timer')}
-            accessibilityLabel="Add sleep"
-            style={{ flex: 1, minHeight: 0 }}
-          />
+          <VStack
+            className="w-full"
+            style={{ height: ACTIONS_HEIGHT, gap: layout.space12 }}
+          >
+            <HomeRoutineCard
+              title="Add sleep"
+              subtitle="Log a nap session"
+              iconName="moon-sharp"
+              onPress={() => navigation.navigate('Timer')}
+              accessibilityLabel="Add sleep"
+              style={{ flex: 1, minHeight: 0 }}
+            />
 
-          <HomeRoutineCard
-            title="Add feeding"
-            subtitle="Bottle or nursing session"
-            iconName="water-sharp"
-            onPress={() => navigateOrPaywall('AddFeeding')}
-            accessibilityLabel="Add feeding"
-            dimmed={!isProUser}
-            style={{ flex: 1, minHeight: 0 }}
-          />
+            <HomeRoutineCard
+              title="Add feeding"
+              subtitle="Bottle or nursing session"
+              iconName="water-sharp"
+              onPress={() => navigateOrPaywall('AddFeeding')}
+              accessibilityLabel="Add feeding"
+              dimmed={!isProUser}
+              style={{ flex: 1, minHeight: 0 }}
+            />
 
-          <HomeRoutineCard
-            title="View timeline"
-            subtitle="See today's schedule"
-            iconName="calendar-sharp"
-            onPress={() => navigateOrPaywall('NapTimeline')}
-            accessibilityLabel="View timeline"
-            dimmed={!isProUser}
-            style={{ flex: 1, minHeight: 0 }}
-          />
-          <HomeRoutineCard
-            title="Soothing sounds"
-            subtitle="White noise & lullabies"
-            iconName="musical-notes-sharp"
-            onPress={() => navigateOrPaywall('Sounds')}
-            accessibilityLabel="Soothing sounds"
-            dimmed={!isProUser}
-            style={{ flex: 1, minHeight: 0 }}
-          />
-        </VStack>
+            <HomeRoutineCard
+              title="View timeline"
+              subtitle="See today's schedule"
+              iconName="calendar-sharp"
+              onPress={() => navigateOrPaywall('NapTimeline')}
+              accessibilityLabel="View timeline"
+              dimmed={!isProUser}
+              style={{ flex: 1, minHeight: 0 }}
+            />
+            <HomeRoutineCard
+              title="Soothing sounds"
+              subtitle="White noise & lullabies"
+              iconName="musical-notes-sharp"
+              onPress={() => navigateOrPaywall('Sounds')}
+              accessibilityLabel="Soothing sounds"
+              dimmed={!isProUser}
+              style={{ flex: 1, minHeight: 0 }}
+            />
+          </VStack>
+        </View>
       </View>
     </ScreenComponent>
   );

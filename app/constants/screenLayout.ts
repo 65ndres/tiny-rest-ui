@@ -1,5 +1,5 @@
 import type { TextStyle, ViewStyle } from 'react-native';
-import { padX, vh } from '@/constants/appViewport';
+import { getAppWindow, padX, vh } from '@/constants/appViewport';
 
 export const SCREEN_TOP_HEIGHT = '10%';
 export const SCREEN_CONTENT_HEIGHT = '80%';
@@ -49,6 +49,9 @@ export const layout = {
   padX16: padX(16),
   padX24: padX(32),
 };
+
+export const HOME_HORIZONTAL_PADDING =
+  getAppWindow().width >= 414 ? padX(8) : layout.padX24;
 
 export const scrollViewClassName = 'flex-1 w-full';
 export const scrollContentClassName = 'flex-grow items-center';
@@ -144,7 +147,11 @@ export const homeAddStepStyle: TextStyle = {
 
 /** Timer section cards (Hatch-inspired). */
 export const timerScrollContentClassName = homeScrollContentClassName;
-export const timerScrollContentStyle = homeScrollContentStyle;
+export const timerScrollContentStyle: ViewStyle = {
+  paddingHorizontal: HOME_HORIZONTAL_PADDING,
+  paddingBottom: layout.space8,
+  paddingTop: layout.space8,
+};
 export const timerContentStackClassName = homeContentStackClassName;
 export const timerPageTitleClassName = homePageTitleClassName;
 export const timerPageTitleStyle = homePageTitleStyle;

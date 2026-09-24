@@ -1,93 +1,79 @@
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { Button, Input, Text } from '@rneui/themed';
+import { useRoute } from '@react-navigation/native';
 import axios from 'axios';
-import { useFonts } from 'expo-font';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
+import { Pressable, TextInput, View } from 'react-native';
+import { EyeIcon, EyeOffIcon, Icon } from '@/components/ui/icon';
+import { Text } from '@/components/ui/text';
+import { VStack } from '@/components/ui/vstack';
 import {
-  Animated,
-  Image,
-  StyleSheet,
-  TextStyle,
-  View,
-  ViewStyle
-} from 'react-native';
-import 'react-native-reanimated';
-import { getAppWindow, vh } from '@/constants/appViewport';
+  fieldInputStyle,
+  fieldLabelStyle,
+  layout,
+  mutedTextClassName,
+  mutedTextStyle,
+  stackGapStyle,
+  timerContentStackClassName,
+  timerScrollContentClassName,
+  timerScrollContentStyle,
+  timerSettingRowClassName,
+  timerSettingRowStyle,
+} from '@/app/constants/screenLayout';
 import { API_URL } from '../../constants/Config';
 import { useAuth } from '../context/AuthContext';
-import ScreenComponent from '../sharedComponents/ScreenComponent';
-import BackButton from '../SampleModule/BackButton';
+import ScreenScrollLayout from '../sharedComponents/ScreenScrollLayout';
+import TimerOutlineButton from '../sharedComponents/timer/TimerOutlineButton';
+import TimerSectionCard from '../sharedComponents/timer/TimerSectionCard';
 
-// Define the navigation stack param list
 type RootStackParamList = {
-  Home: undefined;
-  PasswordReset: undefined;
   PasswordCode: {
     email: string;
   };
 };
 
-const width = getAppWindow().width;
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type RouteProp = {
   key: string;
   name: 'PasswordCode';
   params: RootStackParamList['PasswordCode'];
 };
 
+const inputClassName =
+  'text-white font-semibold underline text-right min-w-[120px] flex-1 py-0';
+const labelClassName = 'text-white font-semibold';
+
+type FieldRowProps = {
+  label: string;
+  isFirst?: boolean;
+  children: React.ReactNode;
+};
+
+const FieldRow: React.FC<FieldRowProps> = ({ label, isFirst = false, children }) => (
+  <View
+    className={`${timerSettingRowClassName}${isFirst ? ' border-t-0' : ''}`}
+    style={timerSettingRowStyle}
+  >
+    <Text className={labelClassName} style={fieldLabelStyle}>
+      {label}
+    </Text>
+    {children}
+  </View>
+);
+
 const PasswordCodeScreen: React.FC = () => {
-  const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteProp>();
-  const colorScheme = useColorScheme();
   const { login } = useAuth();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [loaded] = useFonts({
-    SpaceMono: require('../../assets/fonts/SpaceMono-Regular.ttf'),
-  });
 
   const { email } = route.params || {};
-  const [code, setCode] = useState<string>('');
-  const [codeError, setCodeError] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [passwordConfirmation, setPasswordConfirmation] = useState<string>('');
-  const [passwordError, setPasswordError] = useState<string>('');
-  const [passwordConfirmationError, setPasswordConfirmationError] = useState<string>('');
-  const [codeVerified, setCodeVerified] = useState<boolean>(false);
-  const [isVerifying, setIsVerifying] = useState<boolean>(false);
-  const [isUpdating, setIsUpdating] = useState<boolean>(false);
-
-  // Fade-in animation on component mount
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  }, [fadeAnim]);
-
-  const handleBackPress = () => {
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start(() => {
-      navigation.goBack();
-    });
-  };
-
-  // Set header options
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <BackButton 
-          text="" 
-          onPress={handleBackPress}
-        />
-      ),
-    });
-  }, [navigation]);
+  const [code, setCode] = useState('');
+  const [codeError, setCodeError] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordConfirmationError, setPasswordConfirmationError] = useState('');
+  const [codeVerified, setCodeVerified] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateCode = (): boolean => {
     if (!code.trim()) {
@@ -175,171 +161,181 @@ const PasswordCodeScreen: React.FC = () => {
     }
   };
 
-  if (!loaded) {
-    return null;
-  }
-
   return (
-    <ScreenComponent>
-      <Animated.View style={{opacity: fadeAnim }}>
-        <View style={{height: "22%"}}>
-          <View style={{flex: 1, justifyContent: 'flex-end'}}>
-            <Text h2 style={{color: 'white', textAlign: 'center'}}>FORGOT?</Text>
-          </View>
-        </View>
-        <View style={{height: "58%"}}>
-          <View style={{flex: 1, justifyContent: 'flex-start', marginTop: 60}}>
-            {!codeVerified ? (
-              <>
-                <View style={{paddingBottom: 5}}>
-                  <Input
-                    value={code}
-                    onChangeText={(text) => {
-                      setCode(text);
-                      if (codeError) setCodeError('');
-                    }}
-                    cursorColor={"#ffffff"}
-                    placeholder='Enter verification code'
-                    selectionColor={'white'}
-                    placeholderTextColor={'#d8d8d8ff'}
-                    leftIcon={{ type: 'font-awesome', name: 'key', color: '#ffffffff', size: vh(30) }}
-                    inputStyle={{color: 'white', fontSize: vh(22), paddingLeft: vh(20)}}
-                    labelStyle={{color: 'white'}}
-                    inputContainerStyle={{borderBottomColor: 'white'}}
-                    errorMessage={codeError}
-                    errorStyle={{color: '#ff6b6b'}}
-                    disabled={isVerifying}
-                    keyboardType="number-pad"
-                  />
-                </View>
-                <Button
-                  title={isVerifying ? "VERIFYING..." : "VERIFY CODE"}
-                  buttonStyle={{
-                    backgroundColor: 'white',
-                    borderWidth: 2,
-                    borderColor: 'white',
-                    borderRadius: 30,
+    <ScreenScrollLayout
+      contentContainerClassName={timerScrollContentClassName}
+      contentContainerStyle={timerScrollContentStyle}
+      keyboardShouldPersistTaps="handled"
+    >
+      <VStack className={timerContentStackClassName} style={stackGapStyle}>
+        <TimerSectionCard>
+          <Text
+            style={{
+              fontSize: layout.font3xl,
+              fontWeight: 'bold',
+              color: '#ffffff',
+              lineHeight: layout.space36,
+            }}
+          >
+            {codeVerified ? 'New password' : 'Enter code'}
+          </Text>
+          <Text
+            className={mutedTextClassName}
+            style={[mutedTextStyle, { fontSize: layout.fontLg, marginBottom: layout.space24 }]}
+          >
+            {codeVerified
+              ? 'Choose a new password for your account'
+              : 'Enter the verification code we sent you'}
+          </Text>
+
+          {!codeVerified ? (
+            <>
+              <FieldRow label="Code:" isFirst>
+                <TextInput
+                  value={code}
+                  onChangeText={(text) => {
+                    setCode(text);
+                    if (codeError) setCodeError('');
                   }}
-                  containerStyle={{
-                    marginHorizontal: 50,
-                    marginVertical: 10,
-                  }}
-                  titleStyle={{ fontWeight: 'bold', color: '#ac8861ff' }}
-                  onPress={handleVerifyCode}
-                  disabled={isVerifying}
-                  loading={isVerifying}
+                  placeholder="Enter code"
+                  placeholderTextColor="rgba(255,255,255,0.5)"
+                  editable={!isVerifying}
+                  accessibilityLabel="Verification code"
+                  className={inputClassName}
+                  style={fieldInputStyle}
+                  cursorColor="#ffffff"
+                  selectionColor="white"
+                  keyboardType="number-pad"
+                  autoCorrect={false}
                 />
-              </>
-            ) : (
-              <>
-                <View style={{paddingBottom: 5}}>
-                  <Input
-                    value={password}
-                    onChangeText={(text) => {
-                      setPassword(text);
-                      if (passwordError) setPasswordError('');
-                    }}
-                    cursorColor={"#ffffff"}
-                    placeholder='New password'
-                    selectionColor={'white'}
-                    placeholderTextColor={'#d8d8d8ff'}
-                    leftIcon={{ type: 'font-awesome', name: 'lock', color: '#ffffffff', size: vh(30) }}
-                    inputStyle={{color: 'white', fontSize: vh(22), paddingLeft: vh(20)}}
-                    labelStyle={{color: 'white'}}
-                    inputContainerStyle={{borderBottomColor: 'white'}}
-                    errorMessage={passwordError}
-                    errorStyle={{color: '#ff6b6b'}}
-                    secureTextEntry
-                    disabled={isUpdating}
-                  />
-                </View>
-                <View style={{paddingBottom: 20}}>
-                  <Input
-                    value={passwordConfirmation}
-                    onChangeText={(text) => {
-                      setPasswordConfirmation(text);
-                      if (passwordConfirmationError) setPasswordConfirmationError('');
-                    }}
-                    cursorColor={"#ffffff"}
-                    placeholder='Confirm new password'
-                    selectionColor={'white'}
-                    placeholderTextColor={'#d8d8d8ff'}
-                    leftIcon={{ type: 'font-awesome', name: 'lock', color: '#ffffffff', size: vh(30) }}
-                    inputStyle={{color: 'white', fontSize: vh(22), paddingLeft: vh(20)}}
-                    labelStyle={{color: 'white'}}
-                    inputContainerStyle={{borderBottomColor: 'white'}}
-                    errorMessage={passwordConfirmationError}
-                    errorStyle={{color: '#ff6b6b'}}
-                    secureTextEntry
-                    disabled={isUpdating}
-                  />
-                </View>
-                <Button
-                  title={isUpdating ? "UPDATING..." : "UPDATE PASSWORD"}
-                  buttonStyle={{
-                    backgroundColor: 'white',
-                    borderWidth: 2,
-                    borderColor: 'white',
-                    borderRadius: 30,
+              </FieldRow>
+              {codeError ? (
+                <Text
+                  className="text-error-400 font-semibold"
+                  style={{ fontSize: layout.fontLg, marginTop: layout.space4 }}
+                >
+                  {codeError}
+                </Text>
+              ) : null}
+
+              <TimerOutlineButton
+                label="Verify code"
+                iconName="checkmark-sharp"
+                onPress={() => void handleVerifyCode()}
+                disabled={isVerifying}
+                isLoading={isVerifying}
+                variant="solid"
+                size="xl"
+                style={{ marginTop: layout.space16 }}
+                accessibilityLabel="Verify code"
+              />
+            </>
+          ) : (
+            <>
+              <FieldRow label="Password:" isFirst>
+                <TextInput
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (passwordError) setPasswordError('');
                   }}
-                  containerStyle={{
-                    marginHorizontal: 50,
-                    marginVertical: 10,
-                  }}
-                  titleStyle={{ fontWeight: 'bold', color: '#ac8861ff' }}
-                  onPress={handleUpdatePassword}
+                  placeholder="New password"
+                  placeholderTextColor="rgba(255,255,255,0.5)"
+                  editable={!isUpdating}
+                  accessibilityLabel="New password"
+                  className={inputClassName}
+                  style={fieldInputStyle}
+                  cursorColor="#ffffff"
+                  selectionColor="white"
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <Pressable
+                  onPress={() => setShowPassword((previous) => !previous)}
                   disabled={isUpdating}
-                  loading={isUpdating}
+                  accessibilityRole="button"
+                  accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                  className="ml-2 p-1"
+                >
+                  <Icon
+                    as={showPassword ? EyeIcon : EyeOffIcon}
+                    className="text-white"
+                    size="md"
+                  />
+                </Pressable>
+              </FieldRow>
+              {passwordError ? (
+                <Text
+                  className="text-error-400 font-semibold"
+                  style={{ fontSize: layout.fontLg, marginTop: layout.space4 }}
+                >
+                  {passwordError}
+                </Text>
+              ) : null}
+
+              <FieldRow label="Confirm:">
+                <TextInput
+                  value={passwordConfirmation}
+                  onChangeText={(text) => {
+                    setPasswordConfirmation(text);
+                    if (passwordConfirmationError) setPasswordConfirmationError('');
+                  }}
+                  placeholder="Confirm password"
+                  placeholderTextColor="rgba(255,255,255,0.5)"
+                  editable={!isUpdating}
+                  accessibilityLabel="Confirm password"
+                  className={inputClassName}
+                  style={fieldInputStyle}
+                  cursorColor="#ffffff"
+                  selectionColor="white"
+                  secureTextEntry={!showConfirmPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
                 />
-              </>
-            )}
-          </View>
-        </View>
-        <View style={{height: "20%"}}>
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <View style={styles.bottomSectionInner}>
-            <Image source={require('../../assets/images/splash-icon.png')} style={styles.logoImage} />
-          </View> 
-          </View>
-        </View>
-      </Animated.View>
-    </ScreenComponent>
+                <Pressable
+                  onPress={() => setShowConfirmPassword((previous) => !previous)}
+                  disabled={isUpdating}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'
+                  }
+                  className="ml-2 p-1"
+                >
+                  <Icon
+                    as={showConfirmPassword ? EyeIcon : EyeOffIcon}
+                    className="text-white"
+                    size="md"
+                  />
+                </Pressable>
+              </FieldRow>
+              {passwordConfirmationError ? (
+                <Text
+                  className="text-error-400 font-semibold"
+                  style={{ fontSize: layout.fontLg, marginTop: layout.space4 }}
+                >
+                  {passwordConfirmationError}
+                </Text>
+              ) : null}
+
+              <TimerOutlineButton
+                label="Update password"
+                iconName="lock-closed-sharp"
+                onPress={() => void handleUpdatePassword()}
+                disabled={isUpdating}
+                isLoading={isUpdating}
+                variant="solid"
+                size="xl"
+                style={{ marginTop: layout.space16 }}
+                accessibilityLabel="Update password"
+              />
+            </>
+          )}
+        </TimerSectionCard>
+      </VStack>
+    </ScreenScrollLayout>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  } as ViewStyle,
-  image: {
-    flex: 1,
-    justifyContent: 'center',
-  } as ViewStyle,
-  text: {
-    color: 'white',
-    fontSize: vh(44),
-    lineHeight: vh(84),
-    fontWeight: '300',
-    textAlign: 'center',
-  } as TextStyle,
-  separator: {
-    marginVertical: vh(8),
-    width: '80%',
-    borderBottomColor: 'white',
-    borderBottomWidth: 1,
-    marginLeft: 'auto',
-    marginRight: 'auto',
-  } as ViewStyle,
-  logoImage: {
-    height: vh(80),
-    width: vh(80),
-    alignSelf: 'center',
-  },
-  bottomSectionInner: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  } as ViewStyle,
-});
 
 export default PasswordCodeScreen;
 

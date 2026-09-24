@@ -1,5 +1,9 @@
 import { ExtensionStorage } from '@bacons/apple-targets';
 import {
+  endLiveActivity,
+  syncLiveActivity,
+} from 'tiny-rest-live-activity';
+import {
   fetchSleepPrediction,
   formatPredictionDisplay,
   type SleepPredictionDisplay,
@@ -29,6 +33,28 @@ const storage = new ExtensionStorage(APP_GROUP);
 
 const reload = () => {
   ExtensionStorage.reloadWidget();
+};
+
+const safelySyncLiveActivity = (
+  startTime: string,
+  timerType: TimerRunType,
+  paused: boolean,
+  elapsedMs: number
+): void => {
+  void syncLiveActivity(
+    startTime,
+    timerType,
+    paused,
+    elapsedMs
+  ).catch(() => {
+    // Live Activities may be disabled by the user or unavailable on this device.
+  });
+};
+
+const safelyEndLiveActivity = (): void => {
+  void endLiveActivity().catch(() => {
+    // Ending is best-effort when ActivityKit is unavailable.
+  });
 };
 
 const isPausedFlag = (raw: string | null): boolean =>
@@ -101,6 +127,7 @@ export const syncWidgetPrediction = (display: SleepPredictionDisplay): void => {
   storage.remove(KEYS.timerStart);
   storage.remove(KEYS.timerPaused);
   storage.remove(KEYS.timerElapsed);
+  safelyEndLiveActivity();
   reload();
 };
 
@@ -134,6 +161,12 @@ export const syncWidgetActiveTimer = (
 
   storage.remove(KEYS.label);
   storage.remove(KEYS.value);
+  safelySyncLiveActivity(
+    run.start_time,
+    timerType,
+    paused,
+    paused ? elapsedMs : 0
+  );
   reload();
 };
 
@@ -165,6 +198,7 @@ export const clearWidgetTimer = (): void => {
   storage.remove(KEYS.subtitle);
   storage.remove(KEYS.label);
   storage.remove(KEYS.value);
+  safelyEndLiveActivity();
 };
 
 /**

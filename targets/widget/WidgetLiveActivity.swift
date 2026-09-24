@@ -1,73 +1,206 @@
 import ActivityKit
-import WidgetKit
+import AppIntents
 import SwiftUI
+import WidgetKit
 
-struct WidgetAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-        // Dynamic stateful properties about your activity go here!
-        var emoji: String
+private let liveActivityAppGroupId = "group.com.afre92.tinyrest"
+
+struct TinyRestTimerAttributes: ActivityAttributes {
+    struct ContentState: Codable, Hashable {
+        var startTime: Date
+        var isPaused: Bool
+        var pausedElapsed: TimeInterval
     }
 
-    // Fixed non-changing properties about your activity go here!
-    var name: String
+    var timerType: String
 }
 
 struct WidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: WidgetAttributes.self) { context in
-            // Lock screen/banner UI goes here
-            VStack {
-                Text("Hello \(context.state.emoji)")
-            }
-            .activityBackgroundTint(Color.cyan)
-            .activitySystemActionForegroundColor(Color.black)
+        ActivityConfiguration(for: TinyRestTimerAttributes.self) { context in
+            ZStack {
+                Image("bg-widget")
+                    .resizable()
+                    .scaledToFill()
 
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack {
+                        Label(timerLabel(context.attributes.timerType), systemImage: "moon.stars.fill")
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.85))
+
+                        Spacer()
+
+                        Text(context.state.isPaused ? "Paused" : "Running")
+                            .font(.system(size: 14, weight: .regular))
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+
+                    HStack(alignment: .center, spacing: 18) {
+                        TimerValue(state: context.state, fontSize: 48)
+
+                        Spacer(minLength: 4)
+
+                        Button(intent: ToggleTinyRestTimerIntent()) {
+                            Image(systemName: context.state.isPaused ? "play.fill" : "pause.fill")
+                                .font(.system(size: 22, weight: .bold))
+                                .frame(width: 58, height: 58)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.white.opacity(0.2))
+                        .accessibilityLabel(context.state.isPaused ? "Resume timer" : "Pause timer")
+                    }
+                }
+                .padding(.horizontal, 4)
+            }
+            // iOS caps Lock Screen Live Activities at roughly 160 points.
+            // The system's content margins occupy the remaining height.
+            .frame(maxWidth: .infinity, minHeight: 140)
+            .clipped()
+            .activityBackgroundTint(Color(red: 0.18, green: 0.30, blue: 0.38))
+            .activitySystemActionForegroundColor(.white)
+            .widgetURL(URL(string: "tinyrest://"))
         } dynamicIsland: { context in
             DynamicIsland {
-                // Expanded UI goes here.  Compose the expanded UI through
-                // various regions, like leading/trailing/center/bottom
                 DynamicIslandExpandedRegion(.leading) {
-                    Text("Leading")
+                    Label("TinyRest", systemImage: "moon.stars.fill")
+                        .font(.caption.weight(.semibold))
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text("Trailing")
+                    Button(intent: ToggleTinyRestTimerIntent()) {
+                        Image(systemName: context.state.isPaused ? "play.fill" : "pause.fill")
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.white)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text("Bottom \(context.state.emoji)")
-                    // more content
+                    VStack(spacing: 3) {
+                        TimerValue(state: context.state, fontSize: 32)
+                        Text(timerLabel(context.attributes.timerType))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             } compactLeading: {
-                Text("L")
+                Image(systemName: "moon.stars.fill")
+                    .foregroundStyle(Color(red: 0.55, green: 0.76, blue: 0.86))
             } compactTrailing: {
-                Text("T \(context.state.emoji)")
+                TimerValue(state: context.state, fontSize: 15)
             } minimal: {
-                Text(context.state.emoji)
+                Image(systemName: context.state.isPaused ? "pause.fill" : "moon.stars.fill")
+                    .foregroundStyle(Color(red: 0.55, green: 0.76, blue: 0.86))
             }
-            .widgetURL(URL(string: "https://www.expo.dev"))
-            .keylineTint(Color.red)
+            .widgetURL(URL(string: "tinyrest://"))
+            .keylineTint(Color(red: 0.55, green: 0.76, blue: 0.86))
         }
     }
 }
 
-extension WidgetAttributes {
-    fileprivate static var preview: WidgetAttributes {
-        WidgetAttributes(name: "World")
+private struct TimerValue: View {
+    let state: TinyRestTimerAttributes.ContentState
+    let fontSize: CGFloat
+
+    var body: some View {
+        Group {
+            if state.isPaused {
+                Text(formatElapsedForDisplay(state.pausedElapsed))
+            } else {
+                Text(state.startTime, style: .timer)
+            }
+        }
+        .font(.system(size: fontSize, weight: .regular, design: .monospaced))
+        .monospacedDigit()
+        .foregroundStyle(.white)
+        .lineLimit(1)
+        .minimumScaleFactor(0.65)
     }
 }
 
-extension WidgetAttributes.ContentState {
-    fileprivate static var smiley: WidgetAttributes.ContentState {
-        WidgetAttributes.ContentState(emoji: "😀")
-     }
-     
-     fileprivate static var starEyes: WidgetAttributes.ContentState {
-         WidgetAttributes.ContentState(emoji: "🤩")
-     }
+private func timerLabel(_ type: String) -> String {
+    switch type {
+    case "nursing_left":
+        return "Nursing left"
+    case "nursing_right":
+        return "Nursing right"
+    case "bottle":
+        return "Bottle feeding"
+    case "sleeping":
+        return "Sleep timer"
+    default:
+        return type.replacingOccurrences(of: "_", with: " ").capitalized
+    }
 }
 
-#Preview("Notification", as: .content, using: WidgetAttributes.preview) {
-   WidgetLiveActivity()
+private func formatElapsedForDisplay(_ interval: TimeInterval) -> String {
+    let total = max(0, Int(interval.rounded(.down)))
+    let hours = total / 3600
+    let minutes = (total % 3600) / 60
+    let seconds = total % 60
+    if hours == 0 {
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+    return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+}
+
+private func formatElapsedForStorage(_ interval: TimeInterval) -> String {
+    let total = max(0, Int(interval.rounded(.down)))
+    return String(
+        format: "%02d:%02d:%02d",
+        total / 3600,
+        (total % 3600) / 60,
+        total % 60
+    )
+}
+
+struct ToggleTinyRestTimerIntent: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Pause or resume TinyRest timer"
+    static let description = IntentDescription("Pauses or resumes the active TinyRest timer.")
+    static let openAppWhenRun = false
+
+    func perform() async throws -> some IntentResult {
+        guard let activity = Activity<TinyRestTimerAttributes>.activities.first else {
+            return .result()
+        }
+
+        let current = activity.content.state
+        let now = Date()
+        let nextPaused = !current.isPaused
+        let nextElapsed = nextPaused
+            ? max(0, now.timeIntervalSince(current.startTime))
+            : current.pausedElapsed
+        let nextState = TinyRestTimerAttributes.ContentState(
+            startTime: current.startTime,
+            isPaused: nextPaused,
+            pausedElapsed: nextElapsed
+        )
+
+        let defaults = UserDefaults(suiteName: liveActivityAppGroupId)
+        defaults?.set(nextPaused ? 1 : 0, forKey: "widget.timerPaused")
+        if nextPaused {
+            defaults?.set(formatElapsedForStorage(nextElapsed), forKey: "widget.timerElapsed")
+            defaults?.set("paused", forKey: "widget.subtitle")
+        } else {
+            defaults?.removeObject(forKey: "widget.timerElapsed")
+            defaults?.removeObject(forKey: "widget.subtitle")
+        }
+
+        await activity.update(ActivityContent(state: nextState, staleDate: nil))
+        WidgetCenter.shared.reloadAllTimelines()
+        return .result()
+    }
+}
+
+#Preview("Running", as: .content, using: TinyRestTimerAttributes(timerType: "sleeping")) {
+    WidgetLiveActivity()
 } contentStates: {
-    WidgetAttributes.ContentState.smiley
-    WidgetAttributes.ContentState.starEyes
+    TinyRestTimerAttributes.ContentState(
+        startTime: Date().addingTimeInterval(-3725),
+        isPaused: false,
+        pausedElapsed: 0
+    )
+    TinyRestTimerAttributes.ContentState(
+        startTime: Date().addingTimeInterval(-3725),
+        isPaused: true,
+        pausedElapsed: 3725
+    )
 }

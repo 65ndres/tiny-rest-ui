@@ -16,10 +16,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.afre92.tinyrest",
-      "buildNumber": "4",
+      "buildNumber": "5",
       "appleTeamId": "NQ6AG8RHP3",
       "infoPlist": {
-        "UIBackgroundModes": ["audio"]
+        "UIBackgroundModes": ["audio"],
+        "NSSupportsLiveActivities": true
       },
       "entitlements": {
         "com.apple.security.application-groups": [

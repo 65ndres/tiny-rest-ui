@@ -2267,6 +2267,8 @@ PODS:
   - SDWebImageWebPCoder (0.14.6):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
+  - TinyRestLiveActivity (1.0.0):
+    - ExpoModulesCore
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -2371,6 +2373,7 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - RNWorklets (from `../node_modules/react-native-worklets`)
+  - TinyRestLiveActivity (from `../modules/tiny-rest-live-activity/ios`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -2589,6 +2592,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-vector-icons"
   RNWorklets:
     :path: "../node_modules/react-native-worklets"
+  TinyRestLiveActivity:
+    :path: "../modules/tiny-rest-live-activity/ios"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -2704,6 +2709,7 @@ SPEC CHECKSUMS:
   SDWebImageAVIFCoder: afe194a084e851f70228e4be35ef651df0fc5c57
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
+  TinyRestLiveActivity: 5cf6fe7daf9caf7f7f0ba9b45a60251f22ef928c
   Yoga: 5934998fbeaef7845dbf698f698518695ab4cd1a
 
 PODFILE CHECKSUM: b9a47a95e7a344cd753d5705d287ac011342b24d

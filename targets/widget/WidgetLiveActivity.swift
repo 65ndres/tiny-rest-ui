@@ -23,8 +23,8 @@ struct WidgetLiveActivity: Widget {
                     Image("bg-widget")
                         .resizable()
                         .frame(
-                            width: geometry.size.width,
-                            height: geometry.size.height
+                            width: 440,
+                            height: 140
                         )
                         .clipped()
                 }

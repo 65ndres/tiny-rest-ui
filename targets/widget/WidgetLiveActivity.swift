@@ -22,7 +22,6 @@ struct WidgetLiveActivity: Widget {
                 GeometryReader { geometry in
                     Image("bg-widget")
                         .resizable()
-                        .scaledToFill()
                         .frame(
                             width: geometry.size.width,
                             height: geometry.size.height
@@ -61,7 +60,9 @@ struct WidgetLiveActivity: Widget {
             // iOS caps Lock Screen Live Activities at roughly 160 points.
             .frame(maxWidth: .infinity, minHeight: 140)
             .clipped()
-            .activityBackgroundTint(.clear)
+            .activityBackgroundTint(
+                Color(red: 0.388, green: 0.282, blue: 0.545)
+            )
             .activitySystemActionForegroundColor(.white)
             .widgetURL(URL(string: "tinyrest://"))
         } dynamicIsland: { context in
@@ -110,7 +111,11 @@ private struct TimerValue: View {
             if state.isPaused {
                 Text(formatElapsedForDisplay(state.pausedElapsed))
             } else {
-                Text(state.startTime, style: .timer)
+                Text(
+                    timerInterval: state.startTime...Date.distantFuture,
+                    countsDown: false,
+                    showsHours: true
+                )
             }
         }
         .font(.system(size: fontSize, weight: .regular, design: .monospaced))

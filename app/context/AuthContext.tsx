@@ -5,7 +5,8 @@ import axios, { AxiosError } from 'axios';
 import { useNavigation } from 'expo-router';
 import { jwtDecode } from 'jwt-decode';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { API_URL } from '../../constants/Config';
+import { AppState } from 'react-native';
+import { API_URL, getDeviceTimeZone } from '../../constants/Config';
 import { clearLocalOnboardingStep } from '@/app/utils/onboardingProgress';
 import {
   setWidgetAuthenticated,
@@ -74,6 +75,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigation = useNavigation<NavigationProp>();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const updateTimeZoneHeader = () => {
+      axios.defaults.headers.common['X-Time-Zone'] = getDeviceTimeZone();
+    };
+    updateTimeZoneHeader();
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        updateTimeZoneHeader();
+      }
+    });
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
     const loadUser = async () => {

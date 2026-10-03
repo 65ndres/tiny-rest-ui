@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import axios from 'axios';
 
 /**
  * Environment Configuration
@@ -18,6 +19,17 @@ const PRODUCTION_API_URL = 'https://www.tiny-rest-app.com/api/v1'; //'https://ww
 
 // Export the appropriate API URL based on environment
 export const API_URL = isProduction ? PRODUCTION_API_URL : DEVELOPMENT_API_URL;
+
+export const getDeviceTimeZone = (): string => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+};
+
+// Let the API evaluate calendar days and sleep windows in the user's zone.
+axios.defaults.headers.common['X-Time-Zone'] = getDeviceTimeZone();
 
 // Additional configuration
 export const Config = {

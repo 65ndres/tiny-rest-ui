@@ -108,6 +108,7 @@ const NapTimelineScreen: React.FC = () => {
   >({});
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const fetchedRangesRef = useRef<Set<string>>(new Set());
   const suppressEventPressRef = useRef(false);
 
@@ -146,19 +147,24 @@ const NapTimelineScreen: React.FC = () => {
 
       fetchedRangesRef.current.add(key);
 
-      const token = await AsyncStorage.getItem('token');
-      if (token) {
-        const sessions = filterTimelineSessions(
-          await fetchTimerRunsInRange(token, from, to)
-        );
-        applySessions(sessions);
-        return;
-      }
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+          const sessions = filterTimelineSessions(
+            await fetchTimerRunsInRange(token, from, to)
+          );
+          applySessions(sessions);
+          return;
+        }
 
-      const cached = await loadTimerHistoryFromCache();
-      applySessions(
-        filterTimelineSessions(filterSessionsInRange(cached, from, to))
-      );
+        const cached = await loadTimerHistoryFromCache();
+        applySessions(
+          filterTimelineSessions(filterSessionsInRange(cached, from, to))
+        );
+      } catch (error) {
+        fetchedRangesRef.current.delete(key);
+        throw error;
+      }
     },
     [applySessions]
   );
@@ -173,10 +179,13 @@ const NapTimelineScreen: React.FC = () => {
 
   const refreshTimeline = useCallback(async () => {
     setIsLoading(true);
+    setLoadError(null);
     try {
       fetchedRangesRef.current.clear();
       setEventsByDate({});
-      await loadBufferedRange(new Date(currentDate), true);
+      await loadBufferedRange(new Date(`${currentDate}T12:00:00`), true);
+    } catch {
+      setLoadError('Could not load the timeline. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -192,14 +201,20 @@ const NapTimelineScreen: React.FC = () => {
     (date: string, _source?: string) => {
       setCurrentDate(date);
       const { from, to } = getWeekRangeForDate(new Date(`${date}T12:00:00`));
-      void loadRange(from, to);
+      void loadRange(from, to).catch(() => {
+        setLoadError('Could not load the timeline. Please try again.');
+      });
     },
     [loadRange]
   );
 
   const handleMonthChange = useCallback(
     (month: { dateString: string }) => {
-      void loadBufferedRange(new Date(`${month.dateString}T12:00:00`));
+      void loadBufferedRange(new Date(`${month.dateString}T12:00:00`)).catch(
+        () => {
+          setLoadError('Could not load the timeline. Please try again.');
+        }
+      );
     },
     [loadBufferedRange]
   );
@@ -340,10 +355,11 @@ const NapTimelineScreen: React.FC = () => {
           />
         </CalendarProvider>
 
-        {!isLoading && Object.keys(eventsByDate).length === 0 ? (
+        {!isLoading && (loadError || Object.keys(eventsByDate).length === 0) ? (
           <View style={styles.emptyState} pointerEvents="none">
             <Text style={styles.emptyText}>
-              No sleep or nursing sessions for this period.
+              {loadError ??
+                'No sleep or nursing sessions for this period.'}
             </Text>
           </View>
         ) : null}

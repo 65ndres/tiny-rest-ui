@@ -98,9 +98,9 @@ private func timerTypeLabel(_ type: String) -> String {
     case "nursing_right":
         return "nursing right"
     case "bottle":
-        return "bottle"
+        return "bottle feeding"
     case "sleeping":
-        return "sleeping"
+        return "sleep timer"
     default:
         return type.replacingOccurrences(of: "_", with: " ")
     }
@@ -172,6 +172,37 @@ struct widgetEntryView: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
                 }
+            } else if entry.payload.mode == .timer {
+                VStack(alignment: .center, spacing: 6) {
+                    Group {
+                        if entry.payload.timerPaused {
+                            Text(entry.payload.timerElapsed ?? entry.payload.value)
+                        } else if let start = entry.payload.timerStart {
+                            Text(
+                                timerInterval: start...Date.distantFuture,
+                                countsDown: false,
+                                showsHours: true
+                            )
+                        } else {
+                            Text("--:--:--")
+                        }
+                    }
+                    .font(.system(size: 42, weight: .regular, design: .monospaced))
+                    .monospacedDigit()
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .minimumScaleFactor(0.65)
+                    .lineLimit(1)
+
+                    Text(entry.payload.label.lowercased())
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .offset(y: -6)
             } else {
                 VStack(alignment: .center, spacing: 8) {
                     Text(entry.payload.label)
@@ -180,40 +211,12 @@ struct widgetEntryView: View {
                         .multilineTextAlignment(.center)
                         .lineLimit(1)
 
-                    Group {
-                        if entry.payload.mode == .timer {
-                            if entry.payload.timerPaused {
-                                Text(entry.payload.timerElapsed ?? entry.payload.value)
-                                    .font(.system(size: 42, weight: .regular, design: .monospaced))
-                                    .foregroundStyle(.white)
-                                    .minimumScaleFactor(0.5)
-                                    .lineLimit(1)
-                                    .multilineTextAlignment(.center)
-                            } else if let start = entry.payload.timerStart {
-                                Text(start, style: .timer)
-                                    .font(.system(size: 42, weight: .regular, design: .monospaced))
-                                    .foregroundStyle(.white)
-                                    .minimumScaleFactor(0.5)
-                                    .lineLimit(1)
-                                    .monospacedDigit()
-                                    .multilineTextAlignment(.center)
-                            } else {
-                                Text("--:--:--")
-                                    .font(.system(size: 42, weight: .regular, design: .monospaced))
-                                    .foregroundStyle(.white)
-                                    .minimumScaleFactor(0.5)
-                                    .lineLimit(1)
-                                    .multilineTextAlignment(.center)
-                            }
-                        } else {
-                            Text(entry.payload.value)
-                                .font(.system(size: 42, weight: .regular, design: .monospaced))
-                                .foregroundStyle(.white)
-                                .minimumScaleFactor(0.5)
-                                .lineLimit(1)
-                                .multilineTextAlignment(.center)
-                        }
-                    }
+                    Text(entry.payload.value)
+                        .font(.system(size: 42, weight: .regular, design: .monospaced))
+                        .foregroundStyle(.white)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
+                        .multilineTextAlignment(.center)
 
                     if let subtitle = entry.payload.subtitle, !subtitle.isEmpty {
                         Text(subtitle)
@@ -273,7 +276,7 @@ struct widget: Widget {
         date: .now,
         payload: WidgetPayload(
             mode: .timer,
-            label: "sleeping",
+            label: "sleep timer",
             value: "",
             subtitle: nil,
             timerType: "sleeping",
@@ -286,7 +289,7 @@ struct widget: Widget {
         date: .now,
         payload: WidgetPayload(
             mode: .timer,
-            label: "sleeping",
+            label: "sleep timer",
             value: "00:02:05",
             subtitle: "paused",
             timerType: "sleeping",

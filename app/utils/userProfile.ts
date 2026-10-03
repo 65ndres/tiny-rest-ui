@@ -18,6 +18,7 @@ export type UserProfile = {
   daily_nap_count_alt: number | null;
   day_start_minutes: number;
   day_end_minutes: number;
+  time_zone: string;
 };
 
 export type UserProfileUpdate = Partial<{
@@ -31,6 +32,7 @@ export type UserProfileUpdate = Partial<{
   daily_nap_count_alt: number | null;
   day_start_minutes: number;
   day_end_minutes: number;
+  time_zone: string;
   password: string;
   password_confirmation: string;
 }>;

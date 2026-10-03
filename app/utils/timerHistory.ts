@@ -205,10 +205,11 @@ export const getWeekRangeForDate = (
   firstDay: number = TIMELINE_FIRST_DAY
 ): { from: string; to: string } => {
   const weekStart = getWeekStart(date, firstDay);
-  const weekEnd = getWeekEnd(date, firstDay);
+  const endExclusive = new Date(weekStart);
+  endExclusive.setDate(endExclusive.getDate() + 7);
   return {
-    from: formatDateParam(weekStart),
-    to: formatDateParam(weekEnd),
+    from: weekStart.toISOString(),
+    to: endExclusive.toISOString(),
   };
 };
 
@@ -221,13 +222,14 @@ export const getBufferedWeekRange = (
   const rangeStart = new Date(weekStart);
   rangeStart.setDate(rangeStart.getDate() - bufferWeeks * 7);
 
-  const weekEnd = getWeekEnd(date, firstDay);
-  const rangeEnd = new Date(weekEnd);
-  rangeEnd.setDate(rangeEnd.getDate() + bufferWeeks * 7);
+  const rangeEndExclusive = new Date(weekStart);
+  rangeEndExclusive.setDate(
+    rangeEndExclusive.getDate() + 7 + bufferWeeks * 7
+  );
 
   return {
-    from: formatDateParam(rangeStart),
-    to: formatDateParam(rangeEnd),
+    from: rangeStart.toISOString(),
+    to: rangeEndExclusive.toISOString(),
   };
 };
 
@@ -236,9 +238,15 @@ export const filterSessionsInRange = (
   from: string,
   to: string
 ): TimerSession[] => {
-  const rangeStart = startOfLocalDay(new Date(`${from}T00:00:00`));
-  const rangeEnd = startOfLocalDay(new Date(`${to}T00:00:00`));
-  rangeEnd.setHours(23, 59, 59, 999);
+  const rangeStart = from.includes('T')
+    ? new Date(from)
+    : startOfLocalDay(new Date(`${from}T00:00:00`));
+  const rangeEnd = to.includes('T')
+    ? new Date(to)
+    : startOfLocalDay(new Date(`${to}T00:00:00`));
+  if (!to.includes('T')) {
+    rangeEnd.setDate(rangeEnd.getDate() + 1);
+  }
 
   return sessions.filter((session) => {
     const start = new Date(session.start_time);
@@ -289,15 +297,39 @@ export const buildTimelineEventsByDate = (
   sessions: TimerSession[]
 ): Record<string, TimelineEventProps[]> => {
   const eventsByDate: Record<string, TimelineEventProps[]> = {};
+  const maxTimelineDurationMs = 7 * 24 * 60 * 60 * 1000;
 
   for (const session of sessions) {
-    const dayKey = getLocalDayKey(session.start_time);
-    const event = sessionToTimelineEvent(session);
-    const existing = eventsByDate[dayKey];
-    if (existing) {
-      existing.push(event);
-    } else {
-      eventsByDate[dayKey] = [event];
+    const sessionStart = new Date(session.start_time);
+    const sessionEnd = new Date(session.end_time);
+    const duration = sessionEnd.getTime() - sessionStart.getTime();
+    if (
+      Number.isNaN(sessionStart.getTime()) ||
+      Number.isNaN(sessionEnd.getTime()) ||
+      duration <= 0 ||
+      duration > maxTimelineDurationMs
+    ) {
+      continue;
+    }
+
+    let segmentStart = sessionStart;
+    while (segmentStart < sessionEnd) {
+      const nextDay = startOfLocalDay(segmentStart);
+      nextDay.setDate(nextDay.getDate() + 1);
+      const segmentEnd = nextDay < sessionEnd ? nextDay : sessionEnd;
+      const dayKey = formatDateParam(segmentStart);
+      const event = {
+        ...sessionToTimelineEvent(session),
+        start: segmentStart.toISOString(),
+        end: segmentEnd.toISOString(),
+      };
+      const existing = eventsByDate[dayKey];
+      if (existing) {
+        existing.push(event);
+      } else {
+        eventsByDate[dayKey] = [event];
+      }
+      segmentStart = segmentEnd;
     }
   }
 
@@ -737,7 +769,9 @@ export const isEpochAnchoredDate = (date: Date): boolean =>
   date.getFullYear() < 2000;
 
 /** True when a picker result is safe to store (not invalid / Dec 31 epoch junk). */
-export const isUsableTimerPickerDate = (date: Date | null | undefined): boolean =>
+export const isUsableTimerPickerDate = (
+  date: Date | null | undefined
+): date is Date =>
   !!date &&
   !Number.isNaN(date.getTime()) &&
   !isEpochAnchoredDate(date);
@@ -1017,6 +1051,14 @@ const normalizeSession = (raw: Record<string, unknown>): TimerSession | null => 
 
   const id =
     raw.id != null ? String(raw.id) : `local-${start_time}-${end_time}`;
+  const runType = [
+    'sleeping',
+    'nursing_left',
+    'nursing_right',
+    'bottle',
+  ].includes(raw.run_type as TimerRunType)
+    ? (raw.run_type as TimerRunType)
+    : 'sleeping';
 
   return {
     id,
@@ -1025,6 +1067,7 @@ const normalizeSession = (raw: Record<string, unknown>): TimerSession | null => 
     duration_ms,
     submitted_at:
       typeof raw.submitted_at === 'string' ? raw.submitted_at : undefined,
+    run_type: runType,
   };
 };
 
@@ -1056,6 +1099,7 @@ export const createLocalTimerSession = (
   end_time: payload.end_time,
   duration_ms: payload.duration_ms,
   submitted_at: new Date().toISOString(),
+  run_type: 'sleeping',
 });
 
 export const loadTimerHistoryFromCache = async (): Promise<TimerSession[]> => {

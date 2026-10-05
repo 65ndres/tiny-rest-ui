@@ -4,7 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
+  ImageBackground,
   Pressable,
   StyleSheet,
   Text,
@@ -33,12 +33,25 @@ import {
   removeTimerSessionFromCache,
   type TimerSession,
 } from '@/app/utils/timerHistory';
-import { TIMER_SOLID_BUTTON_CONTENT_COLOR } from '@/app/constants/screenLayout';
+import {
+  TIMER_SOLID_BUTTON_CONTENT_COLOR,
+  layout,
+} from '@/app/constants/screenLayout';
 import { getAppWindow, vh, vw } from '@/constants/appViewport';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
+import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
+import {
+  Drawer,
+  DrawerBackdrop,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerHeader,
+} from '@/components/ui/drawer';
+import { Heading } from '@/components/ui/heading';
 
 const { width: timelineWidth, height: timelineHeight } = getAppWindow();
 const TIMELINE_LEFT_INSET = vw(56);
+const DRAWER_BACKGROUND = require('../../assets/images/bg-date-picker.png');
 
 const calendarTheme = {
   backgroundColor: 'transparent',
@@ -109,8 +122,9 @@ const NapTimelineScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] =
+    useState<TimelinePackedEventProps | null>(null);
   const fetchedRangesRef = useRef<Set<string>>(new Set());
-  const suppressEventPressRef = useRef(false);
 
   const markedDates = useMemo(
     () => buildMarkedDatesFromEvents(eventsByDate),
@@ -219,18 +233,6 @@ const NapTimelineScreen: React.FC = () => {
     [loadBufferedRange]
   );
 
-  const handleEventPress = useCallback((event: TimelineEventProps) => {
-    if (suppressEventPressRef.current) {
-      suppressEventPressRef.current = false;
-      return;
-    }
-
-    Alert.alert(
-      event.summary ?? 'Session',
-      `${formatSessionClockTime(String(event.start))} – ${formatSessionClockTime(String(event.end))}\nDuration: ${event.title ?? '—'}`
-    );
-  }, []);
-
   const performDelete = useCallback(
     async (event: TimelinePackedEventProps) => {
       const eventId = event.id;
@@ -246,7 +248,7 @@ const NapTimelineScreen: React.FC = () => {
         await removeTimerSessionFromCache(eventId);
         removeEventFromState(eventId);
       } catch {
-        Alert.alert('Error', 'Could not delete this entry. Please try again.');
+        setLoadError('Could not delete this entry. Please try again.');
       } finally {
         setIsDeleting(false);
       }
@@ -256,20 +258,9 @@ const NapTimelineScreen: React.FC = () => {
 
   const confirmDelete = useCallback(
     (event: TimelinePackedEventProps) => {
-      Alert.alert(
-        'Delete entry',
-        'Are you sure you want to delete this session? This cannot be undone.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: () => void performDelete(event),
-          },
-        ]
-      );
+      setPendingDelete(event);
     },
-    [performDelete]
+    []
   );
 
   const renderEvent = useCallback(
@@ -278,6 +269,12 @@ const NapTimelineScreen: React.FC = () => {
         <View style={styles.eventTextBlock}>
           <Text numberOfLines={1} style={styles.eventTitle}>
             {event.title || 'Event'}
+          </Text>
+          <Text numberOfLines={1} style={styles.eventTime}>
+            Start: {formatSessionClockTime(String(event.start))}
+          </Text>
+          <Text numberOfLines={1} style={styles.eventTime}>
+            End: {formatSessionClockTime(String(event.end))}
           </Text>
           {event.summary ? (
             <Text numberOfLines={2} style={styles.eventSummary}>
@@ -290,7 +287,6 @@ const NapTimelineScreen: React.FC = () => {
           accessibilityRole="button"
           hitSlop={8}
           onPress={() => {
-            suppressEventPressRef.current = true;
             confirmDelete(event);
           }}
           style={styles.deleteButton}
@@ -313,10 +309,9 @@ const NapTimelineScreen: React.FC = () => {
       rightEdgeSpacing: vw(24),
       timelineLeftInset: TIMELINE_LEFT_INSET,
       theme: timelineTheme,
-      onEventPress: handleEventPress,
       renderEvent,
     }),
-    [handleEventPress, renderEvent]
+    [renderEvent]
   );
 
   return (
@@ -363,6 +358,68 @@ const NapTimelineScreen: React.FC = () => {
             </Text>
           </View>
         ) : null}
+
+        <Drawer
+          isOpen={pendingDelete !== null}
+          onClose={() => setPendingDelete(null)}
+          anchor="bottom"
+          size="md"
+        >
+          <DrawerBackdrop className="bg-black/60" />
+          <DrawerContent className="border-white/0 bg-transparent p-0 overflow-hidden">
+            <ImageBackground
+              resizeMode="cover"
+              source={DRAWER_BACKGROUND}
+              style={styles.drawerBackground}
+            >
+              <View style={styles.drawerContent}>
+                <DrawerHeader className="px-0" style={styles.drawerHeader}>
+                  <Heading
+                    size="lg"
+                    className="text-white font-bold"
+                    style={styles.drawerHeading}
+                  >
+                    Delete entry
+                  </Heading>
+                  <DrawerCloseButton
+                    accessibilityLabel="Cancel deletion"
+                    className="p-1"
+                  >
+                    <Ionicons
+                      name="close"
+                      size={layout.icon2xl}
+                      color="#ffffff"
+                    />
+                  </DrawerCloseButton>
+                </DrawerHeader>
+
+                <Text style={styles.drawerMessage}>
+                  Delete this session? This cannot be undone.
+                </Text>
+
+                <View style={styles.drawerActions}>
+                  <TimerOutlineButton
+                    label="Cancel"
+                    onPress={() => setPendingDelete(null)}
+                    size="lg"
+                  />
+                  <TimerOutlineButton
+                    label="Delete"
+                    onPress={() => {
+                      if (!pendingDelete) return;
+                      const event = pendingDelete;
+                      setPendingDelete(null);
+                      void performDelete(event);
+                    }}
+                    variant="solid"
+                    size="lg"
+                    disabled={isDeleting}
+                  />
+                </View>
+              </View>
+            </ImageBackground>
+          </DrawerContent>
+        </Drawer>
       </View>
     </ScreenComponent>
   );
@@ -413,6 +470,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: vh(15),
   },
+  eventTime: {
+    color: TIMER_SOLID_BUTTON_CONTENT_COLOR,
+    fontWeight: '600',
+    fontSize: vh(13),
+    marginTop: vh(2),
+  },
   eventSummary: {
     color: TIMER_SOLID_BUTTON_CONTENT_COLOR,
     fontWeight: '600',
@@ -423,6 +486,37 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginTop: vh(4),
     paddingVertical: vh(2),
+  },
+  drawerBackground: {
+    width: '100%',
+    height: '100%',
+  },
+  drawerContent: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
+    paddingHorizontal: layout.space24,
+    paddingBottom: layout.space32,
+  },
+  drawerHeader: {
+    paddingTop: 0,
+    paddingHorizontal: 0,
+  },
+  drawerHeading: {
+    fontSize: layout.fontLg,
+  },
+  drawerMessage: {
+    color: '#ffffff',
+    fontSize: layout.fontBase,
+    fontWeight: '600',
+    lineHeight: layout.font2xl,
+    marginTop: layout.space12,
+    textAlign: 'center',
+  },
+  drawerActions: {
+    width: '100%',
+    gap: layout.space12,
+    marginTop: layout.space36,
   },
 });
 

@@ -7,19 +7,15 @@
     "icon": "./assets/images/icon.png",
     "scheme": "tinyrest",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#6E9AB1"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.afre92.tinyrest",
       "buildNumber": "5",
       "appleTeamId": "NQ6AG8RHP3",
       "infoPlist": {
-        "UIBackgroundModes": ["audio"],
+        "UIBackgroundModes": [
+          "audio"
+        ],
         "NSSupportsLiveActivities": true
       },
       "entitlements": {
@@ -33,27 +29,41 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.afre92.tinyrest"
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",
       "expo-font",
       "@bacons/apple-targets",
       "@react-native-community/datetimepicker",
-      "expo-audio"
+      "expo-audio",
+      "expo-image",
+      "expo-status-bar",
+      "expo-web-browser",
+      "expo-asset",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash.png",
+          "resizeMode": "cover",
+          "backgroundColor": "#6E9AB1"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "enableSceneSupport": true
+          }
+        }
+      ]
     ],
-    "experiments": {
-      "typedRoutes": true
-    },
     "owner": "afre92",
     "extra": {
-      "router": {},
       "eas": {
         "build": {
           "experimental": {

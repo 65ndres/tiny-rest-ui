@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
   s.description    = 'Starts, updates, and ends the TinyRest timer Live Activity.'
   s.author         = 'TinyRest'
   s.homepage       = 'https://tinyrest.app'
-  s.platform       = :ios, '15.1'
+  s.platform       = :ios, '16.4'
   s.source         = { git: '' }
   s.static_framework = true
 

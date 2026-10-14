@@ -507,7 +507,6 @@ const OnboardingRootLayout: React.FC = () => {
             headerTitleStyle: { color: 'white', fontSize: height * 0.025, fontWeight: '400' },
             cardStyle: { backgroundColor: 'transparent', flex: 1 },
             headerTintColor: 'white',
-            animationEnabled: true,
             cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter,
             transitionSpec: {
               open: { animation: 'timing', config: { duration: 220 } },

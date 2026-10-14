@@ -11,19 +11,17 @@ import {
   vw,
 } from '../appViewport';
 
-jest.mock('react-native', () => ({
-  Dimensions: {
-    get: jest.fn(() => ({
-      width: 440,
-      height: 956,
-      scale: 3,
-      fontScale: 1,
-    })),
-  },
-}));
+// Spy on Dimensions.get only: replacing the whole react-native module breaks
+// jest-expo's setup, which needs the real Platform from react-native.
+const dimensionsGet = jest.spyOn(Dimensions, 'get').mockReturnValue({
+  width: 440,
+  height: 956,
+  scale: 3,
+  fontScale: 1,
+});
 
 const mockWindow = (width: number, height: number) => {
-  (Dimensions.get as jest.Mock).mockReturnValue({
+  dimensionsGet.mockReturnValue({
     width,
     height,
     scale: 3,

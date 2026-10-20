@@ -51,11 +51,12 @@ import {
 import { Heading } from '@/components/ui/heading';
 
 const DRAWER_BACKGROUND = require('../../assets/images/bg-date-picker.png');
-const AXIS_WIDTH = vw(52);
+const AXIS_WIDTH = vw(62);
 const MIN_BAR_HEIGHT = 3;
 const NIGHT_COLOR = '#3dd1e7';
 const NAP_COLOR = '#b4eef7';
-const SELECTED_COLOR = FEEDING_COLORS.accent;
+// Matches the "14-day free trial" highlight on the landing screen.
+const SELECTED_COLOR = '#FFD700';
 const GRID_COLOR = 'rgba(255,255,255,0.12)';
 
 const isNumericId = (id: string | undefined): id is string =>
@@ -529,6 +530,8 @@ const styles = StyleSheet.create({
   chart: {
     flex: 1,
     position: 'relative',
+    // Room for the first and last axis labels, which straddle the chart edges.
+    marginVertical: layout.fontXs * 0.7,
   },
   gridRow: {
     position: 'absolute',

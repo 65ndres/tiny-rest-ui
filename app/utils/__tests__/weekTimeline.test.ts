@@ -116,10 +116,13 @@ describe('buildWeekTimelineSegments', () => {
 });
 
 describe('buildWeekTimelineHourMarks', () => {
-  it('starts at the first full hour after the day start', () => {
+  it('runs from the day start to the next day start', () => {
     const marks = buildWeekTimelineHourMarks(DAY_START);
-    expect(marks[0].offsetMinutes).toBe(30);
-    expect(marks[1].offsetMinutes).toBe(150);
-    expect(marks).toHaveLength(12);
+    expect(marks[0].offsetMinutes).toBe(0);
+    expect(marks[1].offsetMinutes).toBe(120);
+    expect(marks[marks.length - 1].offsetMinutes).toBe(1440);
+    expect(marks).toHaveLength(13);
+    expect(marks[0].label).toMatch(/6:30/);
+    expect(marks[marks.length - 1].label).toMatch(/6:30/);
   });
 });

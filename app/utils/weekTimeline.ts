@@ -141,23 +141,26 @@ export const buildWeekTimelineSegments = (
   return segments;
 };
 
-/** Hour labels every `stepHours`, starting at the first full hour on or after the day start. */
+/** Axis labels every `stepHours` from the day start, ending with the next day start at the bottom. */
 export const buildWeekTimelineHourMarks = (
   dayStartMinutes: number,
   stepHours = 2
 ): WeekTimelineHourMark[] => {
   const marks: WeekTimelineHourMark[] = [];
-  const firstOffset = (60 - (dayStartMinutes % 60)) % 60;
+  const showMinutes = dayStartMinutes % 60 !== 0;
 
   for (
-    let offset = firstOffset;
-    offset < MINUTES_PER_TIMELINE_DAY;
+    let offset = 0;
+    offset <= MINUTES_PER_TIMELINE_DAY;
     offset += stepHours * 60
   ) {
     const date = minutesToDate((dayStartMinutes + offset) % MINUTES_PER_TIMELINE_DAY);
     marks.push({
       offsetMinutes: offset,
-      label: date.toLocaleTimeString(undefined, { hour: 'numeric' }),
+      label: date.toLocaleTimeString(
+        undefined,
+        showMinutes ? { hour: 'numeric', minute: '2-digit' } : { hour: 'numeric' }
+      ),
     });
   }
 

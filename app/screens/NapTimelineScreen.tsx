@@ -5,39 +5,40 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   ImageBackground,
+  type LayoutChangeEvent,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import {
-  CalendarProvider,
-  TimelineEventProps,
-  TimelineList,
-  TimelinePackedEventProps,
-  WeekCalendar,
-} from 'react-native-calendars';
-import {
-  buildMarkedDatesFromEvents,
-  buildTimelineEventsByDate,
   deleteTimerRun,
   fetchTimerRunsInRange,
   filterSessionsInRange,
-  filterTimelineSessions,
-  formatDateParam,
-  formatSessionClockTime,
-  getBufferedWeekRange,
-  getWeekRangeForDate,
+  formatHumanDuration,
+  formatSessionTimeRange,
   loadTimerHistoryFromCache,
-  mergeTimelineEventsByDate,
   removeTimerSessionFromCache,
   type TimerSession,
 } from '@/app/utils/timerHistory';
 import {
-  TIMER_SOLID_BUTTON_CONTENT_COLOR,
-  layout,
-} from '@/app/constants/screenLayout';
-import { getAppWindow, vh, vw } from '@/constants/appViewport';
+  DEFAULT_DAY_END_MINUTES,
+  DEFAULT_DAY_START_MINUTES,
+} from '@/app/utils/dayWindow';
+import { fetchUserProfile } from '@/app/utils/userProfile';
+import {
+  MINUTES_PER_TIMELINE_DAY,
+  buildWeekTimelineDays,
+  buildWeekTimelineHourMarks,
+  buildWeekTimelineSegments,
+  classifySleep,
+  getSleptMs,
+  getTimelineDayStartForInstant,
+  getWeekTimelineRange,
+} from '@/app/utils/weekTimeline';
+import { FEEDING_COLORS } from '@/app/constants/feedingTheme';
+import { layout } from '@/app/constants/screenLayout';
+import { vh, vw } from '@/constants/appViewport';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 import {
@@ -49,270 +50,200 @@ import {
 } from '@/components/ui/drawer';
 import { Heading } from '@/components/ui/heading';
 
-const { width: timelineWidth, height: timelineHeight } = getAppWindow();
-const TIMELINE_LEFT_INSET = vw(56);
 const DRAWER_BACKGROUND = require('../../assets/images/bg-date-picker.png');
-
-const calendarTheme = {
-  backgroundColor: 'transparent',
-  calendarBackground: 'transparent',
-  textSectionTitleColor: 'rgba(255,255,255,0.75)',
-  selectedDayBackgroundColor: '#ffffff',
-  selectedDayTextColor: '#000000',
-  todayTextColor: '#ffffff',
-  dayTextColor: '#ffffff',
-  textDisabledColor: 'rgba(255,255,255,0.35)',
-  dotColor: '#4ade80',
-  selectedDotColor: '#000000',
-  arrowColor: '#ffffff',
-  monthTextColor: '#ffffff',
-  indicatorColor: '#ffffff',
-  expandableKnobColor: 'rgba(255,255,255,0.45)',
-  textDayFontWeight: '400' as const,
-  textMonthFontWeight: '500' as const,
-  textDayHeaderFontWeight: '500' as const,
-  textDayFontSize: vh(16),
-  textMonthFontSize: vh(16),
-  textDayHeaderFontSize: vh(13),
-};
-
-const timelineTheme = {
-  calendarBackground: 'transparent',
-  contentStyle: {
-    backgroundColor: 'transparent',
-  },
-  timelineContainer: {
-    backgroundColor: 'transparent',
-  },
-  event: {
-    opacity: 0.95,
-    borderRadius: vh(6),
-    paddingLeft: vh(6),
-    paddingRight: vh(6),
-    paddingTop: vh(4),
-    paddingBottom: vh(4),
-  },
-  timeLabel: {
-    color: 'rgba(255,255,255,0.75)',
-    fontSize: vh(12),
-  },
-  line: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-  },
-  verticalLine: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-  },
-  nowIndicatorLine: {
-    backgroundColor: '#ffffff',
-  },
-  nowIndicatorKnob: {
-    backgroundColor: '#ffffff',
-  },
-};
+const AXIS_WIDTH = vw(62);
+const MIN_BAR_HEIGHT = 3;
+const NIGHT_COLOR = '#3dd1e7';
+const NAP_COLOR = '#b4eef7';
+// Matches the "14-day free trial" highlight on the landing screen.
+const SELECTED_COLOR = '#FFD700';
+const GRID_COLOR = 'rgba(255,255,255,0.12)';
 
 const isNumericId = (id: string | undefined): id is string =>
   !!id && /^\d+$/.test(id);
 
+const addDays = (date: Date, days: number): Date => {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+};
+
+const formatWeekLabel = (start: Date, end: Date): string => {
+  const sameMonth = start.getMonth() === end.getMonth();
+  const startLabel = start.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+  });
+  const endLabel = end.toLocaleDateString(
+    undefined,
+    sameMonth ? { day: 'numeric' } : { month: 'short', day: 'numeric' }
+  );
+  return `${startLabel} – ${endLabel}`;
+};
+
+type DayWindow = {
+  startMinutes: number;
+  endMinutes: number;
+};
+
 const NapTimelineScreen: React.FC = () => {
-  const today = useMemo(() => formatDateParam(new Date()), []);
-  const [currentDate, setCurrentDate] = useState(today);
-  const [eventsByDate, setEventsByDate] = useState<
-    Record<string, TimelineEventProps[]>
-  >({});
+  const [weekEnd, setWeekEnd] = useState(() => new Date());
+  const [dayWindow, setDayWindow] = useState<DayWindow>({
+    startMinutes: DEFAULT_DAY_START_MINUTES,
+    endMinutes: DEFAULT_DAY_END_MINUTES,
+  });
+  const [babyName, setBabyName] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<TimerSession[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [chartHeight, setChartHeight] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [pendingDelete, setPendingDelete] =
-    useState<TimelinePackedEventProps | null>(null);
-  const fetchedRangesRef = useRef<Set<string>>(new Set());
+  const [pendingDelete, setPendingDelete] = useState<TimerSession | null>(null);
+  const requestIdRef = useRef(0);
 
-  const markedDates = useMemo(
-    () => buildMarkedDatesFromEvents(eventsByDate),
-    [eventsByDate]
+  const days = useMemo(
+    () => buildWeekTimelineDays(weekEnd, dayWindow.startMinutes),
+    [weekEnd, dayWindow.startMinutes]
   );
 
-  const rangeKey = (from: string, to: string) => `${from}:${to}`;
+  const isCurrentWeek = useMemo(() => {
+    const now = new Date();
+    return now >= days[0].start && now < days[days.length - 1].end;
+  }, [days]);
 
-  const applySessions = useCallback((sessions: TimerSession[]) => {
-    setEventsByDate((current) =>
-      mergeTimelineEventsByDate(current, buildTimelineEventsByDate(sessions))
-    );
+  const segments = useMemo(
+    () =>
+      buildWeekTimelineSegments(
+        sessions,
+        days,
+        dayWindow.startMinutes,
+        dayWindow.endMinutes
+      ),
+    [sessions, days, dayWindow]
+  );
+
+  const hourMarks = useMemo(
+    () => buildWeekTimelineHourMarks(dayWindow.startMinutes),
+    [dayWindow.startMinutes]
+  );
+
+  const selectedSession = useMemo(
+    () => sessions.find((session) => session.id === selectedId) ?? null,
+    [sessions, selectedId]
+  );
+
+  const loadProfile = useCallback(async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) return;
+    try {
+      const profile = await fetchUserProfile(token);
+      setDayWindow({
+        startMinutes: profile.day_start_minutes,
+        endMinutes: profile.day_end_minutes,
+      });
+      setBabyName(profile.baby_name);
+    } catch {
+      // Keep the default day window if the profile can't be loaded.
+    }
   }, []);
 
-  const removeEventFromState = useCallback((eventId: string) => {
-    setEventsByDate((current) => {
-      const next: Record<string, TimelineEventProps[]> = {};
-      for (const [date, events] of Object.entries(current)) {
-        const filtered = events.filter((event) => event.id !== eventId);
-        if (filtered.length > 0) {
-          next[date] = filtered;
-        }
-      }
-      return next;
-    });
-  }, []);
-
-  const loadRange = useCallback(
-    async (from: string, to: string, force = false) => {
-      const key = rangeKey(from, to);
-      if (!force && fetchedRangesRef.current.has(key)) {
-        return;
-      }
-
-      fetchedRangesRef.current.add(key);
-
-      try {
-        const token = await AsyncStorage.getItem('token');
-        if (token) {
-          const sessions = filterTimelineSessions(
-            await fetchTimerRunsInRange(token, from, to)
-          );
-          applySessions(sessions);
-          return;
-        }
-
-        const cached = await loadTimerHistoryFromCache();
-        applySessions(
-          filterTimelineSessions(filterSessionsInRange(cached, from, to))
-        );
-      } catch (error) {
-        fetchedRangesRef.current.delete(key);
-        throw error;
-      }
-    },
-    [applySessions]
-  );
-
-  const loadBufferedRange = useCallback(
-    async (date: Date, force = false) => {
-      const { from, to } = getBufferedWeekRange(date, 1);
-      await loadRange(from, to, force);
-    },
-    [loadRange]
-  );
-
-  const refreshTimeline = useCallback(async () => {
+  const loadWeek = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+    const { from, to } = getWeekTimelineRange(days);
     setIsLoading(true);
     setLoadError(null);
+
     try {
-      fetchedRangesRef.current.clear();
-      setEventsByDate({});
-      await loadBufferedRange(new Date(`${currentDate}T12:00:00`), true);
+      const token = await AsyncStorage.getItem('token');
+      const loaded = token
+        ? await fetchTimerRunsInRange(token, from, to, { run_type: 'sleeping' })
+        : filterSessionsInRange(await loadTimerHistoryFromCache(), from, to);
+      if (requestId !== requestIdRef.current) return;
+
+      const sleeps = loaded.filter((session) => session.run_type === 'sleeping');
+      setSessions(sleeps);
+      setSelectedId((current) => {
+        if (current && sleeps.some((session) => session.id === current)) {
+          return current;
+        }
+        const latest = [...sleeps].sort(
+          (a, b) => Date.parse(b.end_time) - Date.parse(a.end_time)
+        )[0];
+        return latest?.id ?? null;
+      });
     } catch {
+      if (requestId !== requestIdRef.current) return;
       setLoadError('Could not load the timeline. Please try again.');
     } finally {
-      setIsLoading(false);
+      if (requestId === requestIdRef.current) {
+        setIsLoading(false);
+      }
     }
-  }, [currentDate, loadBufferedRange]);
+  }, [days]);
 
   useFocusEffect(
     useCallback(() => {
-      void refreshTimeline();
-    }, [refreshTimeline])
+      void loadProfile();
+    }, [loadProfile])
   );
 
-  const handleDateChanged = useCallback(
-    (date: string, _source?: string) => {
-      setCurrentDate(date);
-      const { from, to } = getWeekRangeForDate(new Date(`${date}T12:00:00`));
-      void loadRange(from, to).catch(() => {
-        setLoadError('Could not load the timeline. Please try again.');
-      });
-    },
-    [loadRange]
+  useFocusEffect(
+    useCallback(() => {
+      void loadWeek();
+    }, [loadWeek])
   );
 
-  const handleMonthChange = useCallback(
-    (month: { dateString: string }) => {
-      void loadBufferedRange(new Date(`${month.dateString}T12:00:00`)).catch(
-        () => {
-          setLoadError('Could not load the timeline. Please try again.');
-        }
-      );
-    },
-    [loadBufferedRange]
-  );
+  const shiftWeek = useCallback((direction: -1 | 1) => {
+    setWeekEnd((current) => {
+      const next = addDays(current, direction * 7);
+      const now = new Date();
+      return next > now ? now : next;
+    });
+  }, []);
 
   const performDelete = useCallback(
-    async (event: TimelinePackedEventProps) => {
-      const eventId = event.id;
-      if (!eventId || isDeleting) return;
+    async (session: TimerSession) => {
+      if (isDeleting) return;
 
       setIsDeleting(true);
       try {
         const token = await AsyncStorage.getItem('token');
-        if (token && isNumericId(eventId)) {
-          await deleteTimerRun(token, Number(eventId));
+        if (token && isNumericId(session.id)) {
+          await deleteTimerRun(token, Number(session.id));
         }
 
-        await removeTimerSessionFromCache(eventId);
-        removeEventFromState(eventId);
+        await removeTimerSessionFromCache(session.id);
+        setSessions((current) =>
+          current.filter((item) => item.id !== session.id)
+        );
+        setSelectedId(null);
       } catch {
         setLoadError('Could not delete this entry. Please try again.');
       } finally {
         setIsDeleting(false);
       }
     },
-    [isDeleting, removeEventFromState]
+    [isDeleting]
   );
 
-  const confirmDelete = useCallback(
-    (event: TimelinePackedEventProps) => {
-      setPendingDelete(event);
-    },
-    []
-  );
+  const handleChartLayout = useCallback((event: LayoutChangeEvent) => {
+    setChartHeight(event.nativeEvent.layout.height);
+  }, []);
 
-  const renderEvent = useCallback(
-    (event: TimelinePackedEventProps) => (
-      <View style={styles.eventContent}>
-        <View style={styles.eventTextBlock}>
-          <Text numberOfLines={1} style={styles.eventTitle}>
-            {event.title || 'Event'}
-          </Text>
-          <Text numberOfLines={1} style={styles.eventTime}>
-            Start: {formatSessionClockTime(String(event.start))}
-          </Text>
-          <Text numberOfLines={1} style={styles.eventTime}>
-            End: {formatSessionClockTime(String(event.end))}
-          </Text>
-          {event.summary ? (
-            <Text numberOfLines={2} style={styles.eventSummary}>
-              {event.summary}
-            </Text>
-          ) : null}
-        </View>
-        <Pressable
-          accessibilityLabel="Delete entry"
-          accessibilityRole="button"
-          hitSlop={8}
-          onPress={() => {
-            confirmDelete(event);
-          }}
-          style={styles.deleteButton}
-        >
-          <Ionicons
-            name="trash-outline"
-            size={vh(22)}
-            color={TIMER_SOLID_BUTTON_CONTENT_COLOR}
-          />
-        </Pressable>
-      </View>
-    ),
-    [confirmDelete]
-  );
+  const pxPerMinute = chartHeight / MINUTES_PER_TIMELINE_DAY;
 
-  const timelineProps = useMemo(
-    () => ({
-      format24h: true,
-      overlapEventsSpacing: vw(8),
-      rightEdgeSpacing: vw(24),
-      timelineLeftInset: TIMELINE_LEFT_INSET,
-      theme: timelineTheme,
-      renderEvent,
-    }),
-    [renderEvent]
-  );
+  const now = new Date();
+  const nowOffsetMinutes = isCurrentWeek
+    ? (now.getTime() -
+        getTimelineDayStartForInstant(now, dayWindow.startMinutes).getTime()) /
+      60_000
+    : null;
+
+  const selectedKind = selectedSession
+    ? classifySleep(selectedSession, dayWindow.startMinutes, dayWindow.endMinutes)
+    : null;
+  const subject = babyName?.trim() || 'Baby';
 
   return (
     <ScreenComponent
@@ -321,43 +252,168 @@ const NapTimelineScreen: React.FC = () => {
       style={styles.screen}
     >
       <View style={styles.container}>
-        {isLoading || isDeleting ? (
-          <View style={styles.loadingOverlay}>
-            <ActivityIndicator color="white" size="large" />
+        <View style={styles.weekHeader}>
+          <Pressable
+            accessibilityLabel="Previous week"
+            accessibilityRole="button"
+            hitSlop={12}
+            onPress={() => shiftWeek(-1)}
+          >
+            <Ionicons name="chevron-back" size={layout.icon2xl} color="#ffffff" />
+          </Pressable>
+          <Text style={styles.weekLabel}>
+            {formatWeekLabel(days[0].start, days[days.length - 1].start)}
+          </Text>
+          <Pressable
+            accessibilityLabel="Next week"
+            accessibilityRole="button"
+            disabled={isCurrentWeek}
+            hitSlop={12}
+            onPress={() => shiftWeek(1)}
+            style={isCurrentWeek ? styles.disabledArrow : undefined}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={layout.icon2xl}
+              color="#ffffff"
+            />
+          </Pressable>
+        </View>
+
+        <View style={styles.dayHeaderRow}>
+          <View style={{ width: AXIS_WIDTH }} />
+          {days.map((day) => (
+            <View key={day.key} style={styles.dayHeader}>
+              <Text style={styles.dayHeaderName}>
+                {day.start.toLocaleDateString(undefined, { weekday: 'short' })}
+              </Text>
+              <Text style={styles.dayHeaderDate}>{day.start.getDate()}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.chart} onLayout={handleChartLayout}>
+          {chartHeight > 0
+            ? hourMarks.map((mark) => {
+                const top = mark.offsetMinutes * pxPerMinute;
+                return (
+                  <View
+                    key={mark.offsetMinutes}
+                    pointerEvents="none"
+                    style={[styles.gridRow, { top }]}
+                  >
+                    <Text style={styles.hourLabel}>{mark.label}</Text>
+                    <View style={styles.gridLine} />
+                  </View>
+                );
+              })
+            : null}
+
+          {chartHeight > 0 && nowOffsetMinutes != null ? (
+            <View
+              pointerEvents="none"
+              style={[styles.nowRow, { top: nowOffsetMinutes * pxPerMinute }]}
+            >
+              <View style={styles.nowKnob} />
+              <View style={styles.nowLine} />
+            </View>
+          ) : null}
+
+          <View style={styles.columns}>
+            {days.map((day, dayIndex) => (
+              <View key={day.key} style={styles.column}>
+                {chartHeight > 0
+                  ? segments
+                      .filter((segment) => segment.dayIndex === dayIndex)
+                      .map((segment) => {
+                        const isSelected = segment.sessionId === selectedId;
+                        const height = Math.max(
+                          MIN_BAR_HEIGHT,
+                          (segment.endOffsetMinutes - segment.startOffsetMinutes) *
+                            pxPerMinute
+                        );
+                        return (
+                          <Pressable
+                            key={segment.key}
+                            accessibilityLabel={
+                              segment.kind === 'night' ? 'Night sleep' : 'Nap'
+                            }
+                            accessibilityRole="button"
+                            hitSlop={{ top: 6, bottom: 6 }}
+                            onPress={() => setSelectedId(segment.sessionId)}
+                            style={[
+                              styles.bar,
+                              {
+                                top: segment.startOffsetMinutes * pxPerMinute,
+                                height,
+                                backgroundColor: isSelected
+                                  ? SELECTED_COLOR
+                                  : segment.kind === 'night'
+                                    ? NIGHT_COLOR
+                                    : NAP_COLOR,
+                              },
+                              isSelected ? styles.barSelected : null,
+                            ]}
+                          />
+                        );
+                      })
+                  : null}
+              </View>
+            ))}
           </View>
-        ) : null}
 
-        <CalendarProvider
-          date={currentDate}
-          onDateChanged={handleDateChanged}
-          onMonthChange={handleMonthChange}
-          showTodayButton
-          disabledOpacity={0.6}
-          theme={calendarTheme}
-          timelineLeftInset={TIMELINE_LEFT_INSET}
-          style={styles.provider}
-        >
-          <WeekCalendar
-            markedDates={markedDates}
-            theme={calendarTheme}
-            allowShadow={false}
-            calendarWidth={timelineWidth}
-          />
-          <TimelineList
-            events={eventsByDate}
-            timelineProps={timelineProps}
-            showNowIndicator
-          />
-        </CalendarProvider>
+          {isLoading || isDeleting ? (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator color="white" size="large" />
+            </View>
+          ) : null}
+        </View>
 
-        {!isLoading && (loadError || Object.keys(eventsByDate).length === 0) ? (
-          <View style={styles.emptyState} pointerEvents="none">
+        <View style={styles.summaryCard}>
+          {selectedSession ? (
+            <>
+              <View style={styles.summaryAccent} />
+              <Ionicons
+                name={selectedKind === 'night' ? 'moon-outline' : 'partly-sunny-outline'}
+                size={layout.font3xl}
+                color={NAP_COLOR}
+              />
+              <View style={styles.summaryText}>
+                <Text style={styles.summaryTitle}>
+                  {subject} {selectedKind === 'night' ? 'slept' : 'napped'}{' '}
+                  {formatHumanDuration(getSleptMs(selectedSession))}
+                </Text>
+                <Text style={styles.summaryRange}>
+                  {formatSessionTimeRange(
+                    selectedSession.start_time,
+                    selectedSession.end_time
+                  )}
+                </Text>
+              </View>
+              <Pressable
+                accessibilityLabel="Delete entry"
+                accessibilityRole="button"
+                hitSlop={8}
+                onPress={() => setPendingDelete(selectedSession)}
+              >
+                <Ionicons
+                  name="trash-outline"
+                  size={layout.iconXl}
+                  color="rgba(255,255,255,0.75)"
+                />
+              </Pressable>
+            </>
+          ) : (
             <Text style={styles.emptyText}>
               {loadError ??
-                'No sleep or nursing sessions for this period.'}
+                (isLoading
+                  ? ' '
+                  : sessions.length === 0
+                    ? 'No sleep logged for this week.'
+                    : 'Tap a bar to see details.')}
             </Text>
-          </View>
-        ) : null}
+          )}
+        </View>
 
         <Drawer
           isOpen={pendingDelete !== null}
@@ -407,9 +463,9 @@ const NapTimelineScreen: React.FC = () => {
                     label="Delete"
                     onPress={() => {
                       if (!pendingDelete) return;
-                      const event = pendingDelete;
+                      const session = pendingDelete;
                       setPendingDelete(null);
-                      void performDelete(event);
+                      void performDelete(session);
                     }}
                     variant="solid"
                     size="lg"
@@ -434,58 +490,154 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: 'transparent',
+    paddingHorizontal: layout.space8,
+    paddingBottom: layout.space12,
   },
-  provider: {
+  weekHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: layout.space24,
+    paddingVertical: layout.space8,
+  },
+  weekLabel: {
+    color: '#ffffff',
+    fontSize: layout.fontLg,
+    fontWeight: '600',
+    minWidth: vw(140),
+    textAlign: 'center',
+  },
+  disabledArrow: {
+    opacity: 0.3,
+  },
+  dayHeaderRow: {
+    flexDirection: 'row',
+    paddingBottom: layout.space8,
+  },
+  dayHeader: {
     flex: 1,
-    backgroundColor: 'transparent',
+    alignItems: 'center',
+  },
+  dayHeaderName: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: layout.fontSm,
+  },
+  dayHeaderDate: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: layout.fontSm,
+    marginTop: layout.space2,
+  },
+  chart: {
+    flex: 1,
+    position: 'relative',
+    // Room for the first and last axis labels, which straddle the chart edges.
+    marginVertical: layout.fontXs * 0.7,
+  },
+  gridRow: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: layout.fontXs * 1.4,
+    marginTop: -(layout.fontXs * 0.7),
+  },
+  hourLabel: {
+    width: AXIS_WIDTH - layout.space6,
+    marginRight: layout.space6,
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: layout.fontXs,
+    textAlign: 'right',
+  },
+  gridLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: GRID_COLOR,
+  },
+  nowRow: {
+    position: 'absolute',
+    left: AXIS_WIDTH - vh(5),
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: vh(10),
+    marginTop: -vh(5),
+    zIndex: 1,
+  },
+  nowKnob: {
+    width: vh(10),
+    height: vh(10),
+    borderRadius: vh(5),
+    backgroundColor: SELECTED_COLOR,
+  },
+  nowLine: {
+    flex: 1,
+    height: 2,
+    backgroundColor: SELECTED_COLOR,
+  },
+  columns: {
+    ...StyleSheet.absoluteFill,
+    left: AXIS_WIDTH,
+    flexDirection: 'row',
+  },
+  column: {
+    flex: 1,
+    position: 'relative',
+  },
+  bar: {
+    position: 'absolute',
+    left: vw(3),
+    right: vw(3),
+    borderRadius: vh(2),
+  },
+  barSelected: {
+    borderWidth: 2,
+    borderColor: '#ffffff',
+    zIndex: 2,
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 2,
-    backgroundColor: 'rgba(0,0,0,0.15)',
+    zIndex: 3,
   },
-  emptyState: {
+  summaryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: layout.space16,
+    minHeight: vh(76),
+    marginTop: layout.space12,
+    paddingHorizontal: layout.space16,
+    borderRadius: layout.radius12,
+    backgroundColor: FEEDING_COLORS.cardBackground,
+    overflow: 'hidden',
+  },
+  summaryAccent: {
     position: 'absolute',
     left: 0,
-    right: 0,
-    bottom: timelineHeight * 0.05,
-    alignItems: 'center',
+    top: 0,
+    bottom: 0,
+    width: vh(5),
+    backgroundColor: SELECTED_COLOR,
+  },
+  summaryText: {
+    flex: 1,
+  },
+  summaryTitle: {
+    color: '#ffffff',
+    fontSize: layout.fontLg,
+    fontWeight: '600',
+  },
+  summaryRange: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: layout.fontBase,
+    marginTop: layout.space4,
   },
   emptyText: {
-    color: 'rgba(255,255,255,0.75)',
-    fontSize: vh(16),
-  },
-  eventContent: {
     flex: 1,
-    justifyContent: 'space-between',
-  },
-  eventTextBlock: {
-    flexShrink: 1,
-  },
-  eventTitle: {
-    color: TIMER_SOLID_BUTTON_CONTENT_COLOR,
-    fontWeight: '700',
-    fontSize: vh(15),
-  },
-  eventTime: {
-    color: TIMER_SOLID_BUTTON_CONTENT_COLOR,
-    fontWeight: '600',
-    fontSize: vh(13),
-    marginTop: vh(2),
-  },
-  eventSummary: {
-    color: TIMER_SOLID_BUTTON_CONTENT_COLOR,
-    fontWeight: '600',
-    fontSize: vh(13),
-    marginTop: vh(2),
-  },
-  deleteButton: {
-    alignSelf: 'flex-start',
-    marginTop: vh(4),
-    paddingVertical: vh(2),
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: layout.fontBase,
+    textAlign: 'center',
   },
   drawerBackground: {
     width: '100%',

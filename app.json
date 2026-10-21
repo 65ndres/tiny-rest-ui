@@ -50,6 +50,7 @@
         {
           "image": "./assets/images/splash.png",
           "resizeMode": "cover",
+          "enableFullScreenImage_legacy": true,
           "backgroundColor": "#6E9AB1"
         }
       ],

@@ -3,6 +3,7 @@ import { H1, H2, H3, H4, H5, H6 } from '@expo/html-elements';
 import { headingStyle } from './styles';
 import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 import { cssInterop } from 'nativewind';
+import { MAX_FONT_SCALE } from '@/app/constants/screenLayout';
 
 type IHeadingProps = VariantProps<typeof headingStyle> &
   React.ComponentPropsWithoutRef<typeof H1> & {
@@ -204,13 +205,20 @@ const Heading = memo(
             highlight: highlight as boolean,
             class: className,
           })}
+          maxFontSizeMultiplier={MAX_FONT_SCALE}
           {...props}
         />
       );
     }
 
     return (
-      <MappedHeading className={className} size={size} ref={ref} {...props} />
+      <MappedHeading
+        className={className}
+        size={size}
+        ref={ref}
+        maxFontSizeMultiplier={MAX_FONT_SCALE}
+        {...props}
+      />
     );
   })
 );

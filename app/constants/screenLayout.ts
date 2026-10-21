@@ -19,6 +19,12 @@ export const MAX_FONT_SCALE = 1.15;
 export const lineHeightFor = (fontSize: number): number =>
   Math.ceil(fontSize * 1.25);
 
+/**
+ * gluestack Heading's built-in vertical margins scale with the system text
+ * size without limit; use this fixed value (their size at default text).
+ */
+export const HEADING_MARGIN = 21;
+
 /** The system font scale, limited to what the app allows. */
 export const appliedFontScale = (systemFontScale: number): number =>
   Math.min(Math.max(systemFontScale, 1), MAX_FONT_SCALE);

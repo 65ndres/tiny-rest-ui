@@ -11,7 +11,11 @@ import {
   DrawerHeader,
 } from '@/components/ui/drawer';
 import { Heading } from '@/components/ui/heading';
-import { TIMER_SOLID_BUTTON_CONTENT_COLOR, layout } from '@/app/constants/screenLayout';
+import {
+  HEADING_MARGIN,
+  TIMER_SOLID_BUTTON_CONTENT_COLOR,
+  layout,
+} from '@/app/constants/screenLayout';
 import {
   APP_MAX_HEIGHT,
   APP_MIN_HEIGHT,
@@ -133,7 +137,7 @@ const TimerDateTimePickerDrawer: React.FC<TimerDateTimePickerDrawerProps> = ({
               <Heading
                 size="lg"
                 className="text-white font-bold"
-                style={{ fontSize: layout.fontLg }}
+                style={{ fontSize: layout.fontLg, marginVertical: HEADING_MARGIN }}
               >
                 {title}
               </Heading>

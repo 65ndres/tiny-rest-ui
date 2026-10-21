@@ -30,7 +30,7 @@ import {
   getWeekTimelineRange,
 } from '@/app/utils/weekTimeline';
 import { FEEDING_COLORS } from '@/app/constants/feedingTheme';
-import { layout } from '@/app/constants/screenLayout';
+import { HEADING_MARGIN, layout } from '@/app/constants/screenLayout';
 import { vh, vw } from '@/constants/appViewport';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
@@ -649,6 +649,7 @@ const styles = StyleSheet.create({
   },
   drawerHeading: {
     fontSize: layout.fontLg,
+    marginVertical: HEADING_MARGIN,
   },
   drawerMessage: {
     color: '#ffffff',

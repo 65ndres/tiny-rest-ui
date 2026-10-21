@@ -39,9 +39,8 @@ import SoundsScreen from './screens/SoundsScreen';
 import BackButton from './SampleModule/BackButton';
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import {
-  HOME_HORIZONTAL_PADDING,
+  HEADER_BUTTON_INSET,
   lineHeightFor,
-  SCREEN_HORIZONTAL_INSET,
 } from '@/app/constants/screenLayout';
 import { getAppWindow, vh } from '@/constants/appViewport';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
@@ -50,14 +49,6 @@ import '@/global.css';
 // Set the animation options. This is optional.
 
 const { width, height } = getAppWindow();
-const HOME_CONTENT_MAX_WIDTH = 360;
-const homeAvailableWidth =
-  width - 2 * SCREEN_HORIZONTAL_INSET - 2 * HOME_HORIZONTAL_PADDING;
-const HOME_CONTENT_RIGHT_INSET =
-  SCREEN_HORIZONTAL_INSET +
-  HOME_HORIZONTAL_PADDING +
-  Math.max(0, (homeAvailableWidth - HOME_CONTENT_MAX_WIDTH) / 2);
-const HAMBURGER_RIGHT_INSET = Math.max(0, HOME_CONTENT_RIGHT_INSET - 8);
 
 type RootDrawerParamList = {
   Home: undefined;
@@ -650,7 +641,7 @@ const styles = StyleSheet.create({
     marginLeft: width * 0.053, 
   } as ImageStyle,
   drawerToggleButton: {
-    marginRight: HAMBURGER_RIGHT_INSET,
+    marginRight: HEADER_BUTTON_INSET,
   } as ViewStyle,
   appBackground: {
     flex: 1,

@@ -4,6 +4,7 @@ import { Text } from '@rneui/themed';
 import React from 'react';
 import { StyleSheet, TextStyle, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { scaleFromPhoneBaseline } from '@/constants/appViewport';
+import { HEADER_BUTTON_INSET } from '@/app/constants/screenLayout';
 
 const s = scaleFromPhoneBaseline;
 
@@ -31,7 +32,7 @@ const BackButton: React.FC<BackButtonProps> = ({ text, onPress }) => {
       hitSlop={{ top: s(8), bottom: s(8), left: s(8), right: s(8) }}
     >
       <View style={styles.row}>
-        <Ionicons name="arrow-back-sharp" size={s(25)} color="white" />
+        <Ionicons name="arrow-back-sharp" size={s(30)} color="white" />
         <Text style={styles.label}>{text}</Text>
       </View>
     </TouchableOpacity>
@@ -40,8 +41,10 @@ const BackButton: React.FC<BackButtonProps> = ({ text, onPress }) => {
 
 const styles = StyleSheet.create({
   touchable: {
-    padding: s(5),
-    marginLeft: s(15),
+    paddingVertical: s(5),
+    // Mirrors the drawer button on the right so the arrow lines up with the
+    // left edge of the content cards, nudged slightly inward.
+    marginLeft: HEADER_BUTTON_INSET + s(3),
   } as ViewStyle,
   row: {
     flexDirection: 'row',

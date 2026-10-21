@@ -67,6 +67,21 @@ export const layout = {
 export const HOME_HORIZONTAL_PADDING =
   getAppWindow().width >= 414 ? padX(8) : layout.padX24;
 
+const HOME_CONTENT_MAX_WIDTH = 360;
+const homeAvailableWidth =
+  getAppWindow().width - 2 * SCREEN_HORIZONTAL_INSET - 2 * HOME_HORIZONTAL_PADDING;
+/** Distance from each screen edge to the edge of the content cards. */
+export const CONTENT_SIDE_INSET =
+  SCREEN_HORIZONTAL_INSET +
+  HOME_HORIZONTAL_PADDING +
+  Math.max(0, (homeAvailableWidth - HOME_CONTENT_MAX_WIDTH) / 2);
+/**
+ * Header button offset so its icon lines up with the cards' edge. Ionicons
+ * glyphs have a few points of empty space inside their box, so the button
+ * sits slightly outside the cards.
+ */
+export const HEADER_BUTTON_INSET = Math.max(0, CONTENT_SIDE_INSET - 8);
+
 export const scrollViewClassName = 'flex-1 w-full';
 export const scrollContentClassName = 'flex-grow items-center';
 export const scrollContentStyle: ViewStyle = {

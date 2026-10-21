@@ -52,13 +52,36 @@ const formatPredictionTime = (isoString: string): string => {
   });
 };
 
+// Matches the API: an unstarted nap stays the prediction this long past its
+// time, after which the API moves on to the next slot.
+export const MISSED_NAP_GRACE_MINUTES = 20;
+
+/** Whole minutes a predicted nap is past due, or 0 when it is not overdue. */
+export const getOverdueMinutes = (
+  prediction: SleepPrediction,
+  now: Date = new Date()
+): number => {
+  if (prediction.status !== 'next_nap' || !prediction.predicted_at) return 0;
+  const lateMs = now.getTime() - new Date(prediction.predicted_at).getTime();
+  return lateMs > 0 ? Math.floor(lateMs / 60000) : 0;
+};
+
+const formatMinutesAgo = (minutes: number): string =>
+  minutes === 1 ? '1 min ago' : `${minutes} min ago`;
+
 export const isSleepTimerRunning = (
   status: SleepPredictionStatus | undefined
 ): boolean =>
   status === 'currently_napping' || status === 'currently_sleeping';
 
+/**
+ * `relativeOverdue` shows an overdue nap as "10 min ago". Pass false where the
+ * text cannot refresh every minute (the widget) to keep the clock time.
+ */
 export const formatPredictionDisplay = (
-  prediction: SleepPrediction
+  prediction: SleepPrediction,
+  now: Date = new Date(),
+  { relativeOverdue = true }: { relativeOverdue?: boolean } = {}
 ): SleepPredictionDisplay => {
   switch (prediction.status) {
     case 'currently_napping':
@@ -93,12 +116,24 @@ export const formatPredictionDisplay = (
         subtitle: 'Set birthdate in Profile',
       };
     case 'next_nap':
-    default:
+    default: {
+      const overdueMinutes = getOverdueMinutes(prediction, now);
+      if (overdueMinutes > 0 && prediction.predicted_at) {
+        const dueTime = formatPredictionTime(prediction.predicted_at);
+        return relativeOverdue
+          ? {
+              label: 'next sleep',
+              value: formatMinutesAgo(overdueMinutes),
+              subtitle: `Was due at ${dueTime}`,
+            }
+          : { label: 'next sleep', value: dueTime, subtitle: 'Overdue' };
+      }
       return {
         label: 'next sleep',
         value: prediction.predicted_at
           ? formatPredictionTime(prediction.predicted_at)
           : '--:--',
       };
+    }
   }
 };

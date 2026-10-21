@@ -227,7 +227,9 @@ export const refreshWidgetState = async (token: string): Promise<void> => {
     }
 
     const prediction = await fetchSleepPrediction(token);
-    syncWidgetPrediction(formatPredictionDisplay(prediction));
+    syncWidgetPrediction(
+      formatPredictionDisplay(prediction, new Date(), { relativeOverdue: false })
+    );
   } catch {
     // Keep last known widget payload on failure.
   }

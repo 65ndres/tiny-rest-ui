@@ -30,14 +30,17 @@ type HomeNapPredictionCarouselProps = {
 
 const CHEVRON_HIT_SLOP = 8;
 const SLIDE_PADDING_TOP = 10;
+// Count label + status label + value + optional subtitle, so the subtitle is
+// not clipped.
 const PREDICTION_CAROUSEL_HEIGHT =
   SLIDE_PADDING_TOP +
   layout.fontXl * 1.3 +
   layout.space4 +
   layout.fontLg * 1.3 +
-  layout.space32 +
-  layout.fontSm * 1.3 +
-  layout.space8;
+  layout.space16 +
+  layout.font5xl +
+  layout.space8 +
+  layout.fontSm * 1.3;
 
 const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
   slides,

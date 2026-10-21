@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, TextInput, View, type TextStyle, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type TextStyle, type ViewStyle } from 'react-native';
+import { Text, TextInput } from '@/components/AppText';
 import { scaleFromPhoneBaseline } from '@/constants/appViewport';
 
 const s = scaleFromPhoneBaseline;

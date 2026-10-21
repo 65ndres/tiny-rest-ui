@@ -1,7 +1,8 @@
 'use client';
 import React from 'react';
 import { createCheckbox } from '@gluestack-ui/core/checkbox/creator';
-import { View, Pressable, Text, Platform } from 'react-native';
+import { View, Pressable, Platform } from 'react-native';
+import { Text } from '@/components/AppText';
 import type { TextProps, ViewProps } from 'react-native';
 import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import {

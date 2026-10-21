@@ -1,14 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useRef } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, useWindowDimensions, View } from 'react-native';
 import Carousel, {
   type ICarouselInstance,
 } from 'react-native-reanimated-carousel';
 import { Text } from '@/components/ui/text';
 import {
+  appliedFontScale,
   homeHintClassName,
   homeHintStyle,
   layout,
+  lineHeightFor,
   mutedTextClassName,
   mutedTextStyle,
 } from '@/app/constants/screenLayout';
@@ -30,14 +32,23 @@ type HomeNapPredictionCarouselProps = {
 
 const CHEVRON_HIT_SLOP = 8;
 const SLIDE_PADDING_TOP = 10;
-const PREDICTION_CAROUSEL_HEIGHT =
+const COUNT_LINE_HEIGHT = lineHeightFor(layout.fontXl);
+const LABEL_LINE_HEIGHT = lineHeightFor(layout.fontLg);
+const VALUE_LINE_HEIGHT = lineHeightFor(layout.font5xl);
+const SUBTITLE_LINE_HEIGHT = lineHeightFor(layout.fontSm);
+
+// Count label + status label + value + optional subtitle. Line heights grow
+// with the user's text size, so the height has to grow with them.
+const predictionCarouselHeight = (fontScale: number): number =>
   SLIDE_PADDING_TOP +
-  layout.fontXl * 1.3 +
   layout.space4 +
-  layout.fontLg * 1.3 +
-  layout.space32 +
-  layout.fontSm * 1.3 +
-  layout.space8;
+  layout.space16 +
+  layout.space8 +
+  (COUNT_LINE_HEIGHT +
+    LABEL_LINE_HEIGHT +
+    VALUE_LINE_HEIGHT +
+    SUBTITLE_LINE_HEIGHT) *
+    fontScale;
 
 const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
   slides,
@@ -47,6 +58,8 @@ const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
   disabled = false,
 }) => {
   const carouselRef = useRef<ICarouselInstance>(null);
+  const { fontScale } = useWindowDimensions();
+  const carouselHeight = predictionCarouselHeight(appliedFontScale(fontScale));
   const defaultIndex = Math.max(
     0,
     slides.findIndex((slide) => slide.count === activeCount)
@@ -62,12 +75,12 @@ const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
 
   return (
     <View className="w-full items-center">
-      <View className="w-full" style={{ height: PREDICTION_CAROUSEL_HEIGHT }}>
+      <View className="w-full" style={{ height: carouselHeight }}>
         <Carousel
           ref={carouselRef}
           key={slides.map((slide) => slide.count).join('-')}
           width={width}
-          height={PREDICTION_CAROUSEL_HEIGHT}
+          height={carouselHeight}
           data={slides}
           loop={false}
           autoPlay={false}
@@ -88,26 +101,47 @@ const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
             >
               <Text
                 className="text-white font-semibold"
-                style={{ fontSize: layout.fontXl }}
+                style={{ fontSize: layout.fontXl, lineHeight: COUNT_LINE_HEIGHT }}
               >
                 {item.countLabel}
               </Text>
               <Text
                 className={mutedTextClassName}
-                style={[mutedTextStyle, { fontSize: layout.fontLg, marginTop: layout.space4 }]}
+                style={[
+                  mutedTextStyle,
+                  {
+                    fontSize: layout.fontLg,
+                    lineHeight: LABEL_LINE_HEIGHT,
+                    marginTop: layout.space4,
+                  },
+                ]}
               >
                 {item.display.label}
               </Text>
               <Text
                 className="text-white font-mono tracking-wider"
-                style={{ fontSize: layout.font5xl, marginTop: layout.space16, lineHeight: layout.font5xl }}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.7}
+                style={{
+                  fontSize: layout.font5xl,
+                  lineHeight: VALUE_LINE_HEIGHT,
+                  marginTop: layout.space16,
+                }}
               >
                 {item.display.value}
               </Text>
               {item.display.subtitle ? (
                 <Text
                   className={homeHintClassName}
-                  style={[homeHintStyle, { marginTop: layout.space8 }]}
+                  style={[
+                    homeHintStyle,
+                    {
+                      fontSize: layout.fontSm,
+                      lineHeight: SUBTITLE_LINE_HEIGHT,
+                      marginTop: layout.space8,
+                    },
+                  ]}
                 >
                   {item.display.subtitle}
                 </Text>
@@ -128,7 +162,7 @@ const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
               accessibilityLabel="Previous nap schedule"
               accessibilityState={{ disabled: !canGoPrev }}
               className="absolute left-0 top-0 items-center justify-center"
-              style={{ width: layout.chevronSize, height: PREDICTION_CAROUSEL_HEIGHT }}
+              style={{ width: layout.chevronSize, height: carouselHeight }}
             >
               <Ionicons
                 name="chevron-back"
@@ -147,7 +181,7 @@ const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
               accessibilityLabel="Next nap schedule"
               accessibilityState={{ disabled: !canGoNext }}
               className="absolute right-0 top-0 items-center justify-center"
-              style={{ width: layout.chevronSize, height: PREDICTION_CAROUSEL_HEIGHT }}
+              style={{ width: layout.chevronSize, height: carouselHeight }}
             >
               <Ionicons
                 name="chevron-forward"

@@ -3,7 +3,8 @@ import { getAppWindow, padX, scaleFromPhoneBaseline } from '@/constants/appViewp
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/AppText';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 import SampleModule from '../SampleModule/SampleModule';
 

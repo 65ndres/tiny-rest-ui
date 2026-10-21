@@ -1,7 +1,9 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Text } from '@/components/ui/text';
-import { layout } from '@/app/constants/screenLayout';
+import { layout, lineHeightFor } from '@/app/constants/screenLayout';
+
+const DIGIT_LINE_HEIGHT = lineHeightFor(layout.font5xl);
 import { formatDuration, splitElapsed } from '@/app/utils/timerHistory';
 
 type TimerElapsedDisplayProps = {
@@ -17,7 +19,11 @@ const Segment: React.FC<SegmentProps> = ({ value, label }) => (
   <View className="items-center" style={{ minWidth: layout.space32 + layout.space32 + layout.space8, flexShrink: 0 }}>
     <Text
       className="text-white font-mono tracking-wider"
-      style={{ fontSize: layout.font5xl, paddingTop: layout.space32 + layout.space16 }}
+      style={{
+        fontSize: layout.font5xl,
+        lineHeight: DIGIT_LINE_HEIGHT,
+        paddingTop: layout.space32 + layout.space16,
+      }}
     >
       {value}
     </Text>
@@ -35,6 +41,7 @@ const Colon: React.FC = () => (
     className="text-white font-mono tracking-wider"
     style={{
       fontSize: layout.font5xl,
+      lineHeight: DIGIT_LINE_HEIGHT,
       paddingTop: layout.space32 + layout.space16,
       paddingBottom: layout.space24,
     }}

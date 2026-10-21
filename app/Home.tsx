@@ -193,7 +193,7 @@ const Home: React.FC = () => {
 
             <HomeRoutineCard
               title="Add feeding"
-              subtitle="Bottle or nursing session"
+              subtitle="Bottle or nursing"
               iconName="water-sharp"
               onPress={() => navigateOrPaywall('AddFeeding')}
               accessibilityLabel="Add feeding"
@@ -212,7 +212,7 @@ const Home: React.FC = () => {
             />
             <HomeRoutineCard
               title="Soothing sounds"
-              subtitle="White noise & lullabies"
+              subtitle="Noise & lullabies"
               iconName="musical-notes-sharp"
               onPress={() => navigateOrPaywall('Sounds')}
               accessibilityLabel="Soothing sounds"

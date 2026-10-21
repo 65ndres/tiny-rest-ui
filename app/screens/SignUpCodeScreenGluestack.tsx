@@ -1,7 +1,8 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Alert, Pressable, TextInput, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
+import { TextInput } from '@/components/AppText';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
@@ -16,6 +17,7 @@ import {
   timerScrollContentStyle,
   timerSettingRowClassName,
   timerSettingRowStyle,
+  lineHeightFor,
 } from '@/app/constants/screenLayout';
 import { vh } from '@/constants/appViewport';
 import { useAuth } from '../context/AuthContext';
@@ -186,7 +188,7 @@ const SignUpCodeScreenGluestack: React.FC = () => {
                 fontSize: layout.fontLg,
                 fontWeight: 'bold',
                 color: '#ffffff',
-                lineHeight: layout.iconLg,
+                lineHeight: lineHeightFor(layout.fontLg),
                 opacity: isResending ? 0.6 : 1,
               }}
             >
@@ -205,7 +207,7 @@ const SignUpCodeScreenGluestack: React.FC = () => {
                 fontSize: layout.fontLg,
                 fontWeight: 'bold',
                 color: '#ffffff',
-                lineHeight: layout.iconLg,
+                lineHeight: lineHeightFor(layout.fontLg),
               }}
             >
               Back to sign up

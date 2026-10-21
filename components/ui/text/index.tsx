@@ -2,6 +2,7 @@ import React from 'react';
 
 import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 import { Text as RNText } from 'react-native';
+import { MAX_FONT_SCALE } from '@/app/constants/screenLayout';
 import { textStyle } from './styles';
 
 type ITextProps = React.ComponentProps<typeof RNText> &
@@ -36,6 +37,7 @@ const Text = React.forwardRef<React.ComponentRef<typeof RNText>, ITextProps>(
           highlight: highlight as boolean,
           class: className,
         })}
+        maxFontSizeMultiplier={MAX_FONT_SCALE}
         {...props}
         ref={ref}
       />

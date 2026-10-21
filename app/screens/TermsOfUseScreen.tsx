@@ -1,6 +1,7 @@
 import { getAppWindow } from '@/constants/appViewport';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
+import { ScrollView, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
+import { Text } from '@/components/AppText';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 
 const { height } = getAppWindow();

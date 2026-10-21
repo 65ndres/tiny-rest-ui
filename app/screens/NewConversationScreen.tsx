@@ -6,14 +6,8 @@ import { Input } from '@rneui/themed';
 import axios from 'axios';
 import { useFonts } from 'expo-font';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ViewStyle
-} from 'react-native';
+import { Animated, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { Text } from '@/components/AppText';
 import { ScrollView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 

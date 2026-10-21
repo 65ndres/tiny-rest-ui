@@ -1,6 +1,7 @@
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import React from 'react';
-import { StyleSheet, Text, View, type TextStyle, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type TextStyle, type ViewStyle } from 'react-native';
+import { Text } from '@/components/AppText';
 import { onboardingHeight } from './onboardingLayout';
 
 const OnboardingHeader: React.FC = () => {

@@ -1,15 +1,8 @@
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import {
-  Alert,
-  Linking,
-  StyleSheet,
-  Text,
-  View,
-  type TextStyle,
-  type ViewStyle,
-} from 'react-native';
+import { Alert, Linking, StyleSheet, View, type TextStyle, type ViewStyle } from 'react-native';
+import { Text } from '@/components/AppText';
 import Carousel from 'react-native-reanimated-carousel';
 import { API_URL } from '../../../constants/Config';
 import { BASIC_PLAN_DISPLAY_NAME } from '../../../constants/appBranding';

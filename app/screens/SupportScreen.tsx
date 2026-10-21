@@ -6,17 +6,8 @@ import { Input } from '@rneui/themed';
 import axios from 'axios';
 import { useFonts } from 'expo-font';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { Animated, FlatList, KeyboardAvoidingView, Platform, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { Text } from '@/components/AppText';
 import 'react-native-reanimated';
 
 import {

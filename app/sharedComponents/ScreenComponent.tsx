@@ -1,11 +1,6 @@
 import React, { useCallback, useRef } from 'react';
-import {
-  Animated,
-  StyleSheet,
-  Text,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { Animated, StyleSheet, View, ViewStyle } from 'react-native';
+import { Text } from '@/components/AppText';
 import { useFocusEffect } from '@react-navigation/native';
 import 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';

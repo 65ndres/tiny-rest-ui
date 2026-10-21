@@ -1,7 +1,8 @@
 import { useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import React, { useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { TextInput } from '@/components/AppText';
 import { EyeIcon, EyeOffIcon, Icon } from '@/components/ui/icon';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';

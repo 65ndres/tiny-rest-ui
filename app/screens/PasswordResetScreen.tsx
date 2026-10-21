@@ -2,7 +2,8 @@ import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import React, { useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { TextInput } from '@/components/AppText';
 import { Link, LinkText } from '@/components/ui/link';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
@@ -18,6 +19,7 @@ import {
   timerScrollContentStyle,
   timerSettingRowClassName,
   timerSettingRowStyle,
+  lineHeightFor,
 } from '@/app/constants/screenLayout';
 import { vh } from '@/constants/appViewport';
 import { API_URL } from '../../constants/Config';
@@ -236,7 +238,7 @@ const PasswordResetScreen: React.FC = () => {
                 fontSize: layout.fontLg,
                 fontWeight: 'bold',
                 color: '#ffffff',
-                lineHeight: layout.iconLg,
+                lineHeight: lineHeightFor(layout.fontLg),
               }}
             >
               Log in
@@ -253,7 +255,7 @@ const PasswordResetScreen: React.FC = () => {
                 fontSize: layout.fontLg,
                 fontWeight: 'bold',
                 color: '#ffffff',
-                lineHeight: layout.iconLg,
+                lineHeight: lineHeightFor(layout.fontLg),
               }}
             >
               Don&apos;t have an account? Sign up

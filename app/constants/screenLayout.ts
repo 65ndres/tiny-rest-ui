@@ -9,6 +9,20 @@ export const SCREEN_CONTENT_WIDTH_RATIO = 1;
 /** Shared outer gutter for screen content, including compact iPhones. */
 export const SCREEN_HORIZONTAL_INSET = padX(20);
 
+/**
+ * Most iOS Larger Text / Android font size can enlarge text (1.15 = +15%).
+ * Layout heights are designed around this, so larger settings would clip.
+ */
+export const MAX_FONT_SCALE = 1.15;
+
+/** Line height with room above and below the glyphs so text never clips. */
+export const lineHeightFor = (fontSize: number): number =>
+  Math.ceil(fontSize * 1.25);
+
+/** The system font scale, limited to what the app allows. */
+export const appliedFontScale = (systemFontScale: number): number =>
+  Math.min(Math.max(systemFontScale, 1), MAX_FONT_SCALE);
+
 /** Design px authored at iPhone 17 Pro Max; use for one-off sizes. */
 export const layout = {
   space2: vh(2),

@@ -1,7 +1,8 @@
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { getAppWindow, padX, scaleFromPhoneBaseline } from '@/constants/appViewport';
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/AppText';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 import SampleModule from '../SampleModule/SampleModule';
 

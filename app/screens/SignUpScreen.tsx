@@ -3,19 +3,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button, Input } from '@rneui/themed';
 import { useFonts } from 'expo-font';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Animated,
-  Image,
-  ImageStyle,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  type TextStyle,
-  type ViewStyle,
-} from 'react-native';
+import { ActivityIndicator, Alert, Animated, Image, ImageStyle, StyleSheet, TouchableOpacity, View, type TextStyle, type ViewStyle } from 'react-native';
+import { Text } from '@/components/AppText';
 import 'react-native-reanimated';
 import { scaleFromPhoneBaseline } from '@/constants/appViewport';
 import { useAuth } from '../context/AuthContext';

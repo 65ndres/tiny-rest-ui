@@ -1,7 +1,8 @@
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import { useFonts } from 'expo-font';
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/AppText';
 import BrowseContent from '../sharedComponents/BrowseContent';
 import ScreenComponent from '../sharedComponents/ScreenComponent';
 

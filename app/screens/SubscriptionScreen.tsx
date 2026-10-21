@@ -9,17 +9,8 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import { useFonts } from 'expo-font';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  Animated,
-  Linking,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextStyle,
-  View,
-  ViewStyle
-} from 'react-native';
+import { ActivityIndicator, Animated, Linking, ScrollView, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
+import { Text } from '@/components/AppText';
 import { PurchasesPackage } from 'react-native-purchases';
 import 'react-native-reanimated';
 import {

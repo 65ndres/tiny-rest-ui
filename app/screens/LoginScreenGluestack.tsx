@@ -1,7 +1,8 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Alert, Pressable, TextInput, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
+import { TextInput } from '@/components/AppText';
 import {
   Checkbox,
   CheckboxIcon,
@@ -24,6 +25,7 @@ import {
   timerScrollContentStyle,
   timerSettingRowClassName,
   timerSettingRowStyle,
+  lineHeightFor,
 } from '@/app/constants/screenLayout';
 import { vh } from '@/constants/appViewport';
 import { useAuth } from '../context/AuthContext';
@@ -216,7 +218,7 @@ const LoginScreenGluestack: React.FC = () => {
             accessibilityRole="link"
             className="items-center"
           >
-            <Text style={{fontSize: layout.fontLg, fontWeight: 'bold', color: '#ffffff', lineHeight: layout.iconLg}}>
+            <Text style={{fontSize: layout.fontLg, fontWeight: 'bold', color: '#ffffff', lineHeight: lineHeightFor(layout.fontLg)}}>
               Forgot password?
             </Text>
           </Pressable>
@@ -226,7 +228,7 @@ const LoginScreenGluestack: React.FC = () => {
             disabled={isLoading}
             className="items-center"
           >
-            <LinkText style={{fontSize: layout.fontLg, fontWeight: 'bold', color: '#ffffff', lineHeight: layout.iconLg}}>
+            <LinkText style={{fontSize: layout.fontLg, fontWeight: 'bold', color: '#ffffff', lineHeight: lineHeightFor(layout.fontLg)}}>
               Don&apos;t have an account? Sign up
             </LinkText>
           </Link>

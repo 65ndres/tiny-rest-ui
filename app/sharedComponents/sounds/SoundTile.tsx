@@ -1,11 +1,6 @@
 import React from 'react';
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/AppText';
 import type { SoundTrack } from '@/app/constants/soundCatalog';
 import {
   CARD_BORDER_COLOR,

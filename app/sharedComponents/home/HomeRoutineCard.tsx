@@ -9,6 +9,8 @@ import {
   layout,
 } from '@/app/constants/screenLayout';
 
+const SUBTITLE_MAX_FONT_SCALE = 1.05;
+
 type HomeRoutineCardProps = {
   title: string;
   subtitle: string;
@@ -46,10 +48,21 @@ const HomeRoutineCard: React.FC<HomeRoutineCardProps> = ({
       <Ionicons name={iconName} size={layout.iconLg} color="#63488b" />
     </View>
     <VStack className="flex-1" style={{ gap: layout.space4 }}>
-      <Text className="text-white font-semibold" style={{ fontSize: layout.fontXl }}>
+      {/* One line each. The longer subtitle grows less with the system text
+          size so it still fits on narrow phones. */}
+      <Text
+        className="text-white font-semibold"
+        numberOfLines={1}
+        style={{ fontSize: layout.fontXl }}
+      >
         {title}
       </Text>
-      <Text className="text-white/75" style={{ fontSize: layout.fontLg }}>
+      <Text
+        className="text-white/75"
+        numberOfLines={1}
+        maxFontSizeMultiplier={SUBTITLE_MAX_FONT_SCALE}
+        style={{ fontSize: layout.fontLg }}
+      >
         {subtitle}
       </Text>
     </VStack>

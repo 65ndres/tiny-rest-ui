@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
-import { Alert, TextInput, View } from 'react-native';
+import { Alert, View } from 'react-native';
+import { TextInput } from '@/components/AppText';
 import { Text } from '@/components/ui/text';
 import { VStack } from '@/components/ui/vstack';
 import {
@@ -14,6 +15,7 @@ import {
   timerSectionLabelStyle,
   timerSettingRowClassName,
   timerSettingRowStyle,
+  lineHeightFor,
 } from '@/app/constants/screenLayout';
 import { vh } from '@/constants/appViewport';
 import {
@@ -184,7 +186,7 @@ const BabyProfileSlide: React.FC<BabyProfileSlideProps> = ({
               placeholderTextColor="rgba(255,255,255,0.5)"
               editable={!isSaving}
               style={{
-                lineHeight: layout.iconLg,
+                lineHeight: lineHeightFor(layout.fontLg),
                 fontSize: layout.fontLg,
                 minWidth: layout.space32 * 4 - layout.space8,
               }}

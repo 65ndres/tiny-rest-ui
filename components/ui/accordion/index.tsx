@@ -1,7 +1,8 @@
 'use client';
 import React from 'react';
 import { createAccordion } from '@gluestack-ui/core/accordion/creator';
-import { View, Pressable, Text, Platform, TextProps } from 'react-native';
+import { View, Pressable, Platform, TextProps } from 'react-native';
+import { Text } from '@/components/AppText';
 import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import type { VariantProps } from '@gluestack-ui/utils/nativewind-utils';
 import {

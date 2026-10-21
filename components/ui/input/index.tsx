@@ -1,7 +1,8 @@
 'use client';
 import React from 'react';
 import { createInput } from '@gluestack-ui/core/input/creator';
-import { View, Pressable, TextInput } from 'react-native';
+import { View, Pressable } from 'react-native';
+import { TextInput } from '@/components/AppText';
 import { tva } from '@gluestack-ui/utils/nativewind-utils';
 import {
   withStyleContext,

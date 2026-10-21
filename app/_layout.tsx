@@ -4,7 +4,8 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItem, DrawerItemL
 import { DrawerActions, useNavigation } from '@react-navigation/native';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Image, ImageBackground, ImageStyle, StatusBar, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { ActivityIndicator, Animated, Image, ImageBackground, ImageStyle, StatusBar, StyleSheet, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { Text } from '@/components/AppText';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { AudioPlaybackProvider } from "./context/AudioPlaybackContext";
@@ -39,6 +40,7 @@ import BackButton from './SampleModule/BackButton';
 import { APP_DISPLAY_NAME } from '@/constants/appBranding';
 import {
   HOME_HORIZONTAL_PADDING,
+  lineHeightFor,
   SCREEN_HORIZONTAL_INSET,
 } from '@/app/constants/screenLayout';
 import { getAppWindow, vh } from '@/constants/appViewport';
@@ -184,9 +186,12 @@ const CustomDrawerContent: React.FC<any> = (props) => {
             );
           })}
         <DrawerItem
-          label={isLoggingOut ? "Logging out..." : "Logout"}
+          label={() => (
+            <Text style={styles.logoutLabel}>
+              {isLoggingOut ? "Logging out..." : "Logout"}
+            </Text>
+          )}
           onPress={handleLogout}
-          labelStyle={styles.logoutLabel}
           icon={isLoggingOut ? () => <ActivityIndicator size="small" color="white" /> : undefined}
         />
       </DrawerContentScrollView>
@@ -635,7 +640,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.7)',
     fontWeight: '400',
     fontSize: height * 0.018,
-    lineHeight: height * 0.02,
+    lineHeight: lineHeightFor(height * 0.018),
     textDecorationLine: 'underline',
     // marginTop: height * 0.005,
   },

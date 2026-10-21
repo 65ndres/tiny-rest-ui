@@ -47,8 +47,13 @@ const TimerSettingRow: React.FC<TimerSettingRowProps> = ({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
     >
-      <View className="flex-1" style={{ marginRight: layout.space8 }}>
-        <Text className="text-white font-semibold" style={{ fontSize: labelSize }}>
+      {/* The label keeps its full width; the value side shrinks instead. */}
+      <View style={{ flexGrow: 1, flexShrink: 0, marginRight: layout.space8 }}>
+        <Text
+          className="text-white font-semibold"
+          numberOfLines={1}
+          style={{ fontSize: labelSize }}
+        >
           {label}
         </Text>
         {hint ? (
@@ -57,10 +62,11 @@ const TimerSettingRow: React.FC<TimerSettingRowProps> = ({
           </Text>
         ) : null}
       </View>
-      <View className="flex-row items-center">
+      <View className="flex-row items-center" style={{ flexShrink: 1, minWidth: 0 }}>
         <Text
           className="text-white font-semibold underline"
-          style={{ fontSize: valueSize, marginRight: layout.space4 }}
+          numberOfLines={1}
+          style={{ flexShrink: 1, fontSize: valueSize, marginRight: layout.space4 }}
         >
           {value || placeholder}
         </Text>

@@ -1,7 +1,8 @@
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Alert, Pressable, TextInput, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
+import { TextInput } from '@/components/AppText';
 import { EyeIcon, EyeOffIcon, Icon } from '@/components/ui/icon';
 import { Link, LinkText } from '@/components/ui/link';
 import { Text } from '@/components/ui/text';
@@ -18,6 +19,7 @@ import {
   timerScrollContentStyle,
   timerSettingRowClassName,
   timerSettingRowStyle,
+  lineHeightFor,
 } from '@/app/constants/screenLayout';
 import { vh } from '@/constants/appViewport';
 import { useAuth } from '../context/AuthContext';
@@ -309,7 +311,7 @@ const SignUpScreenGluestack: React.FC = () => {
                 fontSize: layout.fontLg,
                 fontWeight: 'bold',
                 color: '#ffffff',
-                lineHeight: layout.iconLg,
+                lineHeight: lineHeightFor(layout.fontLg),
               }}
             >
               Already have an account? Log in

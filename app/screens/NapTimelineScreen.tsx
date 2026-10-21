@@ -2,15 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  ImageBackground,
-  type LayoutChangeEvent,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, ImageBackground, type LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@/components/AppText';
 import {
   deleteTimerRun,
   fetchTimerRunsInRange,

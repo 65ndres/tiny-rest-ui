@@ -3,14 +3,8 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFonts } from 'expo-font';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-  ViewStyle,
-} from 'react-native';
+import { Animated, StyleSheet, TouchableWithoutFeedback, View, ViewStyle } from 'react-native';
+import { Text } from '@/components/AppText';
 import { ScrollView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { APP_MAX_HEIGHT, APP_MAX_WIDTH, getAppWindow } from '@/constants/appViewport';

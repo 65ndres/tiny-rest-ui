@@ -15,7 +15,9 @@ import {
 import {
   fetchSleepPrediction,
   formatPredictionDisplay,
+  getOverdueMinutes,
   isSleepTimerRunning,
+  MISSED_NAP_GRACE_MINUTES,
   type SleepPrediction,
 } from '@/app/utils/sleepPrediction';
 import { formatExactNapCount } from '@/app/utils/napSchedule';
@@ -41,6 +43,7 @@ type NavigationProp = DrawerNavigationProp<RootDrawerParamList, 'Home'>;
 const PREDICTION_PANEL_HEIGHT = '32%';
 const ACTIONS_HEIGHT = '58%';
 const HOME_SECTION_GAP = '5%';
+const CLOCK_TICK_MS = 30 * 1000;
 
 const Home: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -51,6 +54,7 @@ const Home: React.FC = () => {
   const [activeNapCount, setActiveNapCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [carouselWidth, setCarouselWidth] = useState(0);
+  const [now, setNow] = useState(() => new Date());
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -65,8 +69,8 @@ const Home: React.FC = () => {
     },
     [isProUser, navigation, presentPaywall]
   );
-  const loadHomeData = useCallback(async () => {
-    setIsLoading(true);
+  const loadHomeData = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) {
@@ -77,6 +81,7 @@ const Home: React.FC = () => {
 
       const nextPrediction = await fetchSleepPrediction(token);
       setPrediction(nextPrediction);
+      setNow(new Date());
       setActiveNapCount((current) => {
         const counts = [
           nextPrediction.daily_nap_count,
@@ -100,6 +105,28 @@ const Home: React.FC = () => {
     }, [loadHomeData])
   );
 
+  // Keep "min ago" text current while the screen is open. Once an overdue nap
+  // passes the grace period the API has moved on to the next slot, so fetch
+  // the new prediction.
+  useFocusEffect(
+    useCallback(() => {
+      const tick = setInterval(() => {
+        const current = new Date();
+        setNow(current);
+        const graceExpired = [
+          prediction,
+          ...(prediction?.range_predictions ?? []),
+        ].some(
+          (entry) =>
+            entry != null &&
+            getOverdueMinutes(entry, current) > MISSED_NAP_GRACE_MINUTES
+        );
+        if (graceExpired) void loadHomeData({ silent: true });
+      }, CLOCK_TICK_MS);
+      return () => clearInterval(tick);
+    }, [loadHomeData, prediction])
+  );
+
   const napTabCounts = prediction
     ? [
         prediction.daily_nap_count,
@@ -111,7 +138,7 @@ const Home: React.FC = () => {
     if (!prediction) return [];
 
     const runningDisplay = timerRunning
-      ? formatPredictionDisplay(prediction)
+      ? formatPredictionDisplay(prediction, now)
       : null;
 
     return napTabCounts.map((count) => {
@@ -126,10 +153,10 @@ const Home: React.FC = () => {
         count,
         countLabel: formatExactNapCount(count),
         display:
-          runningDisplay ?? formatPredictionDisplay(countPrediction),
+          runningDisplay ?? formatPredictionDisplay(countPrediction, now),
       };
     });
-  }, [napTabCounts, prediction, timerRunning]);
+  }, [napTabCounts, now, prediction, timerRunning]);
 
   if (!loaded) {
     return null;

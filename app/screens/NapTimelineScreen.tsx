@@ -411,41 +411,44 @@ const NapTimelineScreen: React.FC = () => {
           ))}
         </View>
 
-        <View style={styles.summaryCard}>
-          {selectedSession ? (
-            <>
-              <View
-                style={[
-                  styles.summaryAccent,
-                  { backgroundColor: SEGMENT_COLORS[selectedKind ?? 'nap'] },
-                ]}
+        {selectedSession ? (
+          <Pressable
+            accessibilityLabel={`Edit entry: ${summaryTitle}, ${summaryRange}`}
+            accessibilityRole="button"
+            onPress={() =>
+              navigation.navigate('EditTimelineEntry', {
+                session: selectedSession,
+                openedAt: Date.now(),
+              })
+            }
+            style={styles.summaryCard}
+          >
+            <View
+              style={[
+                styles.summaryAccent,
+                { backgroundColor: SEGMENT_COLORS[selectedKind ?? 'nap'] },
+              ]}
+            />
+            <View style={styles.summaryIconCircle}>
+              <Ionicons
+                name={SEGMENT_ICONS[selectedKind ?? 'nap']}
+                size={layout.iconLg}
+                color={SEGMENT_ICON_COLORS[selectedKind ?? 'nap']}
               />
-              <View style={styles.summaryIconCircle}>
-                <Ionicons
-                  name={SEGMENT_ICONS[selectedKind ?? 'nap']}
-                  size={layout.iconLg}
-                  color={SEGMENT_ICON_COLORS[selectedKind ?? 'nap']}
-                />
-              </View>
-              <View style={styles.summaryText}>
-                <Text style={styles.summaryTitle}>{summaryTitle}</Text>
-                <Text style={styles.summaryRange}>{summaryRange}</Text>
-              </View>
-              <Pressable
-                accessibilityLabel="Edit entry"
-                accessibilityRole="button"
-                hitSlop={8}
-                onPress={() =>
-                  navigation.navigate('EditTimelineEntry', {
-                    session: selectedSession,
-                    openedAt: Date.now(),
-                  })
-                }
-              >
-                <Ionicons name="create" size={layout.icon2xl} color="#ffffff" />
-              </Pressable>
-            </>
-          ) : (
+            </View>
+            <View style={styles.summaryText}>
+              <Text style={styles.summaryTitle}>{summaryTitle}</Text>
+              <Text style={styles.summaryRange}>{summaryRange}</Text>
+            </View>
+            {/* Matches the chevron on the home screen cards. */}
+            <Ionicons
+              name="chevron-forward"
+              size={layout.iconMd}
+              color="rgba(255,255,255,0.5)"
+            />
+          </Pressable>
+        ) : (
+          <View style={styles.summaryCard}>
             <Text style={styles.emptyText}>
               {loadError ??
                 (isLoading
@@ -454,8 +457,8 @@ const NapTimelineScreen: React.FC = () => {
                     ? 'Nothing logged for this week.'
                     : 'Tap a bar to see details.')}
             </Text>
-          )}
-        </View>
+          </View>
+        )}
       </View>
     </ScreenComponent>
   );

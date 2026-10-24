@@ -41,13 +41,13 @@ import type { EditTimelineEntryParams } from '@/app/screens/EditTimelineEntryScr
 const AXIS_WIDTH = vw(62);
 const MIN_BAR_HEIGHT = 3;
 const MIN_FEEDING_HEIGHT = vh(7);
-// Sleep uses the app's gold (the "14-day free trial" highlight on the landing
-// screen) with a paler shade for naps; feedings pick up the pink and lilac of
-// the background clouds.
-const NIGHT_COLOR = '#FFD700';
-const NAP_COLOR = '#FFEB99';
-const NURSING_COLOR = '#FF9EC4';
-const BOTTLE_COLOR = '#C9B6FF';
+// Sleep picks up the lilac and pink of the background clouds; feedings use
+// the app's gold (the "14-day free trial" highlight on the landing screen)
+// with a paler shade for nursing.
+const NIGHT_COLOR = '#C9B6FF';
+const NAP_COLOR = '#FF9EC4';
+const NURSING_COLOR = '#FFEB99';
+const BOTTLE_COLOR = '#FFD700';
 const NOW_COLOR = '#ffffff';
 const GRID_COLOR = 'rgba(255,255,255,0.12)';
 
@@ -59,12 +59,12 @@ const SEGMENT_COLORS: Record<TimelineSegmentKind, string> = {
 };
 
 // Icon colors inside the summary card's white circle: deeper shades of the
-// bar colors so they read on white.
+// bar colors so they read on white. Night keeps its own lilac.
 const SEGMENT_ICON_COLORS: Record<TimelineSegmentKind, string> = {
-  night: '#C99400',
-  nap: '#E8B923',
-  nursing: '#E0609A',
-  bottle: '#8E6FE0',
+  night: NIGHT_COLOR,
+  nap: '#E0609A',
+  nursing: '#E8B923',
+  bottle: '#C99400',
 };
 
 const SEGMENT_LABELS: Record<TimelineSegmentKind, string> = {

@@ -1,15 +1,27 @@
 /**
- * Week sleep chart: each column is one "timeline day" running from the user's
+ * Week sleep and feeding chart: each column is one "timeline day" running from the user's
  * day start (e.g. 6:30 AM) until the same time the next calendar day, so a
  * night of sleep stays in one column instead of being split at midnight.
  */
 import { minutesToDate } from '@/app/utils/dayWindow';
-import { formatDateParam, type TimerSession } from '@/app/utils/timerHistory';
+import {
+  formatDateParam,
+  NURSING_RUN_TYPES,
+  type TimerRunType,
+  type TimerSession,
+} from '@/app/utils/timerHistory';
 
 export const MINUTES_PER_TIMELINE_DAY = 24 * 60;
 export const WEEK_TIMELINE_DAY_COUNT = 7;
 
 export type SleepKind = 'night' | 'nap';
+export type TimelineSegmentKind = SleepKind | 'nursing' | 'bottle';
+
+export const WEEK_TIMELINE_RUN_TYPES: TimerRunType[] = [
+  'sleeping',
+  ...NURSING_RUN_TYPES,
+  'bottle',
+];
 
 export type WeekTimelineDay = {
   key: string;
@@ -23,7 +35,7 @@ export type WeekTimelineSegment = {
   dayIndex: number;
   startOffsetMinutes: number;
   endOffsetMinutes: number;
-  kind: SleepKind;
+  kind: TimelineSegmentKind;
 };
 
 export type WeekTimelineHourMark = {
@@ -99,6 +111,21 @@ const offsetMinutes = (from: Date, to: Date): number =>
     Math.max(0, (to.getTime() - from.getTime()) / MS_PER_MINUTE)
   );
 
+export const getTimelineSegmentKind = (
+  session: TimerSession,
+  dayStartMinutes: number,
+  dayEndMinutes: number
+): TimelineSegmentKind | null => {
+  if (session.run_type === 'bottle') return 'bottle';
+  if (session.run_type && NURSING_RUN_TYPES.includes(session.run_type)) {
+    return 'nursing';
+  }
+  if (session.run_type === 'sleeping') {
+    return classifySleep(session, dayStartMinutes, dayEndMinutes);
+  }
+  return null;
+};
+
 export const buildWeekTimelineSegments = (
   sessions: TimerSession[],
   days: WeekTimelineDay[],
@@ -108,24 +135,29 @@ export const buildWeekTimelineSegments = (
   const segments: WeekTimelineSegment[] = [];
 
   for (const session of sessions) {
-    if (session.run_type !== 'sleeping') continue;
+    const kind = getTimelineSegmentKind(session, dayStartMinutes, dayEndMinutes);
+    if (!kind) continue;
 
     const sessionStart = new Date(session.start_time);
     const sessionEnd = new Date(session.end_time);
+    // Bottle feedings are instant events (end == start); everything else needs a span.
+    const isInstant = kind === 'bottle';
     if (
       Number.isNaN(sessionStart.getTime()) ||
       Number.isNaN(sessionEnd.getTime()) ||
-      sessionEnd <= sessionStart
+      (isInstant ? sessionEnd < sessionStart : sessionEnd <= sessionStart)
     ) {
       continue;
     }
 
-    const kind = classifySleep(session, dayStartMinutes, dayEndMinutes);
-
     days.forEach((day, dayIndex) => {
       const clippedStart = sessionStart > day.start ? sessionStart : day.start;
       const clippedEnd = sessionEnd < day.end ? sessionEnd : day.end;
-      if (clippedEnd <= clippedStart) return;
+      if (isInstant) {
+        if (sessionStart < day.start || sessionStart >= day.end) return;
+      } else if (clippedEnd <= clippedStart) {
+        return;
+      }
 
       segments.push({
         key: `${session.id}:${day.key}`,

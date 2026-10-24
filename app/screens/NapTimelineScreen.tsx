@@ -1,17 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
+import type { DrawerNavigationProp } from '@react-navigation/drawer';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, ImageBackground, type LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, type LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/AppText';
 import {
-  deleteTimerRun,
   fetchTimerRunsInRange,
   filterSessionsInRange,
+  formatFeedingHistoryPrimary,
   formatHumanDuration,
+  formatSessionClockTime,
   formatSessionTimeRange,
   loadTimerHistoryFromCache,
-  removeTimerSessionFromCache,
   type TimerSession,
 } from '@/app/utils/timerHistory';
 import {
@@ -24,36 +25,66 @@ import {
   buildWeekTimelineDays,
   buildWeekTimelineHourMarks,
   buildWeekTimelineSegments,
-  classifySleep,
   getSleptMs,
   getTimelineDayStartForInstant,
+  getTimelineSegmentKind,
   getWeekTimelineRange,
+  type TimelineSegmentKind,
+  WEEK_TIMELINE_RUN_TYPES,
 } from '@/app/utils/weekTimeline';
 import { FEEDING_COLORS } from '@/app/constants/feedingTheme';
-import { HEADING_MARGIN, layout } from '@/app/constants/screenLayout';
+import { layout } from '@/app/constants/screenLayout';
 import { vh, vw } from '@/constants/appViewport';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
-import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
-import {
-  Drawer,
-  DrawerBackdrop,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-} from '@/components/ui/drawer';
-import { Heading } from '@/components/ui/heading';
+import type { EditTimelineEntryParams } from '@/app/screens/EditTimelineEntryScreen';
 
-const DRAWER_BACKGROUND = require('../../assets/images/bg-date-picker.png');
 const AXIS_WIDTH = vw(62);
 const MIN_BAR_HEIGHT = 3;
-const NIGHT_COLOR = '#3dd1e7';
-const NAP_COLOR = '#b4eef7';
-// Matches the "14-day free trial" highlight on the landing screen.
-const SELECTED_COLOR = '#FFD700';
+const MIN_FEEDING_HEIGHT = vh(7);
+// Sleep picks up the lilac and pink of the background clouds; feedings use
+// the app's gold (the "14-day free trial" highlight on the landing screen)
+// with a paler shade for nursing.
+const NIGHT_COLOR = '#C9B6FF';
+const NAP_COLOR = '#FF9EC4';
+const NURSING_COLOR = '#FFEB99';
+const BOTTLE_COLOR = '#FFD700';
+const NOW_COLOR = '#ffffff';
 const GRID_COLOR = 'rgba(255,255,255,0.12)';
 
-const isNumericId = (id: string | undefined): id is string =>
-  !!id && /^\d+$/.test(id);
+const SEGMENT_COLORS: Record<TimelineSegmentKind, string> = {
+  night: NIGHT_COLOR,
+  nap: NAP_COLOR,
+  nursing: NURSING_COLOR,
+  bottle: BOTTLE_COLOR,
+};
+
+// Icon colors inside the summary card's white circle: deeper shades of the
+// bar colors so they read on white. Night and nap keep their own colors.
+const SEGMENT_ICON_COLORS: Record<TimelineSegmentKind, string> = {
+  night: NIGHT_COLOR,
+  nap: NAP_COLOR,
+  nursing: '#E8B923',
+  bottle: '#C99400',
+};
+
+const SEGMENT_LABELS: Record<TimelineSegmentKind, string> = {
+  night: 'Night',
+  nap: 'Nap',
+  nursing: 'Nursing',
+  bottle: 'Bottle',
+};
+
+const SEGMENT_ICONS: Record<
+  TimelineSegmentKind,
+  React.ComponentProps<typeof Ionicons>['name']
+> = {
+  night: 'moon',
+  nap: 'partly-sunny',
+  nursing: 'heart',
+  bottle: 'water',
+};
+
+const LEGEND_KINDS: TimelineSegmentKind[] = ['night', 'nap', 'nursing', 'bottle'];
 
 const addDays = (date: Date, days: number): Date => {
   const next = new Date(date);
@@ -79,7 +110,16 @@ type DayWindow = {
   endMinutes: number;
 };
 
+// Bottle feedings are a single moment, so they only have a start time.
+const isInstantSession = (session: TimerSession): boolean =>
+  session.run_type === 'bottle';
+
+type TimelineNavigation = DrawerNavigationProp<{
+  EditTimelineEntry: EditTimelineEntryParams;
+}>;
+
 const NapTimelineScreen: React.FC = () => {
+  const navigation = useNavigation<TimelineNavigation>();
   const [weekEnd, setWeekEnd] = useState(() => new Date());
   const [dayWindow, setDayWindow] = useState<DayWindow>({
     startMinutes: DEFAULT_DAY_START_MINUTES,
@@ -90,9 +130,7 @@ const NapTimelineScreen: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [chartHeight, setChartHeight] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<TimerSession | null>(null);
   const requestIdRef = useRef(0);
 
   const days = useMemo(
@@ -150,17 +188,21 @@ const NapTimelineScreen: React.FC = () => {
     try {
       const token = await AsyncStorage.getItem('token');
       const loaded = token
-        ? await fetchTimerRunsInRange(token, from, to, { run_type: 'sleeping' })
+        ? await fetchTimerRunsInRange(token, from, to)
         : filterSessionsInRange(await loadTimerHistoryFromCache(), from, to);
       if (requestId !== requestIdRef.current) return;
 
-      const sleeps = loaded.filter((session) => session.run_type === 'sleeping');
-      setSessions(sleeps);
+      const entries = loaded.filter(
+        (session) =>
+          session.run_type != null &&
+          WEEK_TIMELINE_RUN_TYPES.includes(session.run_type)
+      );
+      setSessions(entries);
       setSelectedId((current) => {
-        if (current && sleeps.some((session) => session.id === current)) {
+        if (current && entries.some((session) => session.id === current)) {
           return current;
         }
-        const latest = [...sleeps].sort(
+        const latest = [...entries].sort(
           (a, b) => Date.parse(b.end_time) - Date.parse(a.end_time)
         )[0];
         return latest?.id ?? null;
@@ -195,31 +237,6 @@ const NapTimelineScreen: React.FC = () => {
     });
   }, []);
 
-  const performDelete = useCallback(
-    async (session: TimerSession) => {
-      if (isDeleting) return;
-
-      setIsDeleting(true);
-      try {
-        const token = await AsyncStorage.getItem('token');
-        if (token && isNumericId(session.id)) {
-          await deleteTimerRun(token, Number(session.id));
-        }
-
-        await removeTimerSessionFromCache(session.id);
-        setSessions((current) =>
-          current.filter((item) => item.id !== session.id)
-        );
-        setSelectedId(null);
-      } catch {
-        setLoadError('Could not delete this entry. Please try again.');
-      } finally {
-        setIsDeleting(false);
-      }
-    },
-    [isDeleting]
-  );
-
   const handleChartLayout = useCallback((event: LayoutChangeEvent) => {
     setChartHeight(event.nativeEvent.layout.height);
   }, []);
@@ -234,9 +251,31 @@ const NapTimelineScreen: React.FC = () => {
     : null;
 
   const selectedKind = selectedSession
-    ? classifySleep(selectedSession, dayWindow.startMinutes, dayWindow.endMinutes)
+    ? getTimelineSegmentKind(
+        selectedSession,
+        dayWindow.startMinutes,
+        dayWindow.endMinutes
+      )
     : null;
   const subject = babyName?.trim() || 'Baby';
+
+  let summaryTitle = '';
+  let summaryRange = '';
+  if (selectedSession) {
+    if (selectedKind === 'night' || selectedKind === 'nap') {
+      summaryTitle = `${subject} ${selectedKind === 'night' ? 'slept' : 'napped'} ${formatHumanDuration(getSleptMs(selectedSession))}`;
+    } else if (selectedKind === 'nursing') {
+      summaryTitle = `${formatFeedingHistoryPrimary(selectedSession)} · ${formatHumanDuration(getSleptMs(selectedSession))}`;
+    } else {
+      summaryTitle = formatFeedingHistoryPrimary(selectedSession);
+    }
+    summaryRange = isInstantSession(selectedSession)
+      ? formatSessionClockTime(selectedSession.start_time)
+      : formatSessionTimeRange(
+          selectedSession.start_time,
+          selectedSession.end_time
+        );
+  }
 
   return (
     <ScreenComponent
@@ -320,30 +359,29 @@ const NapTimelineScreen: React.FC = () => {
                       .filter((segment) => segment.dayIndex === dayIndex)
                       .map((segment) => {
                         const isSelected = segment.sessionId === selectedId;
+                        const isFeeding =
+                          segment.kind === 'nursing' || segment.kind === 'bottle';
                         const height = Math.max(
-                          MIN_BAR_HEIGHT,
+                          isFeeding ? MIN_FEEDING_HEIGHT : MIN_BAR_HEIGHT,
                           (segment.endOffsetMinutes - segment.startOffsetMinutes) *
                             pxPerMinute
                         );
+                        const top = segment.startOffsetMinutes * pxPerMinute;
                         return (
                           <Pressable
                             key={segment.key}
-                            accessibilityLabel={
-                              segment.kind === 'night' ? 'Night sleep' : 'Nap'
-                            }
+                            accessibilityLabel={SEGMENT_LABELS[segment.kind]}
                             accessibilityRole="button"
                             hitSlop={{ top: 6, bottom: 6 }}
                             onPress={() => setSelectedId(segment.sessionId)}
                             style={[
-                              styles.bar,
+                              isFeeding ? styles.feedingBar : styles.bar,
                               {
-                                top: segment.startOffsetMinutes * pxPerMinute,
+                                // Center instant bottle feedings on their time.
+                                top:
+                                  segment.kind === 'bottle' ? top - height / 2 : top,
                                 height,
-                                backgroundColor: isSelected
-                                  ? SELECTED_COLOR
-                                  : segment.kind === 'night'
-                                    ? NIGHT_COLOR
-                                    : NAP_COLOR,
+                                backgroundColor: SEGMENT_COLORS[segment.kind],
                               },
                               isSelected ? styles.barSelected : null,
                             ]}
@@ -355,120 +393,72 @@ const NapTimelineScreen: React.FC = () => {
             ))}
           </View>
 
-          {isLoading || isDeleting ? (
+          {isLoading ? (
             <View style={styles.loadingOverlay}>
               <ActivityIndicator color="white" size="large" />
             </View>
           ) : null}
         </View>
 
-        <View style={styles.summaryCard}>
-          {selectedSession ? (
-            <>
-              <View style={styles.summaryAccent} />
-              <Ionicons
-                name={selectedKind === 'night' ? 'moon-outline' : 'partly-sunny-outline'}
-                size={layout.font3xl}
-                color={NAP_COLOR}
+        <View style={styles.legend}>
+          {LEGEND_KINDS.map((kind) => (
+            <View key={kind} style={styles.legendItem}>
+              <View
+                style={[styles.legendSwatch, { backgroundColor: SEGMENT_COLORS[kind] }]}
               />
-              <View style={styles.summaryText}>
-                <Text style={styles.summaryTitle}>
-                  {subject} {selectedKind === 'night' ? 'slept' : 'napped'}{' '}
-                  {formatHumanDuration(getSleptMs(selectedSession))}
-                </Text>
-                <Text style={styles.summaryRange}>
-                  {formatSessionTimeRange(
-                    selectedSession.start_time,
-                    selectedSession.end_time
-                  )}
-                </Text>
-              </View>
-              <Pressable
-                accessibilityLabel="Delete entry"
-                accessibilityRole="button"
-                hitSlop={8}
-                onPress={() => setPendingDelete(selectedSession)}
-              >
-                <Ionicons
-                  name="trash-outline"
-                  size={layout.iconXl}
-                  color="rgba(255,255,255,0.75)"
-                />
-              </Pressable>
-            </>
-          ) : (
+              <Text style={styles.legendLabel}>{SEGMENT_LABELS[kind]}</Text>
+            </View>
+          ))}
+        </View>
+
+        {selectedSession ? (
+          <Pressable
+            accessibilityLabel={`Edit entry: ${summaryTitle}, ${summaryRange}`}
+            accessibilityRole="button"
+            onPress={() =>
+              navigation.navigate('EditTimelineEntry', {
+                session: selectedSession,
+                openedAt: Date.now(),
+              })
+            }
+            style={styles.summaryCard}
+          >
+            <View
+              style={[
+                styles.summaryAccent,
+                { backgroundColor: SEGMENT_COLORS[selectedKind ?? 'nap'] },
+              ]}
+            />
+            <View style={styles.summaryIconCircle}>
+              <Ionicons
+                name={SEGMENT_ICONS[selectedKind ?? 'nap']}
+                size={layout.iconLg}
+                color={SEGMENT_ICON_COLORS[selectedKind ?? 'nap']}
+              />
+            </View>
+            <View style={styles.summaryText}>
+              <Text style={styles.summaryTitle}>{summaryTitle}</Text>
+              <Text style={styles.summaryRange}>{summaryRange}</Text>
+            </View>
+            {/* Matches the chevron on the home screen cards. */}
+            <Ionicons
+              name="chevron-forward"
+              size={layout.iconMd}
+              color="rgba(255,255,255,0.5)"
+            />
+          </Pressable>
+        ) : (
+          <View style={styles.summaryCard}>
             <Text style={styles.emptyText}>
               {loadError ??
                 (isLoading
                   ? ' '
                   : sessions.length === 0
-                    ? 'No sleep logged for this week.'
+                    ? 'Nothing logged for this week.'
                     : 'Tap a bar to see details.')}
             </Text>
-          )}
-        </View>
-
-        <Drawer
-          isOpen={pendingDelete !== null}
-          onClose={() => setPendingDelete(null)}
-          anchor="bottom"
-          size="md"
-        >
-          <DrawerBackdrop className="bg-black/60" />
-          <DrawerContent className="border-white/0 bg-transparent p-0 overflow-hidden">
-            <ImageBackground
-              resizeMode="cover"
-              source={DRAWER_BACKGROUND}
-              style={styles.drawerBackground}
-            >
-              <View style={styles.drawerContent}>
-                <DrawerHeader className="px-0" style={styles.drawerHeader}>
-                  <Heading
-                    size="lg"
-                    className="text-white font-bold"
-                    style={styles.drawerHeading}
-                  >
-                    Delete entry
-                  </Heading>
-                  <DrawerCloseButton
-                    accessibilityLabel="Cancel deletion"
-                    className="p-1"
-                  >
-                    <Ionicons
-                      name="close"
-                      size={layout.icon2xl}
-                      color="#ffffff"
-                    />
-                  </DrawerCloseButton>
-                </DrawerHeader>
-
-                <Text style={styles.drawerMessage}>
-                  Delete this session? This cannot be undone.
-                </Text>
-
-                <View style={styles.drawerActions}>
-                  <TimerOutlineButton
-                    label="Cancel"
-                    onPress={() => setPendingDelete(null)}
-                    size="lg"
-                  />
-                  <TimerOutlineButton
-                    label="Delete"
-                    onPress={() => {
-                      if (!pendingDelete) return;
-                      const session = pendingDelete;
-                      setPendingDelete(null);
-                      void performDelete(session);
-                    }}
-                    variant="solid"
-                    size="lg"
-                    disabled={isDeleting}
-                  />
-                </View>
-              </View>
-            </ImageBackground>
-          </DrawerContent>
-        </Drawer>
+          </View>
+        )}
       </View>
     </ScreenComponent>
   );
@@ -561,12 +551,12 @@ const styles = StyleSheet.create({
     width: vh(10),
     height: vh(10),
     borderRadius: vh(5),
-    backgroundColor: SELECTED_COLOR,
+    backgroundColor: NOW_COLOR,
   },
   nowLine: {
     flex: 1,
     height: 2,
-    backgroundColor: SELECTED_COLOR,
+    backgroundColor: NOW_COLOR,
   },
   columns: {
     ...StyleSheet.absoluteFill,
@@ -583,9 +573,21 @@ const styles = StyleSheet.create({
     right: vw(3),
     borderRadius: vh(2),
   },
+  feedingBar: {
+    position: 'absolute',
+    left: vw(3),
+    right: vw(3),
+    borderRadius: vh(2),
+  },
+  // A white outline and glow mark the selected entry.
   barSelected: {
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: '#ffffff',
+    shadowColor: '#ffffff',
+    shadowOpacity: 0.9,
+    shadowRadius: vh(6),
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 6,
     zIndex: 2,
   },
   loadingOverlay: {
@@ -593,6 +595,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 3,
+  },
+  legend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: layout.space16,
+    marginTop: layout.space8,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: layout.space6,
+  },
+  legendSwatch: {
+    width: vh(10),
+    height: vh(10),
+    borderRadius: vh(5),
+  },
+  legendLabel: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: layout.fontSm,
   },
   summaryCard: {
     flexDirection: 'row',
@@ -611,7 +634,14 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: vh(5),
-    backgroundColor: SELECTED_COLOR,
+  },
+  summaryIconCircle: {
+    width: layout.iconCircle,
+    height: layout.iconCircle,
+    borderRadius: layout.iconCircle / 2,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   summaryText: {
     flex: 1,
@@ -622,8 +652,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   summaryRange: {
-    color: 'rgba(255,255,255,0.75)',
+    color: '#ffffff',
     fontSize: layout.fontBase,
+    fontWeight: '700',
     marginTop: layout.space4,
   },
   emptyText: {
@@ -631,38 +662,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.75)',
     fontSize: layout.fontBase,
     textAlign: 'center',
-  },
-  drawerBackground: {
-    width: '100%',
-    height: '100%',
-  },
-  drawerContent: {
-    flex: 1,
-    width: '100%',
-    justifyContent: 'center',
-    paddingHorizontal: layout.space24,
-    paddingBottom: layout.space32,
-  },
-  drawerHeader: {
-    paddingTop: 0,
-    paddingHorizontal: 0,
-  },
-  drawerHeading: {
-    fontSize: layout.fontLg,
-    marginVertical: HEADING_MARGIN,
-  },
-  drawerMessage: {
-    color: '#ffffff',
-    fontSize: layout.fontBase,
-    fontWeight: '600',
-    lineHeight: layout.font2xl,
-    marginTop: layout.space12,
-    textAlign: 'center',
-  },
-  drawerActions: {
-    width: '100%',
-    gap: layout.space12,
-    marginTop: layout.space36,
   },
 });
 

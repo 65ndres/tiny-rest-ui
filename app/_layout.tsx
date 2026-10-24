@@ -34,6 +34,9 @@ import TimerScreen from './screens/TimerScreen';
 import TimerScreenGuest from './screens/TimerScreenGuest';
 import SettingsScreen from './screens/SettingsScreen';
 import NapTimelineScreen from './screens/NapTimelineScreen';
+import EditTimelineEntryScreen, {
+  type EditTimelineEntryParams,
+} from './screens/EditTimelineEntryScreen';
 import AddFeedingScreen from './screens/AddFeedingScreen';
 import SoundsScreen from './screens/SoundsScreen';
 import BackButton from './SampleModule/BackButton';
@@ -74,6 +77,7 @@ type RootDrawerParamList = {
   Timer: undefined;
   Settings: undefined;
   NapTimeline: undefined;
+  EditTimelineEntry: EditTimelineEntryParams;
   AddFeeding: undefined;
   Sounds: undefined;
 };
@@ -122,7 +126,12 @@ const CustomDrawerContent: React.FC<any> = (props) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const isProUser = user?.subscription_type === 'pro';
   const alwaysAllowedRoutes = new Set(['Home', 'Profile', 'Timer', 'Settings']);
-  const hiddenRoutes = new Set(['NewConversation', 'Conversation', 'Subscription']);
+  const hiddenRoutes = new Set([
+    'NewConversation',
+    'Conversation',
+    'Subscription',
+    'EditTimelineEntry',
+  ]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -284,6 +293,25 @@ const AuthenticatedNavigator: React.FC = () => {
             </Text>
           ),
         }}
+      />
+      <Drawer.Screen
+        name="EditTimelineEntry"
+        component={EditTimelineEntryScreen}
+        options={({ navigation }) => ({
+          drawerLabel: () => null, // Hide from drawer
+          drawerItemStyle: { display: 'none' },
+          headerLeft: () => (
+            <BackButton
+              text=""
+              onPress={() => navigation.navigate('NapTimeline')}
+            />
+          ),
+          headerTitle: () => (
+            <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
+              EDIT ENTRY
+            </Text>
+          ),
+        })}
       />
       <Drawer.Screen
         name="Sounds"

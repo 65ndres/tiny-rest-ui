@@ -67,10 +67,10 @@ const SEGMENT_ICONS: Record<
   TimelineSegmentKind,
   React.ComponentProps<typeof Ionicons>['name']
 > = {
-  night: 'moon-outline',
-  nap: 'partly-sunny-outline',
-  nursing: 'heart-outline',
-  bottle: 'water-outline',
+  night: 'moon',
+  nap: 'partly-sunny',
+  nursing: 'heart',
+  bottle: 'water',
 };
 
 const LEGEND_KINDS: TimelineSegmentKind[] = ['night', 'nap', 'nursing', 'bottle'];
@@ -405,7 +405,12 @@ const NapTimelineScreen: React.FC = () => {
         <View style={styles.summaryCard}>
           {selectedSession ? (
             <>
-              <View style={styles.summaryAccent} />
+              <View
+                style={[
+                  styles.summaryAccent,
+                  { backgroundColor: SEGMENT_COLORS[selectedKind ?? 'nap'] },
+                ]}
+              />
               <Ionicons
                 name={SEGMENT_ICONS[selectedKind ?? 'nap']}
                 size={layout.font3xl}
@@ -609,7 +614,6 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: vh(5),
-    backgroundColor: SELECTED_COLOR,
   },
   summaryText: {
     flex: 1,

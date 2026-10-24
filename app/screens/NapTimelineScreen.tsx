@@ -59,10 +59,10 @@ const SEGMENT_COLORS: Record<TimelineSegmentKind, string> = {
 };
 
 // Icon colors inside the summary card's white circle: deeper shades of the
-// bar colors so they read on white. Night keeps its own lilac.
+// bar colors so they read on white. Night and nap keep their own colors.
 const SEGMENT_ICON_COLORS: Record<TimelineSegmentKind, string> = {
   night: NIGHT_COLOR,
-  nap: '#E0609A',
+  nap: NAP_COLOR,
   nursing: '#E8B923',
   bottle: '#C99400',
 };

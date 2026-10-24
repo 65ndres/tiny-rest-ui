@@ -688,6 +688,46 @@ export const formatFeedingSessionDetails = (session: TimerSession): string => {
   return parts.join(' · ');
 };
 
+/**
+ * A finished entry that shares time with [start, end] (mirrors the API's
+ * overlap rule: touching edges and boundary bottle feedings are fine).
+ */
+export const findOverlappingSession = (
+  sessions: TimerSession[],
+  candidate: { id?: string; start: Date; end: Date }
+): TimerSession | null => {
+  const start = candidate.start.getTime();
+  const end = candidate.end.getTime();
+  return (
+    sessions
+      .filter((session) => session.id !== candidate.id)
+      .sort((a, b) => Date.parse(a.start_time) - Date.parse(b.start_time))
+      .find((session) => {
+        const otherStart = Date.parse(session.start_time);
+        const otherEnd = Date.parse(session.end_time);
+        if (otherStart < end && otherEnd > start) return true;
+        return otherStart === otherEnd && otherStart > start && otherStart < end;
+      }) ?? null
+  );
+};
+
+const formatOverlapDateTime = (iso: string): string => {
+  const date = new Date(iso);
+  return `${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}, ${formatSessionClockTime(iso)}`;
+};
+
+export const formatOverlapMessage = (session: TimerSession): string => {
+  const start = formatOverlapDateTime(session.start_time);
+  const end = formatSessionClockTime(session.end_time);
+  const description =
+    session.run_type === 'bottle'
+      ? `a bottle feeding at ${start}`
+      : session.run_type && NURSING_RUN_TYPES.includes(session.run_type)
+        ? `a nursing session from ${start} to ${end}`
+        : `a sleep from ${start} to ${end}`;
+  return `This overlaps ${description}. A baby can only sleep or feed at one time.`;
+};
+
 export const getLastNursingSide = (
   sessions: TimerSession[]
 ): 'left' | 'right' | null => {
@@ -1128,6 +1168,16 @@ export const removeTimerSessionFromCache = async (
   const sessions = await loadTimerHistoryFromCache();
   const next = sessions.filter((session) => session.id !== id);
   await saveTimerHistoryToCache(next);
+};
+
+export const replaceTimerSessionInCache = async (
+  session: TimerSession
+): Promise<void> => {
+  const sessions = await loadTimerHistoryFromCache();
+  if (!sessions.some((item) => item.id === session.id)) return;
+  await saveTimerHistoryToCache(
+    sessions.map((item) => (item.id === session.id ? session : item))
+  );
 };
 
 export const prependTimerSession = (

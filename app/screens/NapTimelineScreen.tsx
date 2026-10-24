@@ -8,10 +8,20 @@ import {
   deleteTimerRun,
   fetchTimerRunsInRange,
   filterSessionsInRange,
+  findOverlappingSession,
+  formatOverlapMessage,
+  formatFeedingHistoryPrimary,
   formatHumanDuration,
+  formatSessionClockTime,
+  formatSessionDateTime,
   formatSessionTimeRange,
+  getTimerApiErrorMessage,
   loadTimerHistoryFromCache,
+  mapTimerRunToSession,
   removeTimerSessionFromCache,
+  replaceTimerSessionInCache,
+  START_TIME_FUTURE_MESSAGE,
+  submitTimerRun,
   type TimerSession,
 } from '@/app/utils/timerHistory';
 import {
@@ -24,16 +34,20 @@ import {
   buildWeekTimelineDays,
   buildWeekTimelineHourMarks,
   buildWeekTimelineSegments,
-  classifySleep,
   getSleptMs,
   getTimelineDayStartForInstant,
+  getTimelineSegmentKind,
   getWeekTimelineRange,
+  type TimelineSegmentKind,
+  WEEK_TIMELINE_RUN_TYPES,
 } from '@/app/utils/weekTimeline';
 import { FEEDING_COLORS } from '@/app/constants/feedingTheme';
 import { HEADING_MARGIN, layout } from '@/app/constants/screenLayout';
 import { vh, vw } from '@/constants/appViewport';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
+import TimerDateTimePickerDrawer from '@/app/sharedComponents/TimerDateTimePickerDrawer';
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
+import TimerSettingRow from '@/app/sharedComponents/timer/TimerSettingRow';
 import {
   Drawer,
   DrawerBackdrop,
@@ -46,11 +60,42 @@ import { Heading } from '@/components/ui/heading';
 const DRAWER_BACKGROUND = require('../../assets/images/bg-date-picker.png');
 const AXIS_WIDTH = vw(62);
 const MIN_BAR_HEIGHT = 3;
+const MIN_FEEDING_HEIGHT = vh(7);
 const NIGHT_COLOR = '#3dd1e7';
 const NAP_COLOR = '#b4eef7';
+const NURSING_COLOR = FEEDING_COLORS.nursingCircle;
+const BOTTLE_COLOR = FEEDING_COLORS.accent;
 // Matches the "14-day free trial" highlight on the landing screen.
 const SELECTED_COLOR = '#FFD700';
 const GRID_COLOR = 'rgba(255,255,255,0.12)';
+// Matches the API's allowance for "now" presses.
+const FUTURE_SKEW_MS = 60_000;
+
+const SEGMENT_COLORS: Record<TimelineSegmentKind, string> = {
+  night: NIGHT_COLOR,
+  nap: NAP_COLOR,
+  nursing: NURSING_COLOR,
+  bottle: BOTTLE_COLOR,
+};
+
+const SEGMENT_LABELS: Record<TimelineSegmentKind, string> = {
+  night: 'Night',
+  nap: 'Nap',
+  nursing: 'Nursing',
+  bottle: 'Bottle',
+};
+
+const SEGMENT_ICONS: Record<
+  TimelineSegmentKind,
+  React.ComponentProps<typeof Ionicons>['name']
+> = {
+  night: 'moon-outline',
+  nap: 'partly-sunny-outline',
+  nursing: 'heart-outline',
+  bottle: 'water-outline',
+};
+
+const LEGEND_KINDS: TimelineSegmentKind[] = ['night', 'nap', 'nursing', 'bottle'];
 
 const isNumericId = (id: string | undefined): id is string =>
   !!id && /^\d+$/.test(id);
@@ -79,6 +124,41 @@ type DayWindow = {
   endMinutes: number;
 };
 
+// 'form' shows the edit drawer; 'start' / 'end' swap it for the picker.
+type EditStage = 'form' | 'start' | 'end';
+
+type EditDraft = {
+  session: TimerSession;
+  start: Date;
+  end: Date;
+};
+
+// Bottle feedings are a single moment, so they only have a start time.
+const isInstantSession = (session: TimerSession): boolean =>
+  session.run_type === 'bottle';
+
+const validateEditDraft = (
+  draft: EditDraft,
+  sessions: TimerSession[]
+): string | null => {
+  const latest = Date.now() + FUTURE_SKEW_MS;
+  if (draft.start.getTime() > latest) return START_TIME_FUTURE_MESSAGE;
+  if (!isInstantSession(draft.session)) {
+    if (draft.end.getTime() > latest) return 'End time cannot be in the future.';
+    if (draft.end.getTime() <= draft.start.getTime()) {
+      return 'End time must be after start time.';
+    }
+  }
+  // The API checks every entry; this catches the loaded week up front and
+  // covers guests, whose edits never reach the API.
+  const overlap = findOverlappingSession(sessions, {
+    id: draft.session.id,
+    start: draft.start,
+    end: draft.end,
+  });
+  return overlap ? formatOverlapMessage(overlap) : null;
+};
+
 const NapTimelineScreen: React.FC = () => {
   const [weekEnd, setWeekEnd] = useState(() => new Date());
   const [dayWindow, setDayWindow] = useState<DayWindow>({
@@ -93,6 +173,12 @@ const NapTimelineScreen: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<TimerSession | null>(null);
+  const [editDraft, setEditDraft] = useState<EditDraft | null>(null);
+  const [editStage, setEditStage] = useState<EditStage | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [pickerNow, setPickerNow] = useState(() => new Date());
+  const [pickerOpenGeneration, setPickerOpenGeneration] = useState(0);
   const requestIdRef = useRef(0);
 
   const days = useMemo(
@@ -150,17 +236,21 @@ const NapTimelineScreen: React.FC = () => {
     try {
       const token = await AsyncStorage.getItem('token');
       const loaded = token
-        ? await fetchTimerRunsInRange(token, from, to, { run_type: 'sleeping' })
+        ? await fetchTimerRunsInRange(token, from, to)
         : filterSessionsInRange(await loadTimerHistoryFromCache(), from, to);
       if (requestId !== requestIdRef.current) return;
 
-      const sleeps = loaded.filter((session) => session.run_type === 'sleeping');
-      setSessions(sleeps);
+      const entries = loaded.filter(
+        (session) =>
+          session.run_type != null &&
+          WEEK_TIMELINE_RUN_TYPES.includes(session.run_type)
+      );
+      setSessions(entries);
       setSelectedId((current) => {
-        if (current && sleeps.some((session) => session.id === current)) {
+        if (current && entries.some((session) => session.id === current)) {
           return current;
         }
-        const latest = [...sleeps].sort(
+        const latest = [...entries].sort(
           (a, b) => Date.parse(b.end_time) - Date.parse(a.end_time)
         )[0];
         return latest?.id ?? null;
@@ -220,6 +310,82 @@ const NapTimelineScreen: React.FC = () => {
     [isDeleting]
   );
 
+  const openEdit = useCallback((session: TimerSession) => {
+    setEditDraft({
+      session,
+      start: new Date(session.start_time),
+      end: new Date(session.end_time),
+    });
+    setEditError(null);
+    setEditStage('form');
+  }, []);
+
+  const closeEdit = useCallback(() => {
+    setEditStage(null);
+    setEditDraft(null);
+    setEditError(null);
+  }, []);
+
+  const openEditPicker = useCallback((target: 'start' | 'end') => {
+    setPickerNow(new Date());
+    setPickerOpenGeneration((generation) => generation + 1);
+    setEditStage(target);
+  }, []);
+
+  const handleEditPickerChange = useCallback(
+    (date: Date) => {
+      setEditError(null);
+      setEditDraft((current) => {
+        if (!current) return current;
+        if (isInstantSession(current.session)) {
+          return { ...current, start: date, end: date };
+        }
+        return { ...current, [editStage === 'end' ? 'end' : 'start']: date };
+      });
+    },
+    [editStage]
+  );
+
+  const performEdit = useCallback(async () => {
+    if (!editDraft || isSaving) return;
+
+    const validationError = validateEditDraft(editDraft, sessions);
+    if (validationError) {
+      setEditError(validationError);
+      return;
+    }
+
+    const { session, start, end } = editDraft;
+    const payload = {
+      start_time: start.toISOString(),
+      end_time: end.toISOString(),
+      duration_ms: end.getTime() - start.getTime(),
+    };
+
+    setIsSaving(true);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      let updated: TimerSession = { ...session, ...payload };
+      if (token && isNumericId(session.id)) {
+        const record = await submitTimerRun(token, Number(session.id), payload);
+        updated = mapTimerRunToSession(record) ?? updated;
+      }
+
+      await replaceTimerSessionInCache(updated);
+      setSessions((current) =>
+        current.map((item) => (item.id === updated.id ? updated : item))
+      );
+      setSelectedId(updated.id);
+      closeEdit();
+    } catch (error) {
+      setEditError(
+        getTimerApiErrorMessage(error, 'Could not save this entry. Please try again.')
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }, [closeEdit, editDraft, isSaving, sessions]);
+
   const handleChartLayout = useCallback((event: LayoutChangeEvent) => {
     setChartHeight(event.nativeEvent.layout.height);
   }, []);
@@ -234,9 +400,31 @@ const NapTimelineScreen: React.FC = () => {
     : null;
 
   const selectedKind = selectedSession
-    ? classifySleep(selectedSession, dayWindow.startMinutes, dayWindow.endMinutes)
+    ? getTimelineSegmentKind(
+        selectedSession,
+        dayWindow.startMinutes,
+        dayWindow.endMinutes
+      )
     : null;
   const subject = babyName?.trim() || 'Baby';
+
+  let summaryTitle = '';
+  let summaryRange = '';
+  if (selectedSession) {
+    if (selectedKind === 'night' || selectedKind === 'nap') {
+      summaryTitle = `${subject} ${selectedKind === 'night' ? 'slept' : 'napped'} ${formatHumanDuration(getSleptMs(selectedSession))}`;
+    } else if (selectedKind === 'nursing') {
+      summaryTitle = `${formatFeedingHistoryPrimary(selectedSession)} · ${formatHumanDuration(getSleptMs(selectedSession))}`;
+    } else {
+      summaryTitle = formatFeedingHistoryPrimary(selectedSession);
+    }
+    summaryRange = isInstantSession(selectedSession)
+      ? formatSessionClockTime(selectedSession.start_time)
+      : formatSessionTimeRange(
+          selectedSession.start_time,
+          selectedSession.end_time
+        );
+  }
 
   return (
     <ScreenComponent
@@ -320,30 +508,31 @@ const NapTimelineScreen: React.FC = () => {
                       .filter((segment) => segment.dayIndex === dayIndex)
                       .map((segment) => {
                         const isSelected = segment.sessionId === selectedId;
+                        const isFeeding =
+                          segment.kind === 'nursing' || segment.kind === 'bottle';
                         const height = Math.max(
-                          MIN_BAR_HEIGHT,
+                          isFeeding ? MIN_FEEDING_HEIGHT : MIN_BAR_HEIGHT,
                           (segment.endOffsetMinutes - segment.startOffsetMinutes) *
                             pxPerMinute
                         );
+                        const top = segment.startOffsetMinutes * pxPerMinute;
                         return (
                           <Pressable
                             key={segment.key}
-                            accessibilityLabel={
-                              segment.kind === 'night' ? 'Night sleep' : 'Nap'
-                            }
+                            accessibilityLabel={SEGMENT_LABELS[segment.kind]}
                             accessibilityRole="button"
                             hitSlop={{ top: 6, bottom: 6 }}
                             onPress={() => setSelectedId(segment.sessionId)}
                             style={[
-                              styles.bar,
+                              isFeeding ? styles.feedingBar : styles.bar,
                               {
-                                top: segment.startOffsetMinutes * pxPerMinute,
+                                // Center instant bottle feedings on their time.
+                                top:
+                                  segment.kind === 'bottle' ? top - height / 2 : top,
                                 height,
                                 backgroundColor: isSelected
                                   ? SELECTED_COLOR
-                                  : segment.kind === 'night'
-                                    ? NIGHT_COLOR
-                                    : NAP_COLOR,
+                                  : SEGMENT_COLORS[segment.kind],
                               },
                               isSelected ? styles.barSelected : null,
                             ]}
@@ -355,11 +544,22 @@ const NapTimelineScreen: React.FC = () => {
             ))}
           </View>
 
-          {isLoading || isDeleting ? (
+          {isLoading || isDeleting || isSaving ? (
             <View style={styles.loadingOverlay}>
               <ActivityIndicator color="white" size="large" />
             </View>
           ) : null}
+        </View>
+
+        <View style={styles.legend}>
+          {LEGEND_KINDS.map((kind) => (
+            <View key={kind} style={styles.legendItem}>
+              <View
+                style={[styles.legendSwatch, { backgroundColor: SEGMENT_COLORS[kind] }]}
+              />
+              <Text style={styles.legendLabel}>{SEGMENT_LABELS[kind]}</Text>
+            </View>
+          ))}
         </View>
 
         <View style={styles.summaryCard}>
@@ -367,22 +567,26 @@ const NapTimelineScreen: React.FC = () => {
             <>
               <View style={styles.summaryAccent} />
               <Ionicons
-                name={selectedKind === 'night' ? 'moon-outline' : 'partly-sunny-outline'}
+                name={SEGMENT_ICONS[selectedKind ?? 'nap']}
                 size={layout.font3xl}
-                color={NAP_COLOR}
+                color={SEGMENT_COLORS[selectedKind ?? 'nap']}
               />
               <View style={styles.summaryText}>
-                <Text style={styles.summaryTitle}>
-                  {subject} {selectedKind === 'night' ? 'slept' : 'napped'}{' '}
-                  {formatHumanDuration(getSleptMs(selectedSession))}
-                </Text>
-                <Text style={styles.summaryRange}>
-                  {formatSessionTimeRange(
-                    selectedSession.start_time,
-                    selectedSession.end_time
-                  )}
-                </Text>
+                <Text style={styles.summaryTitle}>{summaryTitle}</Text>
+                <Text style={styles.summaryRange}>{summaryRange}</Text>
               </View>
+              <Pressable
+                accessibilityLabel="Edit entry"
+                accessibilityRole="button"
+                hitSlop={8}
+                onPress={() => openEdit(selectedSession)}
+              >
+                <Ionicons
+                  name="create-outline"
+                  size={layout.iconXl}
+                  color="rgba(255,255,255,0.75)"
+                />
+              </Pressable>
               <Pressable
                 accessibilityLabel="Delete entry"
                 accessibilityRole="button"
@@ -402,11 +606,118 @@ const NapTimelineScreen: React.FC = () => {
                 (isLoading
                   ? ' '
                   : sessions.length === 0
-                    ? 'No sleep logged for this week.'
+                    ? 'Nothing logged for this week.'
                     : 'Tap a bar to see details.')}
             </Text>
           )}
         </View>
+
+        <Drawer
+          isOpen={editStage === 'form'}
+          onClose={closeEdit}
+          anchor="bottom"
+          size="md"
+        >
+          <DrawerBackdrop className="bg-black/60" />
+          <DrawerContent className="border-white/0 bg-transparent p-0 overflow-hidden">
+            <ImageBackground
+              resizeMode="cover"
+              source={DRAWER_BACKGROUND}
+              style={styles.drawerBackground}
+            >
+              <View style={styles.drawerContent}>
+                <DrawerHeader className="px-0" style={styles.drawerHeader}>
+                  <Heading
+                    size="lg"
+                    className="text-white font-bold"
+                    style={styles.drawerHeading}
+                  >
+                    Edit entry
+                  </Heading>
+                  <DrawerCloseButton
+                    accessibilityLabel="Cancel editing"
+                    className="p-1"
+                  >
+                    <Ionicons
+                      name="close"
+                      size={layout.icon2xl}
+                      color="#ffffff"
+                    />
+                  </DrawerCloseButton>
+                </DrawerHeader>
+
+                {editDraft && isInstantSession(editDraft.session) ? (
+                  <View style={styles.editRows}>
+                    <TimerSettingRow
+                      label="Time:"
+                      value={formatSessionDateTime(editDraft.start.toISOString())}
+                      placeholder="Select time"
+                      onPress={() => openEditPicker('start')}
+                      accessibilityLabel="Edit feeding time"
+                      isFirst
+                    />
+                  </View>
+                ) : editDraft ? (
+                  <View style={styles.editRows}>
+                    <TimerSettingRow
+                      label="Started at:"
+                      value={formatSessionDateTime(editDraft.start.toISOString())}
+                      placeholder="Select time"
+                      onPress={() => openEditPicker('start')}
+                      accessibilityLabel="Edit start time"
+                      isFirst
+                    />
+                    <TimerSettingRow
+                      label="Ended at:"
+                      value={formatSessionDateTime(editDraft.end.toISOString())}
+                      placeholder="Select time"
+                      onPress={() => openEditPicker('end')}
+                      accessibilityLabel="Edit end time"
+                    />
+                  </View>
+                ) : null}
+
+                {editError ? (
+                  <Text style={styles.editError}>{editError}</Text>
+                ) : null}
+
+                <View style={styles.drawerActions}>
+                  <TimerOutlineButton
+                    label="Cancel"
+                    onPress={closeEdit}
+                    size="lg"
+                  />
+                  <TimerOutlineButton
+                    label="Save"
+                    onPress={() => void performEdit()}
+                    variant="solid"
+                    size="lg"
+                    disabled={isSaving}
+                    isLoading={isSaving}
+                  />
+                </View>
+              </View>
+            </ImageBackground>
+          </DrawerContent>
+        </Drawer>
+
+        <TimerDateTimePickerDrawer
+          isOpen={editStage === 'start' || editStage === 'end'}
+          title={
+            editStage === 'end'
+              ? 'End time'
+              : editDraft && isInstantSession(editDraft.session)
+                ? 'Feeding time'
+                : 'Start time'
+          }
+          value={
+            (editStage === 'end' ? editDraft?.end : editDraft?.start) ?? pickerNow
+          }
+          onChange={handleEditPickerChange}
+          onClose={() => setEditStage(editDraft ? 'form' : null)}
+          maximumDate={pickerNow}
+          openGeneration={pickerOpenGeneration}
+        />
 
         <Drawer
           isOpen={pendingDelete !== null}
@@ -583,6 +894,12 @@ const styles = StyleSheet.create({
     right: vw(3),
     borderRadius: vh(2),
   },
+  feedingBar: {
+    position: 'absolute',
+    left: vw(3),
+    right: vw(3),
+    borderRadius: vh(2),
+  },
   barSelected: {
     borderWidth: 2,
     borderColor: '#ffffff',
@@ -593,6 +910,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 3,
+  },
+  legend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: layout.space16,
+    marginTop: layout.space8,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: layout.space6,
+  },
+  legendSwatch: {
+    width: vh(10),
+    height: vh(10),
+    borderRadius: vh(5),
+  },
+  legendLabel: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: layout.fontSm,
   },
   summaryCard: {
     flexDirection: 'row',
@@ -656,6 +994,16 @@ const styles = StyleSheet.create({
     fontSize: layout.fontBase,
     fontWeight: '600',
     lineHeight: layout.font2xl,
+    marginTop: layout.space12,
+    textAlign: 'center',
+  },
+  editRows: {
+    width: '100%',
+    marginTop: layout.space12,
+  },
+  editError: {
+    color: SELECTED_COLOR,
+    fontSize: layout.fontSm,
     marginTop: layout.space12,
     textAlign: 'center',
   },

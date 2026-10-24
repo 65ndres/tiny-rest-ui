@@ -104,12 +104,44 @@ describe('buildWeekTimelineSegments', () => {
     ]);
   });
 
-  it('ignores non-sleep sessions', () => {
+  it('includes nursing sessions as nursing segments', () => {
     const nursing: TimerSession = {
       ...sleep('f', local(9, 9, 10), local(9, 9, 10, 20)),
       run_type: 'nursing_left',
     };
-    expect(buildWeekTimelineSegments([nursing], days, DAY_START, DAY_END)).toEqual(
+    expect(
+      buildWeekTimelineSegments([nursing], days, DAY_START, DAY_END).map((s) => [
+        s.dayIndex,
+        s.startOffsetMinutes,
+        s.endOffsetMinutes,
+        s.kind,
+      ])
+    ).toEqual([[6, 210, 230, 'nursing']]);
+  });
+
+  it('places instant bottle feedings in the day that contains them', () => {
+    const at = local(9, 10, 2);
+    const bottle: TimerSession = {
+      ...sleep('b', at, at),
+      duration_ms: 0,
+      run_type: 'bottle',
+    };
+    expect(
+      buildWeekTimelineSegments([bottle], days, DAY_START, DAY_END).map((s) => [
+        s.dayIndex,
+        s.startOffsetMinutes,
+        s.endOffsetMinutes,
+        s.kind,
+      ])
+    ).toEqual([[6, 1170, 1170, 'bottle']]);
+  });
+
+  it('ignores sessions without a known run type', () => {
+    const unknown: TimerSession = {
+      ...sleep('u', local(9, 9, 10), local(9, 9, 11)),
+      run_type: undefined,
+    };
+    expect(buildWeekTimelineSegments([unknown], days, DAY_START, DAY_END)).toEqual(
       []
     );
   });

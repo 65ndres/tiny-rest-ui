@@ -56,6 +56,13 @@ const SEGMENT_COLORS: Record<TimelineSegmentKind, string> = {
   bottle: BOTTLE_COLOR,
 };
 
+// Icon colors inside the summary card's white circle. The nap blue is too
+// light to read on white, so it gets a deeper shade there.
+const SEGMENT_ICON_COLORS: Record<TimelineSegmentKind, string> = {
+  ...SEGMENT_COLORS,
+  nap: '#4a90c2',
+};
+
 const SEGMENT_LABELS: Record<TimelineSegmentKind, string> = {
   night: 'Night',
   nap: 'Nap',
@@ -411,11 +418,13 @@ const NapTimelineScreen: React.FC = () => {
                   { backgroundColor: SEGMENT_COLORS[selectedKind ?? 'nap'] },
                 ]}
               />
-              <Ionicons
-                name={SEGMENT_ICONS[selectedKind ?? 'nap']}
-                size={layout.font3xl}
-                color={SEGMENT_COLORS[selectedKind ?? 'nap']}
-              />
+              <View style={styles.summaryIconCircle}>
+                <Ionicons
+                  name={SEGMENT_ICONS[selectedKind ?? 'nap']}
+                  size={layout.iconLg}
+                  color={SEGMENT_ICON_COLORS[selectedKind ?? 'nap']}
+                />
+              </View>
               <View style={styles.summaryText}>
                 <Text style={styles.summaryTitle}>{summaryTitle}</Text>
                 <Text style={styles.summaryRange}>{summaryRange}</Text>
@@ -614,6 +623,14 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: vh(5),
+  },
+  summaryIconCircle: {
+    width: layout.iconCircle,
+    height: layout.iconCircle,
+    borderRadius: layout.iconCircle / 2,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   summaryText: {
     flex: 1,

@@ -1,27 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
+import type { DrawerNavigationProp } from '@react-navigation/drawer';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, ImageBackground, type LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, type LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/AppText';
 import {
-  deleteTimerRun,
   fetchTimerRunsInRange,
   filterSessionsInRange,
-  findOverlappingSession,
-  formatOverlapMessage,
   formatFeedingHistoryPrimary,
   formatHumanDuration,
   formatSessionClockTime,
-  formatSessionDateTime,
   formatSessionTimeRange,
-  getTimerApiErrorMessage,
   loadTimerHistoryFromCache,
-  mapTimerRunToSession,
-  removeTimerSessionFromCache,
-  replaceTimerSessionInCache,
-  START_TIME_FUTURE_MESSAGE,
-  submitTimerRun,
   type TimerSession,
 } from '@/app/utils/timerHistory';
 import {
@@ -42,22 +33,11 @@ import {
   WEEK_TIMELINE_RUN_TYPES,
 } from '@/app/utils/weekTimeline';
 import { FEEDING_COLORS } from '@/app/constants/feedingTheme';
-import { HEADING_MARGIN, layout } from '@/app/constants/screenLayout';
+import { layout } from '@/app/constants/screenLayout';
 import { vh, vw } from '@/constants/appViewport';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
-import TimerDateTimePickerDrawer from '@/app/sharedComponents/TimerDateTimePickerDrawer';
-import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
-import TimerSettingRow from '@/app/sharedComponents/timer/TimerSettingRow';
-import {
-  Drawer,
-  DrawerBackdrop,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-} from '@/components/ui/drawer';
-import { Heading } from '@/components/ui/heading';
+import type { EditTimelineEntryParams } from '@/app/screens/EditTimelineEntryScreen';
 
-const DRAWER_BACKGROUND = require('../../assets/images/bg-date-picker.png');
 const AXIS_WIDTH = vw(62);
 const MIN_BAR_HEIGHT = 3;
 const MIN_FEEDING_HEIGHT = vh(7);
@@ -68,8 +48,6 @@ const BOTTLE_COLOR = FEEDING_COLORS.accent;
 // Matches the "14-day free trial" highlight on the landing screen.
 const SELECTED_COLOR = '#FFD700';
 const GRID_COLOR = 'rgba(255,255,255,0.12)';
-// Matches the API's allowance for "now" presses.
-const FUTURE_SKEW_MS = 60_000;
 
 const SEGMENT_COLORS: Record<TimelineSegmentKind, string> = {
   night: NIGHT_COLOR,
@@ -97,9 +75,6 @@ const SEGMENT_ICONS: Record<
 
 const LEGEND_KINDS: TimelineSegmentKind[] = ['night', 'nap', 'nursing', 'bottle'];
 
-const isNumericId = (id: string | undefined): id is string =>
-  !!id && /^\d+$/.test(id);
-
 const addDays = (date: Date, days: number): Date => {
   const next = new Date(date);
   next.setDate(next.getDate() + days);
@@ -124,42 +99,16 @@ type DayWindow = {
   endMinutes: number;
 };
 
-// 'form' shows the edit drawer; 'start' / 'end' swap it for the picker.
-type EditStage = 'form' | 'start' | 'end';
-
-type EditDraft = {
-  session: TimerSession;
-  start: Date;
-  end: Date;
-};
-
 // Bottle feedings are a single moment, so they only have a start time.
 const isInstantSession = (session: TimerSession): boolean =>
   session.run_type === 'bottle';
 
-const validateEditDraft = (
-  draft: EditDraft,
-  sessions: TimerSession[]
-): string | null => {
-  const latest = Date.now() + FUTURE_SKEW_MS;
-  if (draft.start.getTime() > latest) return START_TIME_FUTURE_MESSAGE;
-  if (!isInstantSession(draft.session)) {
-    if (draft.end.getTime() > latest) return 'End time cannot be in the future.';
-    if (draft.end.getTime() <= draft.start.getTime()) {
-      return 'End time must be after start time.';
-    }
-  }
-  // The API checks every entry; this catches the loaded week up front and
-  // covers guests, whose edits never reach the API.
-  const overlap = findOverlappingSession(sessions, {
-    id: draft.session.id,
-    start: draft.start,
-    end: draft.end,
-  });
-  return overlap ? formatOverlapMessage(overlap) : null;
-};
+type TimelineNavigation = DrawerNavigationProp<{
+  EditTimelineEntry: EditTimelineEntryParams;
+}>;
 
 const NapTimelineScreen: React.FC = () => {
+  const navigation = useNavigation<TimelineNavigation>();
   const [weekEnd, setWeekEnd] = useState(() => new Date());
   const [dayWindow, setDayWindow] = useState<DayWindow>({
     startMinutes: DEFAULT_DAY_START_MINUTES,
@@ -170,15 +119,7 @@ const NapTimelineScreen: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [chartHeight, setChartHeight] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<TimerSession | null>(null);
-  const [editDraft, setEditDraft] = useState<EditDraft | null>(null);
-  const [editStage, setEditStage] = useState<EditStage | null>(null);
-  const [editError, setEditError] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [pickerNow, setPickerNow] = useState(() => new Date());
-  const [pickerOpenGeneration, setPickerOpenGeneration] = useState(0);
   const requestIdRef = useRef(0);
 
   const days = useMemo(
@@ -284,107 +225,6 @@ const NapTimelineScreen: React.FC = () => {
       return next > now ? now : next;
     });
   }, []);
-
-  const performDelete = useCallback(
-    async (session: TimerSession) => {
-      if (isDeleting) return;
-
-      setIsDeleting(true);
-      try {
-        const token = await AsyncStorage.getItem('token');
-        if (token && isNumericId(session.id)) {
-          await deleteTimerRun(token, Number(session.id));
-        }
-
-        await removeTimerSessionFromCache(session.id);
-        setSessions((current) =>
-          current.filter((item) => item.id !== session.id)
-        );
-        setSelectedId(null);
-      } catch {
-        setLoadError('Could not delete this entry. Please try again.');
-      } finally {
-        setIsDeleting(false);
-      }
-    },
-    [isDeleting]
-  );
-
-  const openEdit = useCallback((session: TimerSession) => {
-    setEditDraft({
-      session,
-      start: new Date(session.start_time),
-      end: new Date(session.end_time),
-    });
-    setEditError(null);
-    setEditStage('form');
-  }, []);
-
-  const closeEdit = useCallback(() => {
-    setEditStage(null);
-    setEditDraft(null);
-    setEditError(null);
-  }, []);
-
-  const openEditPicker = useCallback((target: 'start' | 'end') => {
-    setPickerNow(new Date());
-    setPickerOpenGeneration((generation) => generation + 1);
-    setEditStage(target);
-  }, []);
-
-  const handleEditPickerChange = useCallback(
-    (date: Date) => {
-      setEditError(null);
-      setEditDraft((current) => {
-        if (!current) return current;
-        if (isInstantSession(current.session)) {
-          return { ...current, start: date, end: date };
-        }
-        return { ...current, [editStage === 'end' ? 'end' : 'start']: date };
-      });
-    },
-    [editStage]
-  );
-
-  const performEdit = useCallback(async () => {
-    if (!editDraft || isSaving) return;
-
-    const validationError = validateEditDraft(editDraft, sessions);
-    if (validationError) {
-      setEditError(validationError);
-      return;
-    }
-
-    const { session, start, end } = editDraft;
-    const payload = {
-      start_time: start.toISOString(),
-      end_time: end.toISOString(),
-      duration_ms: end.getTime() - start.getTime(),
-    };
-
-    setIsSaving(true);
-    try {
-      const token = await AsyncStorage.getItem('token');
-      let updated: TimerSession = { ...session, ...payload };
-      if (token && isNumericId(session.id)) {
-        const record = await submitTimerRun(token, Number(session.id), payload);
-        updated = mapTimerRunToSession(record) ?? updated;
-      }
-
-      await replaceTimerSessionInCache(updated);
-      setSessions((current) =>
-        current.map((item) => (item.id === updated.id ? updated : item))
-      );
-      setSelectedId(updated.id);
-      closeEdit();
-    } catch (error) {
-      setEditError(
-        getTimerApiErrorMessage(error, 'Could not save this entry. Please try again.')
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  }, [closeEdit, editDraft, isSaving, sessions]);
 
   const handleChartLayout = useCallback((event: LayoutChangeEvent) => {
     setChartHeight(event.nativeEvent.layout.height);
@@ -544,7 +384,7 @@ const NapTimelineScreen: React.FC = () => {
             ))}
           </View>
 
-          {isLoading || isDeleting || isSaving ? (
+          {isLoading ? (
             <View style={styles.loadingOverlay}>
               <ActivityIndicator color="white" size="large" />
             </View>
@@ -579,25 +419,14 @@ const NapTimelineScreen: React.FC = () => {
                 accessibilityLabel="Edit entry"
                 accessibilityRole="button"
                 hitSlop={8}
-                onPress={() => openEdit(selectedSession)}
+                onPress={() =>
+                  navigation.navigate('EditTimelineEntry', {
+                    session: selectedSession,
+                    openedAt: Date.now(),
+                  })
+                }
               >
-                <Ionicons
-                  name="create-outline"
-                  size={layout.iconXl}
-                  color="rgba(255,255,255,0.75)"
-                />
-              </Pressable>
-              <Pressable
-                accessibilityLabel="Delete entry"
-                accessibilityRole="button"
-                hitSlop={8}
-                onPress={() => setPendingDelete(selectedSession)}
-              >
-                <Ionicons
-                  name="trash-outline"
-                  size={layout.iconXl}
-                  color="rgba(255,255,255,0.75)"
-                />
+                <Ionicons name="create" size={layout.icon2xl} color="#ffffff" />
               </Pressable>
             </>
           ) : (
@@ -611,175 +440,6 @@ const NapTimelineScreen: React.FC = () => {
             </Text>
           )}
         </View>
-
-        <Drawer
-          isOpen={editStage === 'form'}
-          onClose={closeEdit}
-          anchor="bottom"
-          size="md"
-        >
-          <DrawerBackdrop className="bg-black/60" />
-          <DrawerContent className="border-white/0 bg-transparent p-0 overflow-hidden">
-            <ImageBackground
-              resizeMode="cover"
-              source={DRAWER_BACKGROUND}
-              style={styles.drawerBackground}
-            >
-              <View style={styles.drawerContent}>
-                <DrawerHeader className="px-0" style={styles.drawerHeader}>
-                  <Heading
-                    size="lg"
-                    className="text-white font-bold"
-                    style={styles.drawerHeading}
-                  >
-                    Edit entry
-                  </Heading>
-                  <DrawerCloseButton
-                    accessibilityLabel="Cancel editing"
-                    className="p-1"
-                  >
-                    <Ionicons
-                      name="close"
-                      size={layout.icon2xl}
-                      color="#ffffff"
-                    />
-                  </DrawerCloseButton>
-                </DrawerHeader>
-
-                {editDraft && isInstantSession(editDraft.session) ? (
-                  <View style={styles.editRows}>
-                    <TimerSettingRow
-                      label="Time:"
-                      value={formatSessionDateTime(editDraft.start.toISOString())}
-                      placeholder="Select time"
-                      onPress={() => openEditPicker('start')}
-                      accessibilityLabel="Edit feeding time"
-                      isFirst
-                    />
-                  </View>
-                ) : editDraft ? (
-                  <View style={styles.editRows}>
-                    <TimerSettingRow
-                      label="Started at:"
-                      value={formatSessionDateTime(editDraft.start.toISOString())}
-                      placeholder="Select time"
-                      onPress={() => openEditPicker('start')}
-                      accessibilityLabel="Edit start time"
-                      isFirst
-                    />
-                    <TimerSettingRow
-                      label="Ended at:"
-                      value={formatSessionDateTime(editDraft.end.toISOString())}
-                      placeholder="Select time"
-                      onPress={() => openEditPicker('end')}
-                      accessibilityLabel="Edit end time"
-                    />
-                  </View>
-                ) : null}
-
-                {editError ? (
-                  <Text style={styles.editError}>{editError}</Text>
-                ) : null}
-
-                <View style={styles.drawerActions}>
-                  <TimerOutlineButton
-                    label="Cancel"
-                    onPress={closeEdit}
-                    size="lg"
-                  />
-                  <TimerOutlineButton
-                    label="Save"
-                    onPress={() => void performEdit()}
-                    variant="solid"
-                    size="lg"
-                    disabled={isSaving}
-                    isLoading={isSaving}
-                  />
-                </View>
-              </View>
-            </ImageBackground>
-          </DrawerContent>
-        </Drawer>
-
-        <TimerDateTimePickerDrawer
-          isOpen={editStage === 'start' || editStage === 'end'}
-          title={
-            editStage === 'end'
-              ? 'End time'
-              : editDraft && isInstantSession(editDraft.session)
-                ? 'Feeding time'
-                : 'Start time'
-          }
-          value={
-            (editStage === 'end' ? editDraft?.end : editDraft?.start) ?? pickerNow
-          }
-          onChange={handleEditPickerChange}
-          onClose={() => setEditStage(editDraft ? 'form' : null)}
-          maximumDate={pickerNow}
-          openGeneration={pickerOpenGeneration}
-        />
-
-        <Drawer
-          isOpen={pendingDelete !== null}
-          onClose={() => setPendingDelete(null)}
-          anchor="bottom"
-          size="md"
-        >
-          <DrawerBackdrop className="bg-black/60" />
-          <DrawerContent className="border-white/0 bg-transparent p-0 overflow-hidden">
-            <ImageBackground
-              resizeMode="cover"
-              source={DRAWER_BACKGROUND}
-              style={styles.drawerBackground}
-            >
-              <View style={styles.drawerContent}>
-                <DrawerHeader className="px-0" style={styles.drawerHeader}>
-                  <Heading
-                    size="lg"
-                    className="text-white font-bold"
-                    style={styles.drawerHeading}
-                  >
-                    Delete entry
-                  </Heading>
-                  <DrawerCloseButton
-                    accessibilityLabel="Cancel deletion"
-                    className="p-1"
-                  >
-                    <Ionicons
-                      name="close"
-                      size={layout.icon2xl}
-                      color="#ffffff"
-                    />
-                  </DrawerCloseButton>
-                </DrawerHeader>
-
-                <Text style={styles.drawerMessage}>
-                  Delete this session? This cannot be undone.
-                </Text>
-
-                <View style={styles.drawerActions}>
-                  <TimerOutlineButton
-                    label="Cancel"
-                    onPress={() => setPendingDelete(null)}
-                    size="lg"
-                  />
-                  <TimerOutlineButton
-                    label="Delete"
-                    onPress={() => {
-                      if (!pendingDelete) return;
-                      const session = pendingDelete;
-                      setPendingDelete(null);
-                      void performDelete(session);
-                    }}
-                    variant="solid"
-                    size="lg"
-                    disabled={isDeleting}
-                  />
-                </View>
-              </View>
-            </ImageBackground>
-          </DrawerContent>
-        </Drawer>
       </View>
     </ScreenComponent>
   );
@@ -960,8 +620,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   summaryRange: {
-    color: 'rgba(255,255,255,0.75)',
+    color: '#ffffff',
     fontSize: layout.fontBase,
+    fontWeight: '700',
     marginTop: layout.space4,
   },
   emptyText: {
@@ -969,48 +630,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.75)',
     fontSize: layout.fontBase,
     textAlign: 'center',
-  },
-  drawerBackground: {
-    width: '100%',
-    height: '100%',
-  },
-  drawerContent: {
-    flex: 1,
-    width: '100%',
-    justifyContent: 'center',
-    paddingHorizontal: layout.space24,
-    paddingBottom: layout.space32,
-  },
-  drawerHeader: {
-    paddingTop: 0,
-    paddingHorizontal: 0,
-  },
-  drawerHeading: {
-    fontSize: layout.fontLg,
-    marginVertical: HEADING_MARGIN,
-  },
-  drawerMessage: {
-    color: '#ffffff',
-    fontSize: layout.fontBase,
-    fontWeight: '600',
-    lineHeight: layout.font2xl,
-    marginTop: layout.space12,
-    textAlign: 'center',
-  },
-  editRows: {
-    width: '100%',
-    marginTop: layout.space12,
-  },
-  editError: {
-    color: SELECTED_COLOR,
-    fontSize: layout.fontSm,
-    marginTop: layout.space12,
-    textAlign: 'center',
-  },
-  drawerActions: {
-    width: '100%',
-    gap: layout.space12,
-    marginTop: layout.space36,
   },
 });
 

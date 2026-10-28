@@ -59,7 +59,7 @@ type ReportTab = 'sleep' | 'feeding';
 
 const TABS: { id: ReportTab; label: string }[] = [
   { id: 'sleep', label: 'Sleep' },
-  { id: 'feeding', label: 'Nursing/Bottle' },
+  { id: 'feeding', label: 'Feeding' },
 ];
 
 const GRID_COLOR = 'rgba(255,255,255,0.12)';
@@ -368,10 +368,6 @@ const ReportsScreen: React.FC = () => {
           onChange={setActiveTab}
         />
 
-        <Text style={styles.title}>
-          {isSleep ? 'Sleep Trends' : 'Feeding Trends'}
-        </Text>
-
         <View style={styles.ranges}>
           {REPORT_RANGES.map((range) => {
             const isActive = range.id === rangeId;
@@ -482,15 +478,9 @@ const ReportsScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  title: {
-    color: '#ffffff',
-    fontSize: layout.font2xl,
-    fontWeight: '700',
-  },
   ranges: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: layout.space16,
   },
   rangePill: {
     width: vh(46),

@@ -33,6 +33,11 @@ import {
   WEEK_TIMELINE_RUN_TYPES,
 } from '@/app/utils/weekTimeline';
 import { FEEDING_COLORS } from '@/app/constants/feedingTheme';
+import {
+  NAP_COLOR,
+  NIGHT_COLOR,
+  SEGMENT_COLORS,
+} from '@/app/constants/timelineColors';
 import { layout } from '@/app/constants/screenLayout';
 import { vh, vw } from '@/constants/appViewport';
 import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
@@ -41,22 +46,8 @@ import type { EditTimelineEntryParams } from '@/app/screens/EditTimelineEntryScr
 const AXIS_WIDTH = vw(62);
 const MIN_BAR_HEIGHT = 3;
 const MIN_FEEDING_HEIGHT = vh(7);
-// Sleep picks up the lilac and pink of the background clouds; feedings use
-// the app's gold (the "14-day free trial" highlight on the landing screen)
-// with a paler shade for nursing.
-const NIGHT_COLOR = '#C9B6FF';
-const NAP_COLOR = '#FF9EC4';
-const NURSING_COLOR = '#FFEB99';
-const BOTTLE_COLOR = '#FFD700';
 const NOW_COLOR = '#ffffff';
 const GRID_COLOR = 'rgba(255,255,255,0.12)';
-
-const SEGMENT_COLORS: Record<TimelineSegmentKind, string> = {
-  night: NIGHT_COLOR,
-  nap: NAP_COLOR,
-  nursing: NURSING_COLOR,
-  bottle: BOTTLE_COLOR,
-};
 
 // Icon colors inside the summary card's white circle: deeper shades of the
 // bar colors so they read on white. Night and nap keep their own colors.

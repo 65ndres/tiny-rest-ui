@@ -34,6 +34,7 @@ import TimerScreen from './screens/TimerScreen';
 import TimerScreenGuest from './screens/TimerScreenGuest';
 import SettingsScreen from './screens/SettingsScreen';
 import NapTimelineScreen from './screens/NapTimelineScreen';
+import ReportsScreen from './screens/ReportsScreen';
 import EditTimelineEntryScreen, {
   type EditTimelineEntryParams,
 } from './screens/EditTimelineEntryScreen';
@@ -77,6 +78,7 @@ type RootDrawerParamList = {
   Timer: undefined;
   Settings: undefined;
   NapTimeline: undefined;
+  Reports: undefined;
   EditTimelineEntry: EditTimelineEntryParams;
   AddFeeding: undefined;
   Sounds: undefined;
@@ -290,6 +292,19 @@ const AuthenticatedNavigator: React.FC = () => {
           headerTitle: () => (
             <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
               TIMELINE
+            </Text>
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Reports"
+        component={ReportsScreen}
+        options={{
+          drawerLabel: 'REPORTS',
+          headerLeft: () => <BackButton text="" />,
+          headerTitle: () => (
+            <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
+              REPORTS
             </Text>
           ),
         }}

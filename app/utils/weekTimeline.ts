@@ -68,15 +68,16 @@ export const getTimelineDayStartForInstant = (
     : sameDayStart;
 };
 
-/** Seven consecutive timeline days ending with the one that contains `endInstant`. */
+/** `dayCount` consecutive timeline days (a week by default) ending with the one that contains `endInstant`. */
 export const buildWeekTimelineDays = (
   endInstant: Date,
-  dayStartMinutes: number
+  dayStartMinutes: number,
+  dayCount = WEEK_TIMELINE_DAY_COUNT
 ): WeekTimelineDay[] => {
   const lastDayStart = getTimelineDayStartForInstant(endInstant, dayStartMinutes);
   const days: WeekTimelineDay[] = [];
 
-  for (let index = WEEK_TIMELINE_DAY_COUNT - 1; index >= 0; index -= 1) {
+  for (let index = dayCount - 1; index >= 0; index -= 1) {
     const start = getTimelineDayStart(addDays(lastDayStart, -index), dayStartMinutes);
     const end = getTimelineDayStart(addDays(start, 1), dayStartMinutes);
     days.push({ key: formatDateParam(start), start, end });

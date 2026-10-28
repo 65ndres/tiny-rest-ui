@@ -1,9 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import type { DrawerNavigationProp } from '@react-navigation/drawer';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { Text } from '@/components/AppText';
+import { useAuth } from '@/app/context/AuthContext';
 import {
   fetchTimerRunsInRange,
   filterSessionsInRange,
@@ -224,6 +226,9 @@ const formatCount = (value: number): string =>
   (Math.round(value * 10) / 10).toString();
 
 const ReportsScreen: React.FC = () => {
+  const navigation = useNavigation<DrawerNavigationProp<{ Home: undefined }>>();
+  const { user } = useAuth();
+  const isProUser = user?.subscription_type === 'pro';
   const [activeTab, setActiveTab] = useState<ReportTab>('sleep');
   const [rangeId, setRangeId] = useState<ReportRangeId>('7d');
   const [dayWindow, setDayWindow] = useState<DayWindow>({
@@ -319,6 +324,12 @@ const ReportsScreen: React.FC = () => {
       void loadRange();
     }, [loadRange])
   );
+
+  // Reports is Pro-only and hidden from free users' menu; send anyone who
+  // still lands here (e.g. a subscription that lapsed) back home.
+  useEffect(() => {
+    if (!isProUser) navigation.navigate('Home');
+  }, [isProUser, navigation]);
 
   const isSleep = activeTab === 'sleep';
   const trackedDays = isSleep

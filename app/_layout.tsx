@@ -134,6 +134,8 @@ const CustomDrawerContent: React.FC<any> = (props) => {
     'Subscription',
     'EditTimelineEntry',
   ]);
+  // Left out of the menu entirely for free users, rather than shown dimmed.
+  const proOnlyRoutes = new Set(['Reports']);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -158,7 +160,11 @@ const CustomDrawerContent: React.FC<any> = (props) => {
         contentContainerStyle={styles.drawerScrollContent}
       >
         {props.state.routes
-          .filter((route: { name: string }) => !hiddenRoutes.has(route.name))
+          .filter(
+            (route: { name: string }) =>
+              !hiddenRoutes.has(route.name) &&
+              (isProUser || !proOnlyRoutes.has(route.name))
+          )
           .map((route: { key: string; name: string }, index: number) => {
             const descriptor = props.descriptors[route.key];
             const options = descriptor?.options ?? {};

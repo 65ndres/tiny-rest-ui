@@ -34,6 +34,7 @@ import TimerScreen from './screens/TimerScreen';
 import TimerScreenGuest from './screens/TimerScreenGuest';
 import SettingsScreen from './screens/SettingsScreen';
 import NapTimelineScreen from './screens/NapTimelineScreen';
+import ReportsScreen from './screens/ReportsScreen';
 import EditTimelineEntryScreen, {
   type EditTimelineEntryParams,
 } from './screens/EditTimelineEntryScreen';
@@ -77,6 +78,7 @@ type RootDrawerParamList = {
   Timer: undefined;
   Settings: undefined;
   NapTimeline: undefined;
+  Reports: undefined;
   EditTimelineEntry: EditTimelineEntryParams;
   AddFeeding: undefined;
   Sounds: undefined;
@@ -132,6 +134,8 @@ const CustomDrawerContent: React.FC<any> = (props) => {
     'Subscription',
     'EditTimelineEntry',
   ]);
+  // Left out of the menu entirely for free users, rather than shown dimmed.
+  const proOnlyRoutes = new Set(['Reports']);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -156,7 +160,11 @@ const CustomDrawerContent: React.FC<any> = (props) => {
         contentContainerStyle={styles.drawerScrollContent}
       >
         {props.state.routes
-          .filter((route: { name: string }) => !hiddenRoutes.has(route.name))
+          .filter(
+            (route: { name: string }) =>
+              !hiddenRoutes.has(route.name) &&
+              (isProUser || !proOnlyRoutes.has(route.name))
+          )
           .map((route: { key: string; name: string }, index: number) => {
             const descriptor = props.descriptors[route.key];
             const options = descriptor?.options ?? {};
@@ -290,6 +298,19 @@ const AuthenticatedNavigator: React.FC = () => {
           headerTitle: () => (
             <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
               TIMELINE
+            </Text>
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="Reports"
+        component={ReportsScreen}
+        options={{
+          drawerLabel: 'REPORTS',
+          headerLeft: () => <BackButton text="" />,
+          headerTitle: () => (
+            <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>
+              REPORTS
             </Text>
           ),
         }}

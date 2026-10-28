@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { Text } from '@/components/AppText';
 import {
@@ -38,16 +38,22 @@ import {
   type ReportBucket,
   type ReportRangeId,
 } from '@/app/utils/reportTrends';
-import { FEEDING_COLORS } from '@/app/constants/feedingTheme';
 import {
   BOTTLE_COLOR,
   NAP_COLOR,
   NIGHT_COLOR,
   NURSING_COLOR,
 } from '@/app/constants/timelineColors';
-import { layout } from '@/app/constants/screenLayout';
+import {
+  layout,
+  timerContentStackClassName,
+  timerScrollContentClassName,
+  timerScrollContentStyle,
+} from '@/app/constants/screenLayout';
 import { vh, vw } from '@/constants/appViewport';
-import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
+import FeedingSegmentTabs from '@/app/sharedComponents/feeding/FeedingSegmentTabs';
+import ScreenScrollLayout from '@/app/sharedComponents/ScreenScrollLayout';
+import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
 
 type ReportTab = 'sleep' | 'feeding';
 
@@ -56,13 +62,12 @@ const TABS: { id: ReportTab; label: string }[] = [
   { id: 'feeding', label: 'Nursing/Bottle' },
 ];
 
-const ACCENT_COLOR = '#a3d133';
 const GRID_COLOR = 'rgba(255,255,255,0.12)';
 const MUTED_TEXT = 'rgba(255,255,255,0.75)';
 const DONUT_SIZE = vh(170);
-const DONUT_STROKE = vh(22);
+const DONUT_STROKE = vh(18);
 const CHART_HEIGHT = vh(200);
-const AXIS_WIDTH = vw(36);
+const AXIS_WIDTH = vw(30);
 const MAX_X_LABELS = 8;
 const MS_PER_HOUR = 3_600_000;
 const SLEEP_AXIS_STEPS_HOURS = [1, 2, 3, 4, 5, 6];
@@ -199,17 +204,19 @@ const StackedBarChart: React.FC<{
   );
 };
 
-const LegendStat: React.FC<{ color: string; label: string; value: string }> = ({
-  color,
-  label,
-  value,
-}) => (
+const LegendStat: React.FC<{
+  color: string;
+  label: string;
+  value: string;
+  detail?: string;
+}> = ({ color, label, value, detail }) => (
   <View style={styles.legendStat}>
     <View style={styles.legendHeader}>
       <View style={[styles.legendDot, { backgroundColor: color }]} />
       <Text style={styles.legendLabel}>{label}</Text>
     </View>
     <Text style={styles.legendValue}>{value}</Text>
+    {detail ? <Text style={styles.legendDetail}>{detail}</Text> : null}
   </View>
 );
 
@@ -349,34 +356,18 @@ const ReportsScreen: React.FC = () => {
   ];
 
   return (
-    <ScreenComponent contentFlex constrainToPhoneViewport={false} style={styles.screen}>
-      <View style={styles.tabs}>
-        {TABS.map((tab) => {
-          const isActive = tab.id === activeTab;
-          return (
-            <Pressable
-              key={tab.id}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: isActive }}
-              onPress={() => setActiveTab(tab.id)}
-              style={styles.tab}
-            >
-              <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
-                {tab.label}
-              </Text>
-              <View
-                style={[styles.tabUnderline, isActive && styles.tabUnderlineActive]}
-              />
-            </Pressable>
-          );
-        })}
-      </View>
+    <ScreenScrollLayout
+      contentContainerClassName={timerScrollContentClassName}
+      contentContainerStyle={timerScrollContentStyle}
+      stackClassName={timerContentStackClassName}
+    >
+      <TimerSectionCard>
+        <FeedingSegmentTabs
+          tabs={TABS}
+          activeTab={activeTab}
+          onChange={setActiveTab}
+        />
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
         <Text style={styles.title}>
           {isSleep ? 'Sleep Trends' : 'Feeding Trends'}
         </Text>
@@ -410,18 +401,6 @@ const ReportsScreen: React.FC = () => {
         <View style={styles.summary}>
           {isSleep ? (
             <>
-              <View style={styles.legendColumn}>
-                <LegendStat
-                  color={NAP_COLOR}
-                  label="Nap total avg"
-                  value={formatReportDuration(sleepSummary.napAvgMs)}
-                />
-                <LegendStat
-                  color={NIGHT_COLOR}
-                  label="Night total avg"
-                  value={formatReportDuration(sleepSummary.nightAvgMs)}
-                />
-              </View>
               <Donut
                 slices={[
                   { value: sleepSummary.napAvgMs, color: NAP_COLOR },
@@ -429,25 +408,25 @@ const ReportsScreen: React.FC = () => {
                 ]}
               >
                 <Text style={styles.donutLabel}>Daily total avg</Text>
-                <Text style={styles.donutValue}>
+                <Text style={styles.donutValue} numberOfLines={1} adjustsFontSizeToFit>
                   {formatReportDuration(sleepSummary.totalAvgMs)}
                 </Text>
               </Donut>
+              <View style={styles.legendRow}>
+                <LegendStat
+                  color={NAP_COLOR}
+                  label="Nap avg"
+                  value={formatReportDuration(sleepSummary.napAvgMs)}
+                />
+                <LegendStat
+                  color={NIGHT_COLOR}
+                  label="Night avg"
+                  value={formatReportDuration(sleepSummary.nightAvgMs)}
+                />
+              </View>
             </>
           ) : (
             <>
-              <View style={styles.legendColumn}>
-                <LegendStat
-                  color={NURSING_COLOR}
-                  label={`Nursing · ${formatCount(feedingSummary.nursingCountAvg)}/day`}
-                  value={formatReportDuration(feedingSummary.nursingAvgMs)}
-                />
-                <LegendStat
-                  color={BOTTLE_COLOR}
-                  label={`Bottle · ${formatCount(feedingSummary.bottleCountAvg)}/day`}
-                  value={formatVolume(feedingSummary.bottleMlAvg, volumeUnit)}
-                />
-              </View>
               <Donut
                 slices={[
                   { value: feedingSummary.nursingCountAvg, color: NURSING_COLOR },
@@ -457,6 +436,20 @@ const ReportsScreen: React.FC = () => {
                 <Text style={styles.donutLabel}>Feedings / day</Text>
                 <Text style={styles.donutValue}>{formatCount(feedingsAvg)}</Text>
               </Donut>
+              <View style={styles.legendRow}>
+                <LegendStat
+                  color={NURSING_COLOR}
+                  label="Nursing"
+                  value={formatReportDuration(feedingSummary.nursingAvgMs)}
+                  detail={`${formatCount(feedingSummary.nursingCountAvg)} per day`}
+                />
+                <LegendStat
+                  color={BOTTLE_COLOR}
+                  label="Bottle"
+                  value={formatVolume(feedingSummary.bottleMlAvg, volumeUnit)}
+                  detail={`${formatCount(feedingSummary.bottleCountAvg)} per day`}
+                />
+              </View>
             </>
           )}
           {isLoading ? (
@@ -483,57 +476,15 @@ const ReportsScreen: React.FC = () => {
             formatTick={(value) => (isSleep ? `${value}h` : String(value))}
           />
         </View>
-      </ScrollView>
-    </ScreenComponent>
+      </TimerSectionCard>
+    </ScreenScrollLayout>
   );
 };
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    width: '100%',
-    alignItems: 'stretch',
-  },
-  tabs: {
-    flexDirection: 'row',
-    paddingHorizontal: layout.space16,
-    gap: layout.space24,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: FEEDING_COLORS.border,
-  },
-  tab: {
-    paddingTop: layout.space8,
-  },
-  tabLabel: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: layout.fontXl,
-    letterSpacing: 1,
-    paddingBottom: layout.space8,
-  },
-  tabLabelActive: {
-    color: '#ffffff',
-    fontWeight: '600',
-  },
-  tabUnderline: {
-    height: vh(3),
-    borderRadius: vh(2),
-    backgroundColor: 'transparent',
-  },
-  tabUnderlineActive: {
-    backgroundColor: ACCENT_COLOR,
-  },
-  scroll: {
-    flex: 1,
-    width: '100%',
-  },
-  scrollContent: {
-    paddingHorizontal: layout.space16,
-    paddingTop: layout.space24,
-    paddingBottom: layout.space32,
-  },
   title: {
     color: '#ffffff',
-    fontSize: layout.font3xl,
+    fontSize: layout.font2xl,
     fontWeight: '700',
   },
   ranges: {
@@ -542,9 +493,9 @@ const styles = StyleSheet.create({
     marginTop: layout.space16,
   },
   rangePill: {
-    width: vh(56),
-    height: vh(56),
-    borderRadius: vh(28),
+    width: vh(46),
+    height: vh(46),
+    borderRadius: vh(23),
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -553,7 +504,7 @@ const styles = StyleSheet.create({
   },
   rangeLabel: {
     color: '#ffffff',
-    fontSize: layout.fontLg,
+    fontSize: layout.fontBase,
     fontWeight: '700',
     letterSpacing: 1,
   },
@@ -562,24 +513,24 @@ const styles = StyleSheet.create({
   },
   rangeDates: {
     color: '#ffffff',
-    fontSize: layout.fontLg,
+    fontSize: layout.fontBase,
     fontWeight: '600',
     textAlign: 'center',
     marginTop: layout.space20,
   },
   summary: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     marginTop: layout.space20,
   },
-  legendColumn: {
-    flex: 1,
-    gap: layout.space28,
-    paddingRight: layout.space8,
+  legendRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignSelf: 'stretch',
+    marginTop: layout.space20,
   },
   legendStat: {
-    gap: layout.space6,
+    alignItems: 'center',
+    gap: layout.space4,
   },
   legendHeader: {
     flexDirection: 'row',
@@ -593,12 +544,16 @@ const styles = StyleSheet.create({
   },
   legendLabel: {
     color: '#ffffff',
-    fontSize: layout.fontBase,
+    fontSize: layout.fontSm,
   },
   legendValue: {
     color: '#ffffff',
-    fontSize: layout.font2xl,
+    fontSize: layout.fontXl,
     fontWeight: '700',
+  },
+  legendDetail: {
+    color: MUTED_TEXT,
+    fontSize: layout.fontSm,
   },
   donut: {
     width: DONUT_SIZE,
@@ -636,11 +591,7 @@ const styles = StyleSheet.create({
     marginTop: layout.space16,
   },
   chartCard: {
-    marginTop: layout.space16,
-    paddingVertical: layout.space16,
-    paddingRight: layout.space12,
-    borderRadius: layout.radius12,
-    backgroundColor: FEEDING_COLORS.cardBackground,
+    marginTop: layout.space20,
   },
   chart: {
     height: CHART_HEIGHT,

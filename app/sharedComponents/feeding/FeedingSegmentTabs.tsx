@@ -5,25 +5,30 @@ import { layout } from '@/app/constants/screenLayout';
 
 export type FeedingTab = 'nursing' | 'bottle';
 
-type FeedingSegmentTabsProps = {
-  activeTab: FeedingTab;
-  onChange: (tab: FeedingTab) => void;
+type SegmentTab<T extends string> = { id: T; label: string };
+
+type FeedingSegmentTabsProps<T extends string> = {
+  activeTab: T;
+  onChange: (tab: T) => void;
+  /** Defaults to the Nursing / Bottle tabs. */
+  tabs?: SegmentTab<T>[];
 };
 
-const TABS: { id: FeedingTab; label: string }[] = [
+const TABS: SegmentTab<FeedingTab>[] = [
   { id: 'nursing', label: 'Nursing' },
   { id: 'bottle', label: 'Bottle' },
 ];
 
-const FeedingSegmentTabs: React.FC<FeedingSegmentTabsProps> = ({
+const FeedingSegmentTabs = <T extends string = FeedingTab>({
   activeTab,
   onChange,
-}) => (
+  tabs = TABS as unknown as SegmentTab<T>[],
+}: FeedingSegmentTabsProps<T>) => (
   <View
     className="w-full flex-row items-stretch border-b border-white/20"
     style={{ marginBottom: layout.space16 }}
   >
-    {TABS.map((tab, index) => {
+    {tabs.map((tab, index) => {
       const isActive = tab.id === activeTab;
       return (
         <React.Fragment key={tab.id}>
@@ -42,6 +47,8 @@ const FeedingSegmentTabs: React.FC<FeedingSegmentTabsProps> = ({
             accessibilityLabel={tab.label}
           >
             <Text
+              numberOfLines={1}
+              adjustsFontSizeToFit
               style={{
                 fontSize: layout.fontXl,
                 color: isActive ? '#ffffff' : 'rgba(255,255,255,0.5)',

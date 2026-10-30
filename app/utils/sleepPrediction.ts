@@ -69,6 +69,22 @@ export const getOverdueMinutes = (
 const formatMinutesAgo = (minutes: number): string =>
   minutes === 1 ? '1 min ago' : `${minutes} min ago`;
 
+/** "Last sleep 1h 5m ago", or null when the time is missing or in the future. */
+export const formatTimeSinceLastSleep = (
+  lastSleepEnd: string | null,
+  now: Date = new Date()
+): string | null => {
+  if (!lastSleepEnd) return null;
+  const sinceMs = now.getTime() - new Date(lastSleepEnd).getTime();
+  if (Number.isNaN(sinceMs) || sinceMs < 0) return null;
+  const totalMinutes = Math.floor(sinceMs / 60000);
+  const totalHours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (totalHours === 0) return `Last sleep ${formatMinutesAgo(minutes)}`;
+  if (totalHours < 24) return `Last sleep ${totalHours}h ${minutes}m ago`;
+  return `Last sleep ${Math.floor(totalHours / 24)}d ${totalHours % 24}h ago`;
+};
+
 export const isSleepTimerRunning = (
   status: SleepPredictionStatus | undefined
 ): boolean =>

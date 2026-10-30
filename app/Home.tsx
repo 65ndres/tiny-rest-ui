@@ -15,12 +15,14 @@ import {
 import {
   fetchSleepPrediction,
   formatPredictionDisplay,
+  formatTimeSinceLastSleep,
   getOverdueMinutes,
   isSleepTimerRunning,
   MISSED_NAP_GRACE_MINUTES,
   type SleepPrediction,
 } from '@/app/utils/sleepPrediction';
 import { formatExactNapCount } from '@/app/utils/napSchedule';
+import { fetchHistoryPanelTimerRuns } from '@/app/utils/timerHistory';
 import { refreshWidgetState } from '@/app/utils/widgetStorage';
 import { useAuth } from './context/AuthContext';
 import { useRevenueCat } from './context/RevenueCatContext';
@@ -52,6 +54,7 @@ const Home: React.FC = () => {
   const isProUser = user?.subscription_type === 'pro';
   const [prediction, setPrediction] = useState<SleepPrediction | null>(null);
   const [activeNapCount, setActiveNapCount] = useState<number | null>(null);
+  const [lastSleepEnd, setLastSleepEnd] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [carouselWidth, setCarouselWidth] = useState(0);
   const [now, setNow] = useState(() => new Date());
@@ -76,11 +79,19 @@ const Home: React.FC = () => {
       if (!token) {
         setPrediction(null);
         setActiveNapCount(null);
+        setLastSleepEnd(null);
         return;
       }
 
-      const nextPrediction = await fetchSleepPrediction(token);
+      const [nextPrediction, recentSleeps] = await Promise.all([
+        fetchSleepPrediction(token),
+        // Newest first; a failure here only hides the "last sleep" line.
+        fetchHistoryPanelTimerRuns(token, { run_type: 'sleeping' }).catch(
+          () => null
+        ),
+      ]);
       setPrediction(nextPrediction);
+      setLastSleepEnd(recentSleeps?.[0]?.end_time ?? null);
       setNow(new Date());
       setActiveNapCount((current) => {
         const counts = [
@@ -94,6 +105,7 @@ const Home: React.FC = () => {
     } catch {
       setPrediction(null);
       setActiveNapCount(null);
+      setLastSleepEnd(null);
     } finally {
       setIsLoading(false);
     }
@@ -140,6 +152,7 @@ const Home: React.FC = () => {
     const runningDisplay = timerRunning
       ? formatPredictionDisplay(prediction, now)
       : null;
+    const timeSinceLastSleep = formatTimeSinceLastSleep(lastSleepEnd, now);
 
     return napTabCounts.map((count) => {
       const countPrediction =
@@ -149,14 +162,26 @@ const Home: React.FC = () => {
               (entry) => entry.daily_nap_count === count
             ) ?? prediction);
 
+      const display =
+        runningDisplay ?? formatPredictionDisplay(countPrediction, now);
+      // The subtitle slot holds the overdue grace-period note when there is
+      // one; otherwise use it for the time since the last nap or night.
+      const showTimeSince =
+        runningDisplay == null &&
+        display.subtitle == null &&
+        (countPrediction.status === 'next_nap' ||
+          countPrediction.status === 'bedtime');
+
       return {
         count,
         countLabel: formatExactNapCount(count),
         display:
-          runningDisplay ?? formatPredictionDisplay(countPrediction, now),
+          showTimeSince && timeSinceLastSleep
+            ? { ...display, subtitle: timeSinceLastSleep }
+            : display,
       };
     });
-  }, [napTabCounts, now, prediction, timerRunning]);
+  }, [lastSleepEnd, napTabCounts, now, prediction, timerRunning]);
 
   if (!loaded) {
     return null;

@@ -1,7 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { Text } from '@/components/AppText';
@@ -47,15 +53,15 @@ import {
   NURSING_COLOR,
 } from '@/app/constants/timelineColors';
 import {
+  glassCardClassName,
+  glassCardStyle,
+  HOME_HORIZONTAL_PADDING,
   layout,
   timerContentStackClassName,
-  timerScrollContentClassName,
-  timerScrollContentStyle,
 } from '@/app/constants/screenLayout';
 import { vh, vw } from '@/constants/appViewport';
 import FeedingSegmentTabs from '@/app/sharedComponents/feeding/FeedingSegmentTabs';
-import ScreenScrollLayout from '@/app/sharedComponents/ScreenScrollLayout';
-import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
+import ScreenComponent from '@/app/sharedComponents/ScreenComponent';
 
 type ReportTab = 'sleep' | 'feeding';
 
@@ -66,9 +72,10 @@ const TABS: { id: ReportTab; label: string }[] = [
 
 const GRID_COLOR = 'rgba(255,255,255,0.12)';
 const MUTED_TEXT = 'rgba(255,255,255,0.75)';
-const DONUT_SIZE = vh(170);
-const DONUT_STROKE = vh(18);
-const CHART_HEIGHT = vh(200);
+// Whole points: a fractional SVG size clips the ring's outer edge.
+const DONUT_SIZE = Math.round(vh(130));
+const DONUT_STROKE = Math.round(vh(14));
+const REPORT_CARD_HEIGHT = '95%';
 const AXIS_WIDTH = vw(30);
 const MAX_X_LABELS = 8;
 const MS_PER_HOUR = 3_600_000;
@@ -138,13 +145,17 @@ type ChartSeries = {
   value: (bucket: ReportBucket) => number;
 };
 
-/** Stacked bars, one per bucket, with the first series at the bottom. */
+/**
+ * Stacked bars, one per bucket, with the first series at the bottom. Fills
+ * the height its parent gives it.
+ */
 const StackedBarChart: React.FC<{
   buckets: ReportBucket[];
   series: ChartSeries[];
   axisSteps: number[];
   formatTick: (value: number) => string;
 }> = ({ buckets, series, axisSteps, formatTick }) => {
+  const [chartHeight, setChartHeight] = useState(0);
   const totals = buckets.map((bucket) =>
     series.reduce((sum, item) => sum + item.value(bucket), 0)
   );
@@ -156,18 +167,25 @@ const StackedBarChart: React.FC<{
   const labelEvery = Math.ceil(buckets.length / MAX_X_LABELS);
 
   return (
-    <View>
-      <View style={styles.chart}>
-        {ticks.map((tick) => (
-          <View
-            key={tick}
-            pointerEvents="none"
-            style={[styles.gridRow, { top: (1 - tick / axis.max) * CHART_HEIGHT }]}
-          >
-            <Text style={styles.axisLabel}>{formatTick(tick)}</Text>
-            <View style={styles.gridLine} />
-          </View>
-        ))}
+    <View style={styles.chartBody}>
+      <View
+        style={styles.chart}
+        onLayout={(event) => setChartHeight(event.nativeEvent.layout.height)}
+      >
+        {chartHeight > 0 &&
+          ticks.map((tick) => (
+            <View
+              key={tick}
+              pointerEvents="none"
+              style={[
+                styles.gridRow,
+                { top: (1 - tick / axis.max) * chartHeight },
+              ]}
+            >
+              <Text style={styles.axisLabel}>{formatTick(tick)}</Text>
+              <View style={styles.gridLine} />
+            </View>
+          ))}
         <View style={styles.columns}>
           {buckets.map((bucket) => (
             <View key={bucket.key} style={styles.column}>
@@ -179,7 +197,7 @@ const StackedBarChart: React.FC<{
                     <View
                       key={index}
                       style={{
-                        height: (value / axis.max) * CHART_HEIGHT,
+                        height: (value / axis.max) * chartHeight,
                         backgroundColor: item.color,
                       }}
                     />
@@ -357,138 +375,199 @@ const ReportsScreen: React.FC = () => {
     {
       color: NURSING_COLOR,
       value: (bucket) =>
-        averageOverTrackedDays(bucket.days, hasFeeding, (day) => day.nursingCount),
+        averageOverTrackedDays(
+          bucket.days,
+          hasFeeding,
+          (day) => day.nursingCount
+        ),
     },
     {
       color: BOTTLE_COLOR,
       value: (bucket) =>
-        averageOverTrackedDays(bucket.days, hasFeeding, (day) => day.bottleCount),
+        averageOverTrackedDays(
+          bucket.days,
+          hasFeeding,
+          (day) => day.bottleCount
+        ),
     },
   ];
 
   return (
-    <ScreenScrollLayout
-      contentContainerClassName={timerScrollContentClassName}
-      contentContainerStyle={timerScrollContentStyle}
-      stackClassName={timerContentStackClassName}
-    >
-      <TimerSectionCard>
-        <FeedingSegmentTabs
-          tabs={TABS}
-          activeTab={activeTab}
-          onChange={setActiveTab}
-        />
+    <ScreenComponent contentFlex>
+      <View style={styles.screen}>
+        <View className={`${timerContentStackClassName} flex-1 min-h-0`}>
+          <View
+            className={glassCardClassName}
+            style={[glassCardStyle, styles.card]}
+          >
+            <FeedingSegmentTabs
+              tabs={TABS}
+              activeTab={activeTab}
+              onChange={setActiveTab}
+            />
 
-        <View style={styles.ranges}>
-          {REPORT_RANGES.map((range) => {
-            const isActive = range.id === rangeId;
-            return (
-              <Pressable
-                key={range.id}
-                accessibilityRole="button"
-                accessibilityState={{ selected: isActive }}
-                accessibilityLabel={`Last ${range.days} days`}
-                onPress={() => setRangeId(range.id)}
-                style={[styles.rangePill, isActive && styles.rangePillActive]}
-              >
-                <Text
-                  style={[styles.rangeLabel, isActive && styles.rangeLabelActive]}
-                >
-                  {range.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        <Text style={styles.rangeDates}>
-          {formatRangeLabel(days[0].start, days[days.length - 1].start)}
-        </Text>
-
-        <View style={styles.summary}>
-          {isSleep ? (
-            <>
-              <Donut
-                slices={[
-                  { value: sleepSummary.napAvgMs, color: NAP_COLOR },
-                  { value: sleepSummary.nightAvgMs, color: NIGHT_COLOR },
-                ]}
-              >
-                <Text style={styles.donutLabel}>Daily total avg</Text>
-                <Text style={styles.donutValue} numberOfLines={1} adjustsFontSizeToFit>
-                  {formatReportDuration(sleepSummary.totalAvgMs)}
-                </Text>
-              </Donut>
-              <View style={styles.legendRow}>
-                <LegendStat
-                  color={NAP_COLOR}
-                  label="Nap avg"
-                  value={formatReportDuration(sleepSummary.napAvgMs)}
-                />
-                <LegendStat
-                  color={NIGHT_COLOR}
-                  label="Night avg"
-                  value={formatReportDuration(sleepSummary.nightAvgMs)}
-                />
-              </View>
-            </>
-          ) : (
-            <>
-              <Donut
-                slices={[
-                  { value: feedingSummary.nursingCountAvg, color: NURSING_COLOR },
-                  { value: feedingSummary.bottleCountAvg, color: BOTTLE_COLOR },
-                ]}
-              >
-                <Text style={styles.donutLabel}>Feedings / day</Text>
-                <Text style={styles.donutValue}>{formatCount(feedingsAvg)}</Text>
-              </Donut>
-              <View style={styles.legendRow}>
-                <LegendStat
-                  color={NURSING_COLOR}
-                  label="Nursing"
-                  value={formatReportDuration(feedingSummary.nursingAvgMs)}
-                  detail={`${formatCount(feedingSummary.nursingCountAvg)} per day`}
-                />
-                <LegendStat
-                  color={BOTTLE_COLOR}
-                  label="Bottle"
-                  value={formatVolume(feedingSummary.bottleMlAvg, volumeUnit)}
-                  detail={`${formatCount(feedingSummary.bottleCountAvg)} per day`}
-                />
-              </View>
-            </>
-          )}
-          {isLoading ? (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator color="white" size="large" />
+            <View style={styles.ranges}>
+              {REPORT_RANGES.map((range) => {
+                const isActive = range.id === rangeId;
+                return (
+                  <Pressable
+                    key={range.id}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isActive }}
+                    accessibilityLabel={`Last ${range.days} days`}
+                    onPress={() => setRangeId(range.id)}
+                    style={[
+                      styles.rangePill,
+                      isActive && styles.rangePillActive,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.rangeLabel,
+                        isActive && styles.rangeLabelActive,
+                      ]}
+                    >
+                      {range.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
-          ) : null}
-        </View>
 
-        <Text style={styles.note}>
-          {loadError ??
-            (isLoading
-              ? ' '
-              : trackedDays === 0
-                ? 'Nothing logged in this period.'
-                : `Averaged over ${trackedDays} tracked ${trackedDays === 1 ? 'day' : 'days'}.`)}
-        </Text>
+            <Text style={styles.rangeDates}>
+              {formatRangeLabel(days[0].start, days[days.length - 1].start)}
+            </Text>
 
-        <View style={styles.chartCard}>
-          <StackedBarChart
-            buckets={buckets}
-            series={isSleep ? sleepSeries : feedingSeries}
-            axisSteps={isSleep ? SLEEP_AXIS_STEPS_HOURS : FEEDING_AXIS_STEPS}
-            formatTick={(value) => (isSleep ? `${value}h` : String(value))}
-          />
+            <View style={styles.summary}>
+              {isSleep ? (
+                <>
+                  <Donut
+                    slices={[
+                      { value: sleepSummary.napAvgMs, color: NAP_COLOR },
+                      { value: sleepSummary.nightAvgMs, color: NIGHT_COLOR },
+                    ]}
+                  >
+                    <Text
+                      style={styles.donutLabel}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
+                      Daily total avg
+                    </Text>
+                    <Text
+                      style={styles.donutValue}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
+                      {formatReportDuration(sleepSummary.totalAvgMs)}
+                    </Text>
+                  </Donut>
+                  <View style={styles.legendRow}>
+                    <LegendStat
+                      color={NAP_COLOR}
+                      label="Nap avg"
+                      value={formatReportDuration(sleepSummary.napAvgMs)}
+                    />
+                    <LegendStat
+                      color={NIGHT_COLOR}
+                      label="Night avg"
+                      value={formatReportDuration(sleepSummary.nightAvgMs)}
+                    />
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Donut
+                    slices={[
+                      {
+                        value: feedingSummary.nursingCountAvg,
+                        color: NURSING_COLOR,
+                      },
+                      {
+                        value: feedingSummary.bottleCountAvg,
+                        color: BOTTLE_COLOR,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={styles.donutLabel}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
+                      Feedings / day
+                    </Text>
+                    <Text
+                      style={styles.donutValue}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                    >
+                      {formatCount(feedingsAvg)}
+                    </Text>
+                  </Donut>
+                  <View style={styles.legendRow}>
+                    <LegendStat
+                      color={NURSING_COLOR}
+                      label="Nursing"
+                      value={formatReportDuration(feedingSummary.nursingAvgMs)}
+                      detail={`${formatCount(feedingSummary.nursingCountAvg)} per day`}
+                    />
+                    <LegendStat
+                      color={BOTTLE_COLOR}
+                      label="Bottle"
+                      value={formatVolume(
+                        feedingSummary.bottleMlAvg,
+                        volumeUnit
+                      )}
+                      detail={`${formatCount(feedingSummary.bottleCountAvg)} per day`}
+                    />
+                  </View>
+                </>
+              )}
+              {isLoading ? (
+                <View style={styles.loadingOverlay}>
+                  <ActivityIndicator color="white" size="large" />
+                </View>
+              ) : null}
+            </View>
+
+            <Text style={styles.note}>
+              {loadError ??
+                (isLoading
+                  ? ' '
+                  : trackedDays === 0
+                    ? 'Nothing logged in this period.'
+                    : `Averaged over ${trackedDays} tracked ${trackedDays === 1 ? 'day' : 'days'}.`)}
+            </Text>
+
+            <View style={styles.chartCard}>
+              <StackedBarChart
+                buckets={buckets}
+                series={isSleep ? sleepSeries : feedingSeries}
+                axisSteps={
+                  isSleep ? SLEEP_AXIS_STEPS_HOURS : FEEDING_AXIS_STEPS
+                }
+                formatTick={(value) => (isSleep ? `${value}h` : String(value))}
+              />
+            </View>
+          </View>
         </View>
-      </TimerSectionCard>
-    </ScreenScrollLayout>
+      </View>
+    </ScreenComponent>
   );
 };
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    minHeight: 0,
+    paddingTop: layout.space8,
+    paddingBottom: layout.space8,
+    paddingHorizontal: HOME_HORIZONTAL_PADDING,
+  },
+  card: {
+    height: REPORT_CARD_HEIGHT,
+    minHeight: 0,
+  },
   ranges: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -566,16 +645,16 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: DONUT_STROKE,
+    paddingHorizontal: DONUT_STROKE + layout.space6,
   },
   donutLabel: {
     color: '#ffffff',
-    fontSize: layout.fontSm,
+    fontSize: layout.fontXs,
     textAlign: 'center',
   },
   donutValue: {
     color: '#ffffff',
-    fontSize: layout.fontXl,
+    fontSize: layout.fontLg,
     fontWeight: '700',
     marginTop: layout.space4,
     textAlign: 'center',
@@ -591,11 +670,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: layout.space16,
   },
+  // Takes whatever height the card has left after the summary.
   chartCard: {
+    flex: 1,
+    minHeight: 0,
     marginTop: layout.space20,
   },
+  chartBody: {
+    flex: 1,
+    minHeight: 0,
+  },
   chart: {
-    height: CHART_HEIGHT,
+    flex: 1,
+    minHeight: 0,
     position: 'relative',
   },
   gridRow: {

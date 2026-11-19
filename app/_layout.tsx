@@ -9,6 +9,7 @@ import { Text } from '@/components/AppText';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { AudioPlaybackProvider } from "./context/AudioPlaybackContext";
+import { BabyProvider, useBabies, withSelectedBabyKey } from "./context/BabyContext";
 import { RevenueCatProvider, useRevenueCat } from "./context/RevenueCatContext";
 import Home from './Home';
 import SavedScreen from './Saved';
@@ -49,6 +50,15 @@ import {
 import { getAppWindow, vh } from '@/constants/appViewport';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import '@/global.css';
+
+// Screens that show one baby's data remount (fresh state + reload) when the
+// selected baby changes.
+const HomeForBaby = withSelectedBabyKey(Home);
+const TimerScreenForBaby = withSelectedBabyKey(TimerScreen);
+const NapTimelineScreenForBaby = withSelectedBabyKey(NapTimelineScreen);
+const ReportsScreenForBaby = withSelectedBabyKey(ReportsScreen);
+const AddFeedingScreenForBaby = withSelectedBabyKey(AddFeedingScreen);
+const SettingsScreenForBaby = withSelectedBabyKey(SettingsScreen);
 
 // Set the animation options. This is optional.
 
@@ -122,6 +132,71 @@ const DrawerToggleButton: React.FC<{ size?: number }> = ({ size }) => {
   );
 };
 
+/** Home header: the selected baby's name; tap to switch or add babies. */
+const BabyHeaderTitle: React.FC = () => {
+  const { selectedBabyName, openBabySwitcher, isSwitching } = useBabies();
+  return (
+    <TouchableOpacity
+      onPress={openBabySwitcher}
+      disabled={isSwitching}
+      accessibilityRole="button"
+      accessibilityLabel={`${selectedBabyName}. Switch baby`}
+      style={styles.babyHeaderButton}
+    >
+      <Text
+        numberOfLines={1}
+        style={[styles.babyHeaderLabel, { fontSize: height * 0.025 }]}
+      >
+        {selectedBabyName.toUpperCase()}
+      </Text>
+      {isSwitching ? (
+        <ActivityIndicator size="small" color="white" />
+      ) : (
+        <Ionicons name="chevron-down" size={height * 0.022} color="white" />
+      )}
+    </TouchableOpacity>
+  );
+};
+
+/** Babies at the top of the drawer; tap one to switch. */
+const DrawerBabyList: React.FC<{ onSwitched: () => void }> = ({ onSwitched }) => {
+  const { babies, selectedBabyId, switchBaby, openBabySwitcher, isSwitching } =
+    useBabies();
+  return (
+    <View style={styles.drawerBabies}>
+      {babies.map((baby) => {
+        const selected = baby.id === selectedBabyId;
+        return (
+          <TouchableOpacity
+            key={baby.id}
+            disabled={isSwitching}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
+            onPress={async () => {
+              if (selected) return;
+              if (await switchBaby(baby.id)) onSwitched();
+            }}
+            style={[styles.drawerBabyChip, selected && styles.drawerBabyChipSelected]}
+          >
+            <Text numberOfLines={1} style={styles.drawerBabyLabel}>
+              {(baby.name?.trim() || 'Baby').toUpperCase()}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+      <TouchableOpacity
+        disabled={isSwitching}
+        accessibilityRole="button"
+        accessibilityLabel="Manage babies"
+        onPress={openBabySwitcher}
+        style={styles.drawerBabyChip}
+      >
+        <Ionicons name="add" size={vh(20)} color="white" />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 const CustomDrawerContent: React.FC<any> = (props) => {
   const { logout, user } = useAuth();
   const { presentPaywall } = useRevenueCat();
@@ -159,6 +234,7 @@ const CustomDrawerContent: React.FC<any> = (props) => {
         style={styles.drawerScrollView}
         contentContainerStyle={styles.drawerScrollContent}
       >
+        <DrawerBabyList onSwitched={() => props.navigation.closeDrawer()} />
         {props.state.routes
           .filter(
             (route: { name: string }) =>
@@ -218,7 +294,7 @@ const UnauthenticatedDrawerContent: React.FC<any> = (props) => (
 const AuthenticatedNavigator: React.FC = () => {
   return (
     <AudioPlaybackProvider>
-    <>
+    <BabyProvider>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <Drawer.Navigator
       initialRouteName="Home"
@@ -254,13 +330,13 @@ const AuthenticatedNavigator: React.FC = () => {
     >
       <Drawer.Screen
         name="Home"
-        component={Home}
-        options={{ 
-          drawerLabel: 'HOME', headerTitle: () => <Text style={{ color: 'white', fontSize: height * 0.025, fontWeight: '400' }}>HOME</Text> }}
+        component={HomeForBaby}
+        options={{
+          drawerLabel: 'HOME', headerTitle: () => <BabyHeaderTitle /> }}
       />
       <Drawer.Screen
         name="Timer"
-        component={TimerScreen}
+        component={TimerScreenForBaby}
         options={{
           drawerLabel: 'ADD SLEEP',
           headerLeft: () => <BackButton text="" />,
@@ -291,7 +367,7 @@ const AuthenticatedNavigator: React.FC = () => {
       />
       <Drawer.Screen
         name="NapTimeline"
-        component={NapTimelineScreen}
+        component={NapTimelineScreenForBaby}
         options={{
           drawerLabel: 'TIMELINE',
           headerLeft: () => <BackButton text="" />,
@@ -304,7 +380,7 @@ const AuthenticatedNavigator: React.FC = () => {
       />
       <Drawer.Screen
         name="Reports"
-        component={ReportsScreen}
+        component={ReportsScreenForBaby}
         options={{
           drawerLabel: 'REPORTS',
           headerLeft: () => <BackButton text="" />,
@@ -349,7 +425,7 @@ const AuthenticatedNavigator: React.FC = () => {
       />
       <Drawer.Screen
         name="AddFeeding"
-        component={AddFeedingScreen}
+        component={AddFeedingScreenForBaby}
         options={{
           drawerLabel: 'ADD FEEDING',
           headerLeft: () => <BackButton text="" />,
@@ -371,7 +447,7 @@ const AuthenticatedNavigator: React.FC = () => {
       />
       <Drawer.Screen
         name="Profile"
-        component={SettingsScreen}
+        component={SettingsScreenForBaby}
         options={{
           drawerLabel: 'PROFILE',
           headerLeft: () => <BackButton text="" />,
@@ -414,7 +490,7 @@ const AuthenticatedNavigator: React.FC = () => {
         })}
       />
     </Drawer.Navigator>
-    </>
+    </BabyProvider>
     </AudioPlaybackProvider>
   );
 };
@@ -658,6 +734,46 @@ const styles = StyleSheet.create({
   drawerFooter: {
     paddingBottom: vh(32),
   } as ViewStyle,
+  babyHeaderButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: vh(6),
+    maxWidth: width * 0.6,
+  } as ViewStyle,
+  babyHeaderLabel: {
+    color: 'white',
+    fontWeight: '400',
+    flexShrink: 1,
+  },
+  drawerBabies: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: vh(8),
+    paddingHorizontal: vh(12),
+    marginBottom: vh(16),
+  } as ViewStyle,
+  drawerBabyChip: {
+    minHeight: vh(36),
+    minWidth: vh(36),
+    paddingHorizontal: vh(12),
+    borderRadius: vh(18),
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    maxWidth: '100%',
+  } as ViewStyle,
+  drawerBabyChipSelected: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.9)',
+  } as ViewStyle,
+  drawerBabyLabel: {
+    color: 'white',
+    fontSize: vh(16),
+    lineHeight: vh(20),
+    fontWeight: '400',
+  },
   drawerLabel: {
     color: 'white',
     lineHeight: vh(28),

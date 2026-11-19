@@ -41,6 +41,7 @@ export type TimerSubmitPayload = {
 
 export type TimerRunApiRecord = {
   id: number;
+  baby_id?: number | null;
   start_time: string;
   end_time: string | null;
   duration: number | null;
@@ -58,6 +59,11 @@ export type CreateTimerRunOptions = {
 
 export type FetchTimerRunsOptions = {
   run_type?: TimerRunType;
+};
+
+export type FetchActiveTimerRunOptions = FetchTimerRunsOptions & {
+  /** Return the account's running timer whichever baby it belongs to. */
+  allBabies?: boolean;
 };
 
 const authHeaders = (token: string) => ({
@@ -551,13 +557,17 @@ export const getTimerApiErrorMessage = (
 
 export const fetchActiveTimerRun = async (
   token: string,
-  options?: FetchTimerRunsOptions
+  options?: FetchActiveTimerRunOptions
 ): Promise<TimerRunApiRecord | null> => {
+  const params = {
+    ...(options?.run_type ? { run_type: options.run_type } : {}),
+    ...(options?.allBabies ? { all_babies: true } : {}),
+  };
   const response = await axios.get<{ timer_run: TimerRunApiRecord | null }>(
     `${API_URL}/timer_runs/active`,
     {
       headers: authHeaders(token),
-      params: options?.run_type ? { run_type: options.run_type } : undefined,
+      params: Object.keys(params).length > 0 ? params : undefined,
     }
   );
 
@@ -592,7 +602,7 @@ export const confirmReplaceActiveTimer = async (
   token: string,
   options?: ConfirmReplaceActiveTimerOptions
 ): Promise<boolean> => {
-  const activeRun = await fetchActiveTimerRun(token);
+  const activeRun = await fetchActiveTimerRun(token, { allBabies: true });
   if (!activeRun) {
     return true;
   }

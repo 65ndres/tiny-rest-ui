@@ -103,3 +103,32 @@ export const addBabyDestination = (
   isProUser: boolean,
   babyCount: number
 ): 'form' | 'paywall' => (isProUser || babyCount === 0 ? 'form' : 'paywall');
+
+/** The Profile screen's saved fields, compared to know when Save has work to do. */
+export type ProfileSnapshot = {
+  name: string;
+  birthdate: string | null;
+  dailyNapCount: number;
+  dailyNapCountAlt: number | null;
+  dayStartMinutes: number;
+  dayEndMinutes: number;
+};
+
+/**
+ * True when the form differs from what was last saved. Names compare
+ * trimmed, since that is what gets saved.
+ */
+export const hasProfileChanges = (
+  saved: ProfileSnapshot | null,
+  current: ProfileSnapshot
+): boolean => {
+  if (!saved) return false;
+  return (
+    saved.name.trim() !== current.name.trim() ||
+    saved.birthdate !== current.birthdate ||
+    saved.dailyNapCount !== current.dailyNapCount ||
+    (saved.dailyNapCountAlt ?? null) !== (current.dailyNapCountAlt ?? null) ||
+    saved.dayStartMinutes !== current.dayStartMinutes ||
+    saved.dayEndMinutes !== current.dayEndMinutes
+  );
+};

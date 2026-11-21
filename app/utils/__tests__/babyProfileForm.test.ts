@@ -7,6 +7,8 @@ import {
   buildBabyInput,
   formatBirthdate,
   hasBabyProfileErrors,
+  hasProfileChanges,
+  type ProfileSnapshot,
   validateBabyProfile,
   type BabyProfileValues,
 } from '@/app/utils/babyProfileForm';
@@ -146,5 +148,39 @@ describe('formatBirthdate', () => {
   it('is empty until a valid date is picked', () => {
     expect(formatBirthdate(null)).toBe('');
     expect(formatBirthdate('not a date')).toBe('');
+  });
+});
+
+describe('hasProfileChanges', () => {
+  const saved: ProfileSnapshot = {
+    name: 'Gaby',
+    birthdate: '2024-10-14',
+    dailyNapCount: 1,
+    dailyNapCountAlt: null,
+    dayStartMinutes: 570,
+    dayEndMinutes: 1320,
+  };
+
+  it('is false until the profile has loaded', () => {
+    expect(hasProfileChanges(null, saved)).toBe(false);
+  });
+
+  it('is false when nothing changed', () => {
+    expect(hasProfileChanges(saved, { ...saved })).toBe(false);
+  });
+
+  it('ignores spaces around the name, which are trimmed on save', () => {
+    expect(hasProfileChanges(saved, { ...saved, name: '  Gaby ' })).toBe(false);
+  });
+
+  it.each<[string, Partial<ProfileSnapshot>]>([
+    ['name', { name: 'Gabriela' }],
+    ['birthdate', { birthdate: '2024-10-15' }],
+    ['nap count', { dailyNapCount: 2 }],
+    ['alternate nap count', { dailyNapCountAlt: 2 }],
+    ['day start', { dayStartMinutes: 600 }],
+    ['day end', { dayEndMinutes: 1260 }],
+  ])('is true when the %s changes', (_field, change) => {
+    expect(hasProfileChanges(saved, { ...saved, ...change })).toBe(true);
   });
 });

@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { TextInput } from '@/components/AppText';
 import { Text } from '@/components/ui/text';
@@ -42,7 +42,14 @@ import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
 import TimerSettingRow from '@/app/sharedComponents/timer/TimerSettingRow';
 import { useBabies } from '@/app/context/BabyContext';
 import { babyDisplayName } from '@/app/utils/babies';
-import { formatBirthdate } from '@/app/utils/babyProfileForm';
+import {
+  formatBirthdate,
+  hasProfileChanges,
+  type ProfileSnapshot,
+} from '@/app/utils/babyProfileForm';
+
+/** How long Save reads "Saved" after a successful save. */
+const SAVED_CONFIRMATION_MS = 2000;
 
 const toDateInput = (value: string | null): Date => {
   if (!value) return new Date();
@@ -84,6 +91,32 @@ const SettingsScreen: React.FC = () => {
   const [isDayEndPickerOpen, setIsDayEndPickerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  // What the server has, so Save only works when something changed.
+  const [savedSnapshot, setSavedSnapshot] = useState<ProfileSnapshot | null>(
+    null
+  );
+  const [showSaved, setShowSaved] = useState(false);
+
+  const currentSnapshot: ProfileSnapshot = {
+    name: babyName,
+    birthdate: babyBirthdate,
+    dailyNapCount: napSchedule.daily_nap_count,
+    dailyNapCountAlt: napSchedule.daily_nap_count_alt,
+    dayStartMinutes,
+    dayEndMinutes,
+  };
+  const hasChanges = hasProfileChanges(savedSnapshot, currentSnapshot);
+
+  // Editing again replaces the confirmation with a live Save button.
+  useEffect(() => {
+    if (hasChanges) setShowSaved(false);
+  }, [hasChanges]);
+
+  useEffect(() => {
+    if (!showSaved) return undefined;
+    const timer = setTimeout(() => setShowSaved(false), SAVED_CONFIRMATION_MS);
+    return () => clearTimeout(timer);
+  }, [showSaved]);
 
   const loadSettings = useCallback(async () => {
     setIsLoading(true);
@@ -115,6 +148,18 @@ const SettingsScreen: React.FC = () => {
       setDayEndMinutes(end);
       setDayStartPickerValue(minutesToDate(start));
       setDayEndPickerValue(minutesToDate(end));
+      const schedule = napScheduleFromProfile(
+        profile.daily_nap_count,
+        profile.daily_nap_count_alt
+      );
+      setSavedSnapshot({
+        name: profile.baby_name || '',
+        birthdate: profile.baby_birthdate,
+        dailyNapCount: schedule.daily_nap_count,
+        dailyNapCountAlt: schedule.daily_nap_count_alt,
+        dayStartMinutes: start,
+        dayEndMinutes: end,
+      });
     } catch {
       Alert.alert('Error', 'Could not load settings.');
     } finally {
@@ -139,16 +184,16 @@ const SettingsScreen: React.FC = () => {
   };
 
   const saveSettings = async () => {
+    if (!hasChanges) return;
     const trimmedName = babyName.trim();
+    // Errors show under their fields; no pop-up on top of them.
     if (!trimmedName) {
       setNameError('Baby name is required.');
-      Alert.alert('Error', 'Baby name is required.');
       return;
     }
 
     if (dayStartMinutes >= dayEndMinutes) {
       setDayWindowError('Day end must be after day start.');
-      Alert.alert('Error', 'Day end must be after day start.');
       return;
     }
 
@@ -171,7 +216,9 @@ const SettingsScreen: React.FC = () => {
         day_end_minutes: dayEndMinutes,
       });
       void refreshBabies();
-      Alert.alert('Success', 'Profile saved.');
+      setSavedSnapshot({ ...currentSnapshot, name: trimmedName });
+      setBabyName(trimmedName);
+      setShowSaved(true);
     } catch {
       Alert.alert('Error', 'Could not save settings. Please try again.');
       void loadSettings();
@@ -317,29 +364,34 @@ const SettingsScreen: React.FC = () => {
               ) : null}
 
               <TimerOutlineButton
-                label="Save"
-                iconName="save-sharp"
+                label={showSaved ? 'Saved' : 'Save'}
+                iconName={showSaved ? 'checkmark-sharp' : 'save-sharp'}
                 onPress={() => void saveSettings()}
-                disabled={isSaving}
+                // Stays bright while it reads "Saved"; taps do nothing then.
+                disabled={isSaving || isDeleting || (!hasChanges && !showSaved)}
                 isLoading={isSaving}
+                accessibilityLabel={
+                  showSaved ? 'Profile saved' : hasChanges ? 'Save' : 'Save, no changes'
+                }
                 size="xl"
                 variant="solid"
                 style={{ marginTop: layout.space24 }}
               />
-            </TimerSectionCard>
 
-            {babies.length > 1 && selectedBaby ? (
-              <TimerOutlineButton
-                label="Delete profile"
-                iconName="trash-outline"
-                onPress={confirmDeleteBaby}
-                disabled={isSaving || isDeleting || isSwitching}
-                isLoading={isDeleting}
-                accessibilityLabel={`Delete ${babyDisplayName(selectedBaby)}'s profile`}
-                size="lg"
-                variant="destructive"
-              />
-            ) : null}
+              {babies.length > 1 && selectedBaby ? (
+                <TimerOutlineButton
+                  label="Delete profile"
+                  iconName="trash-outline"
+                  onPress={confirmDeleteBaby}
+                  disabled={isSaving || isDeleting || isSwitching}
+                  isLoading={isDeleting}
+                  accessibilityLabel={`Delete ${babyDisplayName(selectedBaby)}'s profile`}
+                  size="lg"
+                  variant="destructive"
+                  style={{ marginTop: layout.space12 }}
+                />
+              ) : null}
+            </TimerSectionCard>
           </>
         )}
       </VStack>

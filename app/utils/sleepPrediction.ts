@@ -28,6 +28,8 @@ export type SleepPredictionDisplay = {
   label: string;
   value: string;
   subtitle?: string;
+  /** Set for a running timer; Home draws it as a labelled HH:MM:SS clock. */
+  elapsedMs?: number;
 };
 
 const authHeaders = (token: string) => ({

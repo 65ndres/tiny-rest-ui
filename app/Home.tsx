@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -22,9 +21,9 @@ import {
   MISSED_NAP_GRACE_MINUTES,
   type SleepPrediction,
 } from '@/app/utils/sleepPrediction';
-import { formatExactNapCount } from '@/app/utils/napSchedule';
 import {
   formatFeedingTimerDisplay,
+  formatSleepTimerDisplay,
   isFeedingTimerRun,
 } from '@/app/utils/homeActiveTimer';
 import {
@@ -58,6 +57,8 @@ const PREDICTION_PANEL_HEIGHT = '32%';
 const ACTIONS_HEIGHT = '58%';
 const HOME_SECTION_GAP = '5%';
 const CLOCK_TICK_MS = 30 * 1000;
+// A running timer shows seconds, so redraw every second while one runs.
+const RUNNING_CLOCK_TICK_MS = 1000;
 
 const Home: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -137,11 +138,15 @@ const Home: React.FC = () => {
     }, [loadHomeData])
   );
 
-  // Keep "min ago" text current while the screen is open. Once an overdue nap
-  // passes the grace period the API has moved on to the next slot, so fetch
-  // the new prediction.
+  // Keep "min ago" text and a running timer's clock current while the screen
+  // is open. Once an overdue nap passes the grace period the API has moved on
+  // to the next slot, so fetch the new prediction.
+  const clockRunning =
+    feedingRun != null || isSleepTimerRunning(prediction?.status);
   useFocusEffect(
     useCallback(() => {
+      // Start from the current time, not the last (up to 30 s old) tick.
+      setNow(new Date());
       const tick = setInterval(() => {
         const current = new Date();
         setNow(current);
@@ -154,9 +159,9 @@ const Home: React.FC = () => {
             getOverdueMinutes(entry, current) > MISSED_NAP_GRACE_MINUTES
         );
         if (graceExpired) void loadHomeData({ silent: true });
-      }, CLOCK_TICK_MS);
+      }, clockRunning ? RUNNING_CLOCK_TICK_MS : CLOCK_TICK_MS);
       return () => clearInterval(tick);
-    }, [loadHomeData, prediction])
+    }, [clockRunning, loadHomeData, prediction])
   );
 
   const napTabCounts = prediction
@@ -184,7 +189,13 @@ const Home: React.FC = () => {
             (feedingRun.paused ? (feedingRun.duration ?? 0) : null)
         )
       : sleepTimerRunning
-        ? formatPredictionDisplay(prediction, now)
+        ? formatSleepTimerDisplay(
+            prediction,
+            now,
+            prediction.active_sleep
+              ? getStoredPausedElapsedForRun(prediction.active_sleep.start_time)
+              : null
+          )
         : null;
     const timeSinceLastSleep = formatTimeSinceLastSleep(lastSleepEnd, now);
 
@@ -208,7 +219,6 @@ const Home: React.FC = () => {
 
       return {
         count,
-        countLabel: formatExactNapCount(count),
         display:
           showTimeSince && timeSinceLastSleep
             ? { ...display, subtitle: timeSinceLastSleep }
@@ -270,19 +280,6 @@ const Home: React.FC = () => {
                   width={carouselWidth}
                   disabled={timerRunning}
                 />
-              ) : null}
-              {!isLoading && runningTimerRoute ? (
-                // Same chevron as the routine cards: the panel opens the timer.
-                <View
-                  pointerEvents="none"
-                  className="absolute right-0 top-0 bottom-0 justify-center"
-                >
-                  <Ionicons
-                    name="chevron-forward"
-                    size={layout.iconMd}
-                    color="rgba(255,255,255,0.5)"
-                  />
-                </View>
               ) : null}
             </Pressable>
           </VStack>

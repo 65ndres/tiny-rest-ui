@@ -65,7 +65,9 @@ const HomeNapPredictionCarousel: React.FC<HomeNapPredictionCarouselProps> = ({
     slides.findIndex((slide) => slide.count === activeCount)
   );
   const activeIndex = defaultIndex;
-  const showChevrons = slides.length > 1;
+  // A running timer locks the nap-count switcher, so hide its chevrons and
+  // dots; the Home panel shows its own chevron to open the timer instead.
+  const showChevrons = slides.length > 1 && !disabled;
   const canGoPrev = !disabled && activeIndex > 0;
   const canGoNext = !disabled && activeIndex < slides.length - 1;
 

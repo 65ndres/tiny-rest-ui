@@ -11,6 +11,8 @@ import {
   preferredVolumeUnit,
   summarizeFeeding,
   summarizeSleep,
+  REPORT_RANGES,
+  getReportRangeDays,
 } from '@/app/utils/reportTrends';
 import { buildWeekTimelineDays } from '@/app/utils/weekTimeline';
 import type { TimerSession } from '@/app/utils/timerHistory';
@@ -165,5 +167,22 @@ describe('formatting', () => {
   it('picks the smallest step that fits', () => {
     expect(niceAxis(10.5, [1, 2, 3, 4, 5, 6])).toEqual({ max: 12, step: 3 });
     expect(niceAxis(0, [1, 2])).toEqual({ max: 4, step: 1 });
+  });
+});
+
+describe('REPORT_RANGES', () => {
+  it('labels ranges in weeks, months and a year', () => {
+    expect(REPORT_RANGES.map((range) => range.label)).toEqual(['1W', '2W', '1M', '3M', '1Y']);
+  });
+
+  it('keeps the same number of days behind each label', () => {
+    expect(REPORT_RANGES.map((range) => [range.label, range.days])).toEqual([
+      ['1W', 7],
+      ['2W', 14],
+      ['1M', 30],
+      ['3M', 90],
+      ['1Y', 365],
+    ]);
+    expect(getReportRangeDays('30d')).toBe(30);
   });
 });

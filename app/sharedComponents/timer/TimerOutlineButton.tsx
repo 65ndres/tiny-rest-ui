@@ -6,6 +6,7 @@ import {
   TIMER_SOLID_BUTTON_CONTENT_COLOR,
   layout,
   timerButtonStyle,
+  timerDestructiveButtonClassName,
   timerOutlineButtonClassName,
   timerPrimaryButtonClassName,
   timerSolidButtonClassName,
@@ -20,7 +21,7 @@ type TimerOutlineButtonProps = {
   accessibilityLabel?: string;
   className?: string;
   style?: ViewStyle;
-  variant?: 'outline' | 'primary' | 'solid';
+  variant?: 'outline' | 'primary' | 'solid' | 'destructive';
   size?: 'md' | 'lg' | 'xl';
 };
 
@@ -28,6 +29,7 @@ const variantClassName = {
   outline: timerOutlineButtonClassName,
   primary: timerPrimaryButtonClassName,
   solid: timerSolidButtonClassName,
+  destructive: timerDestructiveButtonClassName,
 } as const;
 
 const sizeStyles = {

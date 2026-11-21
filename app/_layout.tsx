@@ -160,45 +160,6 @@ const BabyHeaderTitle: React.FC = () => {
   );
 };
 
-/** Babies at the top of the drawer; tap one to switch. */
-const DrawerBabyList: React.FC<{ onSwitched: () => void }> = ({ onSwitched }) => {
-  const { babies, selectedBabyId, switchBaby, openBabySwitcher, isSwitching } =
-    useBabies();
-  return (
-    <View style={styles.drawerBabies}>
-      {babies.map((baby) => {
-        const selected = baby.id === selectedBabyId;
-        return (
-          <TouchableOpacity
-            key={baby.id}
-            disabled={isSwitching}
-            accessibilityRole="button"
-            accessibilityState={{ selected }}
-            onPress={async () => {
-              if (selected) return;
-              if (await switchBaby(baby.id)) onSwitched();
-            }}
-            style={[styles.drawerBabyChip, selected && styles.drawerBabyChipSelected]}
-          >
-            <Text numberOfLines={1} style={styles.drawerBabyLabel}>
-              {(baby.name?.trim() || 'Baby').toUpperCase()}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-      <TouchableOpacity
-        disabled={isSwitching}
-        accessibilityRole="button"
-        accessibilityLabel="Manage babies"
-        onPress={openBabySwitcher}
-        style={styles.drawerBabyChip}
-      >
-        <Ionicons name="add" size={vh(20)} color="white" />
-      </TouchableOpacity>
-    </View>
-  );
-};
-
 const CustomDrawerContent: React.FC<any> = (props) => {
   const { logout, user } = useAuth();
   const { presentPaywall } = useRevenueCat();
@@ -237,7 +198,6 @@ const CustomDrawerContent: React.FC<any> = (props) => {
         style={styles.drawerScrollView}
         contentContainerStyle={styles.drawerScrollContent}
       >
-        <DrawerBabyList onSwitched={() => props.navigation.closeDrawer()} />
         {props.state.routes
           .filter(
             (route: { name: string }) =>
@@ -767,35 +727,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '400',
     flexShrink: 1,
-  },
-  drawerBabies: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: vh(8),
-    paddingHorizontal: vh(12),
-    marginBottom: vh(16),
-  } as ViewStyle,
-  drawerBabyChip: {
-    minHeight: vh(36),
-    minWidth: vh(36),
-    paddingHorizontal: vh(12),
-    borderRadius: vh(18),
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.35)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    maxWidth: '100%',
-  } as ViewStyle,
-  drawerBabyChipSelected: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderColor: 'rgba(255, 255, 255, 0.9)',
-  } as ViewStyle,
-  drawerBabyLabel: {
-    color: 'white',
-    fontSize: vh(16),
-    lineHeight: vh(20),
-    fontWeight: '400',
   },
   drawerLabel: {
     color: 'white',

@@ -337,7 +337,7 @@ const SettingsScreen: React.FC = () => {
                 isLoading={isDeleting}
                 accessibilityLabel={`Delete ${babyDisplayName(selectedBaby)}'s profile`}
                 size="lg"
-                variant="outline"
+                variant="destructive"
               />
             ) : null}
           </>

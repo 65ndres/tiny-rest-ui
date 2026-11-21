@@ -12,11 +12,12 @@ import {
 
 export type ReportRangeId = '7d' | '14d' | '30d' | '90d' | '1y';
 
+// Labels read as weeks and months; the ranges still cover these exact days.
 export const REPORT_RANGES: { id: ReportRangeId; label: string; days: number }[] = [
-  { id: '7d', label: '7D', days: 7 },
-  { id: '14d', label: '14D', days: 14 },
-  { id: '30d', label: '30D', days: 30 },
-  { id: '90d', label: '90D', days: 90 },
+  { id: '7d', label: '1W', days: 7 },
+  { id: '14d', label: '2W', days: 14 },
+  { id: '30d', label: '1M', days: 30 },
+  { id: '90d', label: '3M', days: 90 },
   { id: '1y', label: '1Y', days: 365 },
 ];
 

@@ -1,9 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import React, { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 import { VStack } from '@/components/ui/vstack';
 import {
   glassCardCenteredClassName,
@@ -22,8 +23,19 @@ import {
   type SleepPrediction,
 } from '@/app/utils/sleepPrediction';
 import { formatExactNapCount } from '@/app/utils/napSchedule';
-import { fetchHistoryPanelTimerRuns } from '@/app/utils/timerHistory';
-import { refreshWidgetState } from '@/app/utils/widgetStorage';
+import {
+  formatFeedingTimerDisplay,
+  isFeedingTimerRun,
+} from '@/app/utils/homeActiveTimer';
+import {
+  fetchActiveTimerRun,
+  fetchHistoryPanelTimerRuns,
+  type TimerRunApiRecord,
+} from '@/app/utils/timerHistory';
+import {
+  getStoredPausedElapsedForRun,
+  refreshWidgetState,
+} from '@/app/utils/widgetStorage';
 import { useAuth } from './context/AuthContext';
 import { useRevenueCat } from './context/RevenueCatContext';
 import HomeNapPredictionCarousel, {
@@ -55,6 +67,9 @@ const Home: React.FC = () => {
   const [prediction, setPrediction] = useState<SleepPrediction | null>(null);
   const [activeNapCount, setActiveNapCount] = useState<number | null>(null);
   const [lastSleepEnd, setLastSleepEnd] = useState<string | null>(null);
+  const [feedingRun, setFeedingRun] = useState<TimerRunApiRecord | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [carouselWidth, setCarouselWidth] = useState(0);
   const [now, setNow] = useState(() => new Date());
@@ -80,17 +95,21 @@ const Home: React.FC = () => {
         setPrediction(null);
         setActiveNapCount(null);
         setLastSleepEnd(null);
+        setFeedingRun(null);
         return;
       }
 
-      const [nextPrediction, recentSleeps] = await Promise.all([
+      const [nextPrediction, recentSleeps, activeRun] = await Promise.all([
         fetchSleepPrediction(token),
         // Newest first; a failure here only hides the "last sleep" line.
         fetchHistoryPanelTimerRuns(token, { run_type: 'sleeping' }).catch(
           () => null
         ),
+        // Sleep timers come back in the prediction; this adds feeding ones.
+        fetchActiveTimerRun(token).catch(() => null),
       ]);
       setPrediction(nextPrediction);
+      setFeedingRun(isFeedingTimerRun(activeRun) ? activeRun : null);
       setLastSleepEnd(recentSleeps?.[0]?.end_time ?? null);
       setNow(new Date());
       setActiveNapCount((current) => {
@@ -106,6 +125,7 @@ const Home: React.FC = () => {
       setPrediction(null);
       setActiveNapCount(null);
       setLastSleepEnd(null);
+      setFeedingRun(null);
     } finally {
       setIsLoading(false);
     }
@@ -145,13 +165,27 @@ const Home: React.FC = () => {
         prediction.daily_nap_count_alt,
       ].filter((count): count is number => count != null)
     : [];
-  const timerRunning = isSleepTimerRunning(prediction?.status);
+  const sleepTimerRunning = isSleepTimerRunning(prediction?.status);
+  // Only one timer runs at a time; a feeding timer takes over the panel.
+  const runningTimerRoute: 'Timer' | 'AddFeeding' | null = feedingRun
+    ? 'AddFeeding'
+    : sleepTimerRunning
+      ? 'Timer'
+      : null;
+  const timerRunning = runningTimerRoute != null;
   const slides: HomeNapPredictionSlide[] = useMemo(() => {
     if (!prediction) return [];
 
-    const runningDisplay = timerRunning
-      ? formatPredictionDisplay(prediction, now)
-      : null;
+    const runningDisplay = feedingRun
+      ? formatFeedingTimerDisplay(
+          feedingRun,
+          now,
+          getStoredPausedElapsedForRun(feedingRun.start_time) ??
+            (feedingRun.paused ? (feedingRun.duration ?? 0) : null)
+        )
+      : sleepTimerRunning
+        ? formatPredictionDisplay(prediction, now)
+        : null;
     const timeSinceLastSleep = formatTimeSinceLastSleep(lastSleepEnd, now);
 
     return napTabCounts.map((count) => {
@@ -181,7 +215,7 @@ const Home: React.FC = () => {
             : display,
       };
     });
-  }, [lastSleepEnd, napTabCounts, now, prediction, timerRunning]);
+  }, [feedingRun, lastSleepEnd, napTabCounts, now, prediction, sleepTimerRunning]);
 
   if (!loaded) {
     return null;
@@ -205,8 +239,20 @@ const Home: React.FC = () => {
               { height: PREDICTION_PANEL_HEIGHT, minHeight: 0 },
             ]}
           >
-            <View
+            <Pressable
               className="w-full"
+              disabled={isLoading || runningTimerRoute == null}
+              onPress={() => {
+                if (runningTimerRoute) navigation.navigate(runningTimerRoute);
+              }}
+              accessibilityRole={runningTimerRoute ? 'button' : undefined}
+              accessibilityLabel={
+                runningTimerRoute === 'AddFeeding'
+                  ? 'Open feeding timer'
+                  : runningTimerRoute === 'Timer'
+                    ? 'Open sleep timer'
+                    : undefined
+              }
               onLayout={(event) => {
                 const nextWidth = Math.round(event.nativeEvent.layout.width);
                 if (nextWidth > 0 && nextWidth !== carouselWidth) {
@@ -225,7 +271,20 @@ const Home: React.FC = () => {
                   disabled={timerRunning}
                 />
               ) : null}
-            </View>
+              {!isLoading && runningTimerRoute ? (
+                // Same chevron as the routine cards: the panel opens the timer.
+                <View
+                  pointerEvents="none"
+                  className="absolute right-0 top-0 bottom-0 justify-center"
+                >
+                  <Ionicons
+                    name="chevron-forward"
+                    size={layout.iconMd}
+                    color="rgba(255,255,255,0.5)"
+                  />
+                </View>
+              ) : null}
+            </Pressable>
           </VStack>
 
           <View style={{ height: HOME_SECTION_GAP }} />

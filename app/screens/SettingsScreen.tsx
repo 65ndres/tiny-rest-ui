@@ -40,6 +40,8 @@ import TimerDateTimePickerDrawer from '@/app/sharedComponents/TimerDateTimePicke
 import TimerOutlineButton from '@/app/sharedComponents/timer/TimerOutlineButton';
 import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
 import TimerSettingRow from '@/app/sharedComponents/timer/TimerSettingRow';
+import { useBabies } from '@/app/context/BabyContext';
+import { babyDisplayName } from '@/app/utils/babies';
 
 const formatBirthdate = (value: string | null): string => {
   if (!value) return '';
@@ -66,6 +68,10 @@ const toIsoDate = (date: Date): string => {
 };
 
 const SettingsScreen: React.FC = () => {
+  // Edits the selected baby: /user reads and writes its fields.
+  const { babies, selectedBaby, refreshBabies, removeBaby, isSwitching } =
+    useBabies();
+  const [isDeleting, setIsDeleting] = useState(false);
   const [babyName, setBabyName] = useState('');
   const [nameError, setNameError] = useState('');
   const [dayWindowError, setDayWindowError] = useState('');
@@ -174,6 +180,7 @@ const SettingsScreen: React.FC = () => {
         day_start_minutes: dayStartMinutes,
         day_end_minutes: dayEndMinutes,
       });
+      void refreshBabies();
       Alert.alert('Success', 'Profile saved.');
     } catch {
       Alert.alert('Error', 'Could not save settings. Please try again.');
@@ -181,6 +188,26 @@ const SettingsScreen: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const confirmDeleteBaby = () => {
+    if (!selectedBaby) return;
+    const name = babyDisplayName(selectedBaby);
+    Alert.alert(
+      `Delete ${name}?`,
+      `All of ${name}'s sleep and feeding entries will be deleted. This can't be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            setIsDeleting(true);
+            void removeBaby(selectedBaby.id).finally(() => setIsDeleting(false));
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -310,6 +337,19 @@ const SettingsScreen: React.FC = () => {
                 style={{ marginTop: layout.space24 }}
               />
             </TimerSectionCard>
+
+            {babies.length > 1 && selectedBaby ? (
+              <TimerOutlineButton
+                label="Delete profile"
+                iconName="trash-outline"
+                onPress={confirmDeleteBaby}
+                disabled={isSaving || isDeleting || isSwitching}
+                isLoading={isDeleting}
+                accessibilityLabel={`Delete ${babyDisplayName(selectedBaby)}'s profile`}
+                size="lg"
+                variant="outline"
+              />
+            ) : null}
           </>
         )}
       </VStack>

@@ -4,11 +4,24 @@
     "info": {
       "en-US": {
         "title": "TinyRest",
-        "subtitle": "Prayer and Devotional App",
-        "description": "TinyRest is a prayer and devotional app that helps you connect with God and grow in your faith.\n\nTerms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/",
-        "keywords": ["TinyRest", "tinyrest", "prayers", "bible", "devotional"],
+        "subtitle": "Baby Sleep & Nap Tracker",
+        "description": "TinyRest helps you see when your little one is likely ready for their next nap, so naps and bedtime feel less like guesswork and more like a gentle rhythm you can trust.\n\nStart the sleep timer when your baby falls asleep and stop it when they wake up. TinyRest uses their age, their usual day and recent sleep to predict the next nap or bedtime, and shows how many naps are left today.\n\nFREE\n• Next nap and bedtime predictions\n• One-tap sleep timer, with start and end times you can edit\n• Recent sleep history\n• Sleep timer on the Lock Screen and in a Home Screen widget\n\nTINYREST PRO\n• Feeding: time nursing sessions by side, or log bottles by type and amount\n• Weekly timeline of naps, nights, nursing and bottles\n• Sleep and feeding reports, from 7 days to a full year\n• Soothing sounds, including White Noise, Night Rain and Cozy Fireplace\n• Profiles for more than one baby, such as twins or siblings\n\nPrivacy Policy: https://www.tiny-rest-app.com/privacy.html\nTerms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/",
+        "keywords": [
+          "newborn",
+          "infant",
+          "toddler",
+          "schedule",
+          "wake window",
+          "routine",
+          "bedtime",
+          "feeding",
+          "breastfeeding",
+          "bottle",
+          "white noise"
+        ],
         "privacyPolicyUrl": "https://www.tiny-rest-app.com/privacy.html",
-        "termsOfUseUrl": "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+        "marketingUrl": "https://www.tiny-rest-app.com/",
+        "supportUrl": "https://www.tiny-rest-app.com/contact.html"
       }
     }
   }

@@ -12,6 +12,7 @@ import { Alert } from 'react-native';
 import {
   applyBabyHeader,
   type Baby,
+  type BabyInput,
   babyDisplayName,
   createBaby,
   deleteBaby,
@@ -51,7 +52,7 @@ type BabyContextType = {
    */
   switchBaby: (babyId: number) => Promise<boolean>;
   /** Add a baby (Pro only beyond the first) and switch to it. */
-  addBaby: (name: string) => Promise<Baby | null>;
+  addBaby: (input: BabyInput) => Promise<Baby | null>;
   removeBaby: (babyId: number) => Promise<boolean>;
   refreshBabies: () => Promise<void>;
   openBabySwitcher: () => void;
@@ -245,7 +246,7 @@ export const BabyProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const addBaby = useCallback(
-    async (name: string): Promise<Baby | null> => {
+    async (input: BabyInput): Promise<Baby | null> => {
       if (babies.length > 0 && !isProUser) {
         void presentPaywall();
         return null;
@@ -255,7 +256,10 @@ export const BabyProvider: React.FC<{ children: React.ReactNode }> = ({
 
       let created: Baby;
       try {
-        const response = await createBaby(token, { name: name.trim() });
+        const response = await createBaby(token, {
+          ...input,
+          name: input.name?.trim() ?? null,
+        });
         created = response.baby;
         storeBabies(response.babies);
       } catch (error) {

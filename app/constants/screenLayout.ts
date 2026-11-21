@@ -208,6 +208,9 @@ export const timerPrimaryButtonClassName =
   'w-full border border-white/50 bg-white/30 items-center justify-center flex-row active:opacity-80';
 export const timerSolidButtonClassName =
   'w-full border border-white bg-white items-center justify-center flex-row active:opacity-80';
+/** Red, for actions that delete data. */
+export const timerDestructiveButtonClassName =
+  'w-full border border-error-600 bg-error-600 items-center justify-center flex-row active:opacity-80';
 export const timerButtonStyle: ViewStyle = {
   borderRadius: vh(15),
   paddingVertical: vh(16),

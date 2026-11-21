@@ -33,7 +33,7 @@ type BabySwitcherSheetProps = {
   onClose: () => void;
 };
 
-/** Bottom sheet listing the account's babies: switch, add, edit. */
+/** Bottom sheet listing the account's babies: switch, add. */
 const BabySwitcherSheet: React.FC<BabySwitcherSheetProps> = ({
   isOpen,
   onClose,
@@ -100,7 +100,7 @@ const BabySwitcherSheet: React.FC<BabySwitcherSheetProps> = ({
           <View style={styles.content}>
             <View style={styles.headerRow}>
               <Text className="font-bold" style={styles.title}>
-                Babies
+                Switch profile
               </Text>
               {busy ? <ActivityIndicator color={HOME_TILE_PURPLE} /> : null}
             </View>
@@ -185,19 +185,6 @@ const BabySwitcherSheet: React.FC<BabySwitcherSheetProps> = ({
                 </Pressable>
               )}
             </ScrollView>
-
-            <TimerOutlineButton
-              label="Edit profile"
-              iconName="create-outline"
-              onPress={() => {
-                close();
-                navigation.navigate('Profile');
-              }}
-              disabled={busy}
-              variant="solid"
-              size="xl"
-              style={{ marginTop: layout.space16 }}
-            />
           </View>
         </ImageBackground>
       </DrawerContent>
@@ -214,7 +201,8 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     paddingHorizontal: layout.space24,
-    paddingTop: layout.space32,
+    // Extra top room so the title clears the background art's top edge.
+    paddingTop: layout.space32 * 4,
     paddingBottom: layout.space32,
   },
   headerRow: {

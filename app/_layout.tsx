@@ -34,6 +34,7 @@ import BrowseScreen from './screens/BrowseScreen';
 import TimerScreen from './screens/TimerScreen';
 import TimerScreenGuest from './screens/TimerScreenGuest';
 import SettingsScreen from './screens/SettingsScreen';
+import AddBabyScreen from './screens/AddBabyScreen';
 import NapTimelineScreen from './screens/NapTimelineScreen';
 import ReportsScreen from './screens/ReportsScreen';
 import EditTimelineEntryScreen, {
@@ -91,6 +92,7 @@ type RootDrawerParamList = {
   Reports: undefined;
   EditTimelineEntry: EditTimelineEntryParams;
   AddFeeding: undefined;
+  AddBaby: undefined;
   Sounds: undefined;
 };
 
@@ -208,6 +210,7 @@ const CustomDrawerContent: React.FC<any> = (props) => {
     'Conversation',
     'Subscription',
     'EditTimelineEntry',
+    'AddBaby',
   ]);
   // Left out of the menu entirely for free users, rather than shown dimmed.
   const proOnlyRoutes = new Set(['Reports']);
@@ -460,6 +463,26 @@ const AuthenticatedNavigator: React.FC = () => {
               }}
             >
               PROFILE
+            </Text>
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="AddBaby"
+        component={AddBabyScreen}
+        options={{
+          drawerLabel: () => null, // Hide from drawer
+          drawerItemStyle: { display: 'none' },
+          headerLeft: () => <BackButton text="" />,
+          headerTitle: () => (
+            <Text
+              style={{
+                color: 'white',
+                fontSize: height * 0.025,
+                fontWeight: '400',
+              }}
+            >
+              ADD BABY
             </Text>
           ),
         }}

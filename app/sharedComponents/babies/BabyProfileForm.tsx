@@ -17,6 +17,7 @@ import {
 import { vh } from '@/constants/appViewport';
 import { MAX_BABY_NAME_LENGTH } from '@/app/utils/babies';
 import {
+  formatBirthdate,
   hasBabyProfileErrors,
   validateBabyProfile,
   type BabyProfileErrors,
@@ -48,17 +49,6 @@ type BabyProfileFormProps = {
    * the button shows a spinner until the promise settles.
    */
   onSubmit: (values: BabyProfileValues) => Promise<unknown>;
-};
-
-const formatBirthdate = (value: string | null): string => {
-  if (!value) return '';
-  const date = new Date(`${value}T12:00:00`);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
 };
 
 const toDateInput = (value: string | null): Date => {

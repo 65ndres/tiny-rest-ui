@@ -42,17 +42,7 @@ import TimerSectionCard from '@/app/sharedComponents/timer/TimerSectionCard';
 import TimerSettingRow from '@/app/sharedComponents/timer/TimerSettingRow';
 import { useBabies } from '@/app/context/BabyContext';
 import { babyDisplayName } from '@/app/utils/babies';
-
-const formatBirthdate = (value: string | null): string => {
-  if (!value) return '';
-  const date = new Date(`${value}T12:00:00`);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
+import { formatBirthdate } from '@/app/utils/babyProfileForm';
 
 const toDateInput = (value: string | null): Date => {
   if (!value) return new Date();

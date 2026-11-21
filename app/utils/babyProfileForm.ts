@@ -28,6 +28,23 @@ const startOfDay = (date: Date): Date =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
 /**
+ * Birthdate for display in a form row, with the month as a number
+ * ("9/21/2026" in the US) so it fits beside its label without cutting off.
+ */
+export const formatBirthdate = (
+  value: string | null,
+  locale?: string
+): string => {
+  const date = value ? parseIsoDate(value) : null;
+  if (!date) return '';
+  return date.toLocaleDateString(locale, {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  });
+};
+
+/**
  * Validates the form before it is sent. Mirrors the API's Baby validations so
  * mistakes show inline instead of as a generic save error.
  */

@@ -5,6 +5,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 import {
   addBabyDestination,
   buildBabyInput,
+  formatBirthdate,
   hasBabyProfileErrors,
   validateBabyProfile,
   type BabyProfileValues,
@@ -124,5 +125,26 @@ describe('addBabyDestination', () => {
   it('lets free accounts add their first baby only', () => {
     expect(addBabyDestination(false, 0)).toBe('form');
     expect(addBabyDestination(false, 1)).toBe('paywall');
+  });
+});
+
+describe('formatBirthdate', () => {
+  it('shows the month as a number so the row does not cut off', () => {
+    expect(formatBirthdate('2026-09-21', 'en-US')).toBe('9/21/2026');
+    expect(formatBirthdate('2026-09-21', 'en-US')).not.toMatch(/Sep/);
+  });
+
+  it("follows the device's date order", () => {
+    expect(formatBirthdate('2026-09-21', 'es-ES')).toBe('21/9/2026');
+  });
+
+  it('keeps the calendar day in any time zone', () => {
+    expect(formatBirthdate('2026-01-01', 'en-US')).toBe('1/1/2026');
+    expect(formatBirthdate('2026-12-31', 'en-US')).toBe('12/31/2026');
+  });
+
+  it('is empty until a valid date is picked', () => {
+    expect(formatBirthdate(null)).toBe('');
+    expect(formatBirthdate('not a date')).toBe('');
   });
 });
